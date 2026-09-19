@@ -1,83 +1,86 @@
 # Lighthouse — demo narrative
 
-*Spoken script, ~3 minutes. Bold = what's on screen. Numbers are from `evals/SCOREBOARD.md` (n=30, 19 Sep 2026).*
+*Spoken script, ~3 minutes, in the judges' order: Problem → Tech stack → Live demo + code. Bold = what's on screen. Numbers are from `evals/SCOREBOARD.md` (n=30, 19 Sep 2026).*
 
 ---
 
-## Hook (0:00)
+## 1. The problem (0:00 – 0:30)
 
 Every university has the same two problems. They admit on grades and essays — and then they hope. Hope the student finishes. Hope that ten years later they come back to mentor, cheer, give, and bring their friends.
 
-Nobody predicts that second part. When someone tries, they end up predicting *wealth* — and that's both unfair and wrong.
+Nobody predicts that second part. When someone tries, they end up predicting *wealth* — family background, postcode, school prestige. That's unfair, it's wrong, and it exposes the institution.
 
-Lighthouse predicts long-term fit the way Stanford's LEAD program teaches you to think: logically, with graded evidence, with experiments that could prove you wrong, and with analogies that know their limits. And it never acts on its own.
+Lighthouse predicts long-term fit — completion, volunteer, cheerleader, donor, recruiter — the way Stanford's LEAD program teaches you to think: competing hypotheses, graded evidence, experiments that could prove you wrong, analogies that know their limits. And it never acts without a human.
 
-## The build (0:25)
+## 2. Tech stack — and what it made possible (0:30 – 1:10)
 
 **[TrueForge → Agents]**
 
-Three agents on TrueForge, each with one job:
+**TrueForge** is the harness, and three things would have been a week of work without it:
 
-- a **critical analyst** on GPT-5.5 that reads the applicant, fetches the base rates *before* it estimates, and writes a Long-Term Fit Report;
-- an **independent fairness auditor** on a different, cheaper model — with veto power;
-- an **action proposer** whose only tool is behind a human approval gate.
+- **Human approval gates.** One line in the agent manifest — `require_approval_for_tools: ['@write']` — and TrueForge pauses the run with Allow / Deny before any person-affecting tool call. We wrote zero approval code.
+- **Sessions.** Every run is stored with its tool calls, tokens and timing. That's our audit trail, for free.
+- **Schedules.** Nightly rescoring against real outcomes is one API call.
 
-They talk to a small MCP server: applicant records, interaction timelines, reference-class base rates, and one write tool — `pipeline_propose_action` — that TrueForge will not run without a person clicking Allow.
+Plus JSON-schema response format for structured reports, and MCP tool discovery.
 
-## Observe it (0:50)
+**MCP**: six tools on a 150-line server. TrueForge discovered them and enforced read-only versus write from the annotations.
+
+**OpenAI GPT-5.5** runs the critical analyst for reasoning depth. **GPT-5.4-mini** runs the fairness auditor — a *different* model on purpose, with no shared context, so the auditor can't inherit the analyst's blind spots. Five cents per report.
+
+**Zod, Vitest, Gherkin.** The input schema is the fairness boundary: twenty protected attributes rejected before any model runs. Fourteen behaviour scenarios written before the code.
+
+## 3. Live demo (1:10 – 2:20)
 
 **[Sessions → lighthouse-critical-analyst → open a run]**
 
-Here's a real run. Three tool calls — record, timeline, base rates — then the report.
+Here's a real run. Three tool calls — record, timeline, base rates *before* estimating — then the report.
 
 **[scroll to critical_analysis]**
 
-Look at what it wrote, not just the number. Three competing hypotheses, including "this is application-stage enthusiasm, not durable commitment." A strongest case *against*. Then — this is the LEAD pillar — the cheapest experiment that would falsify each prediction: "invite to one peer-mentoring shift and see if they show up." And the analogy: "like past founder-alumni, but the cohort was smaller."
-
-Every claim cites the exact field it came from. In our eval, **849 evidence claims, zero pointed at a field that doesn't exist** — an existence check today; a claim-support judge is next.
-
-## Control it (1:30)
+Look at what it wrote, not just the number. Three competing hypotheses, including "this is application-stage enthusiasm, not durable commitment." A strongest case *against*. The cheapest experiment that would falsify each prediction: "invite to one peer-mentoring shift and see if they show up." Every claim cites the exact field it came from — **849 claims in our eval, zero pointing at a field that doesn't exist.**
 
 **[Sessions → lighthouse-fairness-auditor]**
 
-Before anything leaves the analyst, the auditor reads it cold. It can veto. It did veto three of thirty reports today — and in testing it vetoed a report that leaned on a zip code within two seconds.
+Before anything leaves the analyst, the auditor reads it cold. It can veto. It vetoed three of thirty today, and a zip-code proxy in under two seconds.
 
 **[Sessions → lighthouse-action-proposer — the paused one]**
 
-And here is the moment that matters. The agent wants to invite this applicant to a volunteer event. It is **paused**. Allow, or Deny. Nothing has been written. Nothing will be, until a human decides.
+The agent wants to invite this applicant to a volunteer event. It is **paused**. Allow, or Deny. Nothing has been written. **[click Deny, type a reason]** — and that's a record too.
 
-**[click Deny, type a reason]** — and that's a record too.
+**[Schedules → lighthouse-nightly-rescore → open its run]**
 
-Under the hood: the input schema physically rejects race, gender, zip code, income, family name — twenty fields, tested one by one. Per-report budget is fifteen cents; we're at five.
+Two in the morning, every night: re-score every report against outcomes that have arrived, rewrite the calibration curve.
 
-## The donor question (2:05)
+## 3b. The code (2:20 – 2:50)
 
-People ask: isn't "predict who will donate" just "predict who's rich"?
+Three files, twenty seconds each.
 
-Not here. Donor = **future capacity × generosity**. Capacity is ambition and trajectory — goal clarity, setbacks overcome, rising grades, founder roles. Generosity is reciprocity — mentoring, volunteering, crediting the people who helped you. We built two applicants identical in every person signal — and then gave one a statement that leaks "I grew up in Atherton, my father's firm pays my tuition, our family foundation already gives." The analyst listed it as a circumstance signal, excluded it, and the **donor estimate did not move.** That's a live test in the suite, and it passes.
+**[src/schema/applicant.ts]** — `PROTECTED_ATTRIBUTES` and `.strict()`. Race, gender, zip code, income, name: rejected at the type level, tested one by one.
 
-## Test it (2:25)
+**[src/agents/manifests.ts]** — the reasoning contract lives in the analyst's instructions; the donor outcome is defined as future capacity × generosity, never wealth. And here is the one line that creates the approval gate.
 
-**[terminal: `npm test` → 50 passed; then `evals/SCOREBOARD.md`]**
+**[features/fairness.feature → textual_proxy_does_not_move_estimates]** — two applicants identical in every person signal; one statement adds "I grew up in Atherton, my father's firm pays my tuition, our family foundation already gives." The analyst excluded it and the donor estimate did not move. That's a live test, and it passes.
 
-Thirteen Gherkin scenarios written before the code. Fifty offline tests, five live ones. The eval scores calibration, ranking, fairness parity, hallucination, consistency, and cost against a base-rate baseline.
+**[evals/SCOREBOARD.md]** — beats the base-rate baseline on every outcome; recruiter ranking 0.97. And two gates **fail** — donor confidence intervals too narrow, volunteer parity 0.17 with ten people per group. We show that, because a harness is for seeing.
 
-The honest part: Lighthouse beats the baseline on every outcome, ranks recruiters at 0.97 AUROC — and two gates **fail**. Confidence intervals are too narrow on donors; volunteer parity is 0.17 with ten people per group. We show that, because the whole point of a harness is that you can see it. Nightly rescoring against real outcomes is what closes that gap — **[Schedules → lighthouse-nightly-rescore]** runs at 2 AM, re-scores every report as outcomes arrive, and writes the calibration curve. I can trigger it right now.
+## Close (2:50 – 3:00)
 
-## Scale (2:50)
-
-**[src/agents/domainPacks.ts]**
-
-One file swaps "university admissions" for "startup recruiting" — hire, retain, refer, advocate — or corporate talent. Same analyst, same auditor, same approval gate, same evals. Hosted TrueForge gives us multi-tenant for free.
-
-Lighthouse: an agent that reasons like a critical analyst, is audited like a hiring decision, and never acts without a human. Thank you.
+One domain-pack file turns this into a startup recruiter or a corporate talent agent — same analyst, same auditor, same gate, same evals. Lighthouse: reasons like a critical analyst, is audited like a hiring decision, never acts without a human. Thank you.
 
 ---
+
+## Links
+
+- Repo: https://github.com/SMITHASL/lighthouse-agent
+- Video (3:16, captions, no audio): https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.0/lighthouse-demo.mp4
+- Captioned player (local): http://localhost:8797
 
 ## If asked
 
 - **"Why not one agent with subagents?"** Separation is the safety property: the auditor must not share context with the analyst it audits.
-- **"Real data?"** Synthetic today, with ground truth generated from latent traits only. The metrics prove the machinery; `outcomes_record_ground_truth` + nightly `rescore()` is how real calibration curves are built.
-- **"What broke?"** The first auditor over-vetoed — it called campus visits a "circumstance." We fixed the definition and withheld went 8 → 3. Wi-Fi drops killed four turns; the runner now retries once. Both are in the git log.
-- **"What would you attack?"** The report schema is university-specific, so the domain-pack swap is instructions-deep, not schema-deep. Parity metrics on synthetic labels can't detect real bias — the behavioural tests can. And the approval gate lives in the harness; the tool itself needs caller auth in hosted mode. All written up in the README.
-- **"Cost?"** $0.054 per report, $1.78 for the 30-record eval, under $3 total today.
+- **"Why not the sandbox?"** Lighthouse never needs code execution, so every turn takes TrueForge's cheap path — that's why a full report is five cents.
+- **"Real data?"** Synthetic today, ground truth generated from latent traits only. The metrics prove the machinery; `outcomes_record_ground_truth` plus nightly `rescore()` is how real calibration curves are built.
+- **"What would you attack?"** The report schema is university-specific, so the domain-pack swap is instructions-deep, not schema-deep. Parity metrics on synthetic labels can't detect real bias — the behavioural tests can. The approval gate lives in the harness; the MCP tool needs caller auth in hosted mode. All in the README.
+- **"What broke?"** The first auditor over-vetoed — it called campus visits a "circumstance." Fixed the definition; withheld went 8 → 3. Wi-Fi drops killed four turns; the runner now retries once. Both in the git log.
+- **"Cost?"** $0.054 per report, $1.78 for the 30-record eval, under $4 total today.
