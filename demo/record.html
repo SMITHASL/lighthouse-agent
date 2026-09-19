@@ -20,13 +20,15 @@ frame.addEventListener('load', async () => {
   try {
     stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30, width: 1280, height: 800 }, audio: false, preferCurrentTab: true });
   } catch (e) { status('capture refused: ' + e.message); return; }
-  const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 4_000_000 });
+  // H.264 MP4 plays natively on Windows/macOS players; VP9 WebM does not.
+  const mime = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42E01E') ? 'video/mp4;codecs=avc1.42E01E' : 'video/webm;codecs=vp9';
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
   const chunks = [];
   rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   rec.onstop = async () => {
     status('uploading');
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    await fetch('/upload', { method: 'POST', body: blob });
+    const blob = new Blob(chunks, { type: mime.split(';')[0] });
+    await fetch('/upload?ext=' + (mime.startsWith('video/mp4') ? 'mp4' : 'webm'), { method: 'POST', body: blob });
     status('done');
   };
   rec.start(1000);

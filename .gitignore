@@ -3,3 +3,4 @@ data/*.json
 evals/results
 
 demo/lighthouse-demo.webm
+demo/lighthouse-demo.mp4

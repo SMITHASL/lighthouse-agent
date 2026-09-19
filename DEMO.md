@@ -46,3 +46,5 @@ npm run demo      # http://localhost:8797
 Open it in a normal browser window at ≥1280px wide, start the HackerSquad recorder sharing that tab, click **▶ play**. It auto-advances through 17 captioned steps (~3:15), framing the live TrueForge sessions (analyst run, fairness audit, the paused Allow/Deny gate, schedules, rescorer run) between explainer panels. ◀ ▶ step manually, ⏸ to hold on a screen. Ends on the closing card; stop the recorder there.
 
 If you regenerate runs, update the session ids at the top of `demo/index.html`.
+
+Automated file: `npm run demo:record` drives Chrome (tab capture, H.264 MP4, no audio) and writes `demo/lighthouse-demo.mp4`; then run `node demo/fix-mp4-duration.mjs demo/lighthouse-demo.mp4 196` so players show the full length (MediaRecorder writes fragmented MP4 with only the first fragment declared). Prefer the MP4 over the WebM: Windows' Movies & TV app crashes on VP9 WebM.
