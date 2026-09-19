@@ -1,0 +1,29 @@
+{
+  "name": "lighthouse-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen:data": "tsx src/data/generate.ts",
+    "mcp": "tsx src/mcp/server.ts",
+    "setup": "tsx src/agents/register.ts",
+    "report": "tsx src/pipeline/run.ts",
+    "eval": "tsx evals/run.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@truefoundry/trueforge-sdk": "^0.2.0",
+    "express": "^5.1.0",
+    "zod": "^3.25.0",
+    "zod-to-json-schema": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
