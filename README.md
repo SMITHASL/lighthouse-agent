@@ -11,6 +11,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 | Rubric | What Lighthouse does | Where to see it |
 |---|---|---|
 | **Observe it** | Every stage is a TrueForge session with tool calls, tokens and timing | TrueForge → Sessions |
+| **Schedule it** | `lighthouse-nightly-rescore` runs `lighthouse-rescorer` at 02:00 PT: re-scores every stored report against recorded outcomes and refreshes `data/calibration.json`. Trigger it manually from TrueForge → Schedules. | TrueForge → Schedules |
 | **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | Sessions → `lighthouse-action-proposer` |
 | **Test it** | 13 Gherkin scenarios (BDD) → 50 offline + 5 live tests (TDD). `pnpm eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
 
@@ -48,7 +49,7 @@ Prereqs: TrueForge running on `http://localhost:8790` with an OpenAI provider co
 npm install
 npm run gen:data          # 500 synthetic applicants → data/
 npm run mcp               # MCP tools on :8799 (keep running)
-npm run setup             # registers MCP server + 3 agents in TrueForge
+npm run setup             # registers MCP server + 4 agents + nightly schedule in TrueForge
 npm run report -- app_0001   # one full pipeline run; pauses at the approval gate
 npm test                  # 50 offline tests (schemas, metrics, BDD traceability)
 LIVE=1 npm test           # + 5 live BDD scenarios against TrueForge (~$0.30)

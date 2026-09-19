@@ -62,7 +62,7 @@ Not here. Donor = **future capacity × generosity**. Capacity is ambition and tr
 
 Thirteen Gherkin scenarios written before the code. Fifty offline tests, five live ones. The eval scores calibration, ranking, fairness parity, hallucination, consistency, and cost against a base-rate baseline.
 
-The honest part: Lighthouse beats the baseline on every outcome, ranks recruiters at 0.97 AUROC — and two gates **fail**. Confidence intervals are too narrow on donors; volunteer parity is 0.17 with ten people per group. We show that, because the whole point of a harness is that you can see it. Nightly rescoring against real outcomes is what closes that gap.
+The honest part: Lighthouse beats the baseline on every outcome, ranks recruiters at 0.97 AUROC — and two gates **fail**. Confidence intervals are too narrow on donors; volunteer parity is 0.17 with ten people per group. We show that, because the whole point of a harness is that you can see it. Nightly rescoring against real outcomes is what closes that gap — **[Schedules → lighthouse-nightly-rescore]** runs at 2 AM, re-scores every report as outcomes arrive, and writes the calibration curve. I can trigger it right now.
 
 ## Scale (2:50)
 

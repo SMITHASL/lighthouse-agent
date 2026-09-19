@@ -43,6 +43,10 @@ async function pool<T, R>(items: T[], size: number, fn: (t: T) => Promise<R>): P
 let spent = 0;
 const results = await pool(applicants, concurrency, async (a) => {
   const r = await runReport(a.applicant_id, { proposeAction: false });
+  if (r.report) {
+    mkdirSync('data/reports', { recursive: true });
+    writeFileSync(`data/reports/${a.applicant_id}.json`, JSON.stringify(r, null, 2));
+  }
   spent += r.usage.estimated_usd;
   process.stderr.write(`${a.applicant_id} ${r.status} $${r.usage.estimated_usd.toFixed(3)} (total $${spent.toFixed(2)})\n`);
   if (spent > CAP_USD_PER_RUN) throw new Error('cost cap exceeded mid-run');

@@ -93,4 +93,17 @@ export const AGENT_NAMES = {
   analyst: 'lighthouse-critical-analyst',
   fairness: 'lighthouse-fairness-auditor',
   action: 'lighthouse-action-proposer',
+  rescorer: 'lighthouse-rescorer',
 } as const;
+
+export const RESCORER_INSTRUCTIONS = `You are Lighthouse's nightly rescorer. Call calibration_rescore exactly once. Then reply with a short plain-text summary: how many reports were scored, how many outcomes were available, and for each outcome its AUROC, Brier, ECE and CI coverage. If any ECE exceeds 0.15 or CI coverage is below 0.8, say so explicitly under a line "ATTENTION:".`;
+
+export const rescorerManifest = {
+  model: { name: MODELS.mini, params: { reasoning_effort: 'none' } },
+  instructions: RESCORER_INSTRUCTIONS,
+  // Metrics-only write; runs unattended, so it is deliberately not approval-gated.
+  mcp_servers: [{ name: MCP_SERVER_NAME, enable_tools: ['calibration_rescore'], require_approval_for_tools: [], preload: true }],
+  config: { sandbox: { enabled: false }, generative_ui: { enabled: false }, ask_user_questions: { enabled: false }, dynamic_sub_agents: { enabled: false }, iteration_limit: 5 },
+};
+
+export const SCHEDULE_NAME = 'lighthouse-nightly-rescore';

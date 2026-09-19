@@ -1,0 +1,424 @@
+{
+  "applicant_id": "app_000u",
+  "status": "released",
+  "report": {
+    "applicant_id": "app_000u",
+    "completion_likelihood": {
+      "estimate": 0.52,
+      "ci_low": 0.38,
+      "ci_high": 0.66,
+      "evidence": [
+        {
+          "claim": "Applicant reports recovering 80% of churned pilot accounts after rewriting onboarding, suggesting initiative under pressure; this is person-level but self-reported and not independently verified.",
+          "source_field": "statement",
+          "quality": "anecdotal"
+        },
+        {
+          "claim": "Institutional engagement is present but modest: one visit, one event, two questions, and 31-hour median response time.",
+          "source_field": "institution_interaction.events_attended",
+          "quality": "indirect"
+        },
+        {
+          "claim": "Mentoring activity over 22 months suggests consistency and follow-through outside coursework.",
+          "source_field": "activities[1].months",
+          "quality": "indirect"
+        }
+      ],
+      "counter_evidence": [
+        {
+          "claim": "Term scores show a sustained decline across four terms, a direct negative signal for completion risk.",
+          "source_field": "academic_trajectory.term_scores",
+          "quality": "direct"
+        },
+        {
+          "claim": "Applicant states goals are not yet clear, which can reduce persistence when program workload rises.",
+          "source_field": "stated_goals",
+          "quality": "direct"
+        },
+        {
+          "claim": "Hardest course load is listed as standard, so there is limited evidence of tested capacity under unusually high academic load.",
+          "source_field": "academic_trajectory.hardest_course_load_taken",
+          "quality": "direct"
+        },
+        {
+          "claim": "No setbacks overcome are recorded in the academic trajectory field, limiting direct evidence of academic recovery after difficulty.",
+          "source_field": "academic_trajectory.setbacks_overcome",
+          "quality": "direct"
+        }
+      ],
+      "missing_signals": [
+        "Recent graded work or instructor assessment explaining the score decline",
+        "Evidence of study plan, time allocation, or academic support use",
+        "Direct confirmation of the pilot-recovery claim",
+        "Interview notes specifically addressing academic persistence"
+      ]
+    },
+    "alumni_engagement_profile": {
+      "volunteer": {
+        "estimate": 0.6,
+        "ci_low": 0.45,
+        "ci_high": 0.74,
+        "evidence": [
+          {
+            "claim": "Volunteer coordinator role for 34 months is direct evidence of sustained service orientation.",
+            "source_field": "activities[0].months",
+            "quality": "direct"
+          },
+          {
+            "claim": "Food-bank shift coordination indicates practical volunteer organizing rather than only passive participation.",
+            "source_field": "activities[0].description",
+            "quality": "direct"
+          },
+          {
+            "claim": "Peer mentoring for 22 months indicates repeated investment in others' development.",
+            "source_field": "activities[1].months",
+            "quality": "direct"
+          },
+          {
+            "claim": "Statement says applicant still mentors two former interns, supporting ongoing helping behavior beyond formal roles.",
+            "source_field": "statement",
+            "quality": "anecdotal"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "No direct record yet of volunteering for this institution specifically.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Interaction volume with the institution is modest, so institutional volunteer conversion is not yet proven.",
+            "source_field": "institution_interaction.questions_asked",
+            "quality": "indirect"
+          }
+        ],
+        "missing_signals": [
+          "Response to a concrete invitation to support an admitted-student or alumni event",
+          "Record of reliability in volunteer commitments for this institution",
+          "Preferred volunteer format and time availability"
+        ]
+      },
+      "cheerleader": {
+        "estimate": 0.46,
+        "ci_low": 0.32,
+        "ci_high": 0.6,
+        "evidence": [
+          {
+            "claim": "Interview notes describe the applicant as energetic, a positive signal for visible alumni advocacy.",
+            "source_field": "interview_notes",
+            "quality": "anecdotal"
+          },
+          {
+            "claim": "Applicant asked about the alumni network, indicating interest in post-program affiliation.",
+            "source_field": "interview_notes",
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant credited former colleagues, suggesting pro-social attribution rather than purely self-focused framing.",
+            "source_field": "interview_notes",
+            "quality": "anecdotal"
+          },
+          {
+            "claim": "One event attended and one campus visit indicate some institutional curiosity before enrollment.",
+            "source_field": "institution_interaction.campus_visits",
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Stated goals are exploratory, so long-term identification with the program mission is not yet established.",
+            "source_field": "stated_goals",
+            "quality": "direct"
+          },
+          {
+            "claim": "No direct evidence of public advocacy for the institution yet.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "absent"
+          }
+        ],
+        "missing_signals": [
+          "Willingness to provide testimonial or speak with prospects",
+          "Observed participation in community discussion spaces",
+          "Post-event feedback sentiment about the institution"
+        ]
+      },
+      "donor": {
+        "estimate": 0.18,
+        "ci_low": 0.09,
+        "ci_high": 0.3,
+        "future_capacity": {
+          "estimate": 0.43,
+          "ambition_signals": [
+            {
+              "signal": "Weekend rewrite of onboarding after pilot failure suggests initiative, urgency, and ownership.",
+              "source_field": "statement"
+            },
+            {
+              "signal": "Reported recovery of 80% of churned accounts suggests applied problem-solving with measurable results, though self-reported.",
+              "source_field": "statement"
+            },
+            {
+              "signal": "Goals are explicitly uncertain, reducing clarity of trajectory.",
+              "source_field": "stated_goals"
+            },
+            {
+              "signal": "Declining term scores and standard hardest course load limit evidence of upward academic momentum or appetite for high difficulty.",
+              "source_field": "academic_trajectory.term_scores"
+            }
+          ]
+        },
+        "generosity": {
+          "estimate": 0.73,
+          "reciprocity_signals": [
+            {
+              "signal": "Sustained volunteer coordination over 34 months.",
+              "source_field": "activities[0].months"
+            },
+            {
+              "signal": "Peer mentoring over 22 months.",
+              "source_field": "activities[1].months"
+            },
+            {
+              "signal": "Continued mentoring of two former interns.",
+              "source_field": "statement"
+            },
+            {
+              "signal": "Credited former colleagues in interview.",
+              "source_field": "interview_notes"
+            },
+            {
+              "signal": "Already made one referral to the institution.",
+              "source_field": "institution_interaction.referrals_made"
+            }
+          ]
+        },
+        "horizon_years": 10,
+        "evidence": [
+          {
+            "claim": "Donor likelihood is estimated as a combination of moderate future-capacity signals and strong generosity signals; current resources or background circumstances are not used.",
+            "source_field": "statement",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Sustained volunteering and mentoring provide direct evidence of giving time and effort, a generosity proxy for later giving back.",
+            "source_field": "activities[0].description",
+            "quality": "direct"
+          },
+          {
+            "claim": "One referral already made is a concrete reciprocity signal toward the institution.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Unclear stated goals reduce confidence in future capacity trajectory.",
+            "source_field": "stated_goals",
+            "quality": "direct"
+          },
+          {
+            "claim": "Declining term scores reduce confidence in sustained performance growth.",
+            "source_field": "academic_trajectory.term_scores",
+            "quality": "direct"
+          },
+          {
+            "claim": "No direct prior donation behavior is recorded.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "absent"
+          }
+        ],
+        "missing_signals": [
+          "Career progression evidence after enrollment",
+          "Observed participation in alumni giving campaigns",
+          "Explicit gratitude toward the institution after receiving value",
+          "Direct record of small-dollar giving or other institutional reciprocity"
+        ]
+      },
+      "recruiter": {
+        "estimate": 0.43,
+        "ci_low": 0.28,
+        "ci_high": 0.6,
+        "evidence": [
+          {
+            "claim": "Applicant has already made one referral, the strongest direct signal for future recruiting behavior.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          },
+          {
+            "claim": "Asked about alumni network, indicating interest in community connectivity.",
+            "source_field": "interview_notes",
+            "quality": "direct"
+          },
+          {
+            "claim": "Volunteer coordinator and peer mentor roles suggest comfort mobilizing and guiding others.",
+            "source_field": "activities[0].role",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Mentored junior analysts through their first year, suggesting access to and willingness to support potential peer prospects.",
+            "source_field": "activities[1].description",
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Institutional interaction count is still low, so referral behavior may not persist without structured prompts.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Only one referral is recorded; this is meaningful but not enough to infer a high-volume recruiter pattern.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          }
+        ],
+        "missing_signals": [
+          "Quality and conversion outcome of the existing referral",
+          "Response to a structured referral request",
+          "Size and relevance of professional network, excluding background circumstance signals",
+          "Observed willingness to host or attend prospect sessions"
+        ]
+      }
+    },
+    "recruiter_multiplier": {
+      "expected_referrals_5y": 1.4,
+      "ci_low": 0.3,
+      "ci_high": 3,
+      "reasoning": "Reference-class recruiter base rate is 0.22 over 10 years. This applicant is above base rate because institution_interaction.referrals_made records 1 referral already, and interview_notes show interest in the alumni network. The estimate is tempered because total institutional engagement is modest and one referral may be situational rather than durable."
+    },
+    "critical_analysis": {
+      "question": "For applicant app_000u, what is the 10-year likelihood of completion and post-completion alumni engagement as volunteer, cheerleader, donor, and recruiter?",
+      "hypotheses": [
+        "H1: The applicant is a high-engagement, service-oriented future alum whose volunteering, mentoring, and prior referral will translate into above-base volunteer, recruiter, cheerleader, and donor behavior.",
+        "H2: The applicant is pro-social but academically at risk; declining term scores and unclear goals may reduce completion and therefore limit later alumni outcomes.",
+        "H3: The strongest positive signals are situational and self-reported; without direct institutional behavior beyond one referral and modest event engagement, alumni engagement may regress toward base rates."
+      ],
+      "inference_type": "abductive",
+      "base_rate_used": "Base rates fetched before estimation for LEAD Certificate alumni over 10 years: completion 0.62, volunteer 0.31, cheerleader 0.28, donor 0.14, recruiter 0.22.",
+      "inconsistencies": [
+        "Statement emphasizes successful recovery after a failed pilot, but academic_trajectory.term_scores show a sustained decline; this is not a contradiction, but it weakens a broad persistence inference.",
+        "Applicant asked about the alumni network while stated_goals says they are not sure yet; this suggests community interest without clear outcome direction.",
+        "Potential fallacy checked: avoiding halo effect from volunteering by keeping completion estimate below the completion base rate due to direct academic counter-evidence.",
+        "Potential fallacy checked: avoiding causal claims from correlation; volunteering and mentoring are treated as engagement proxies, not proof of future institutional service."
+      ],
+      "circumstance_signals_excluded": [
+        "No background circumstance signals were used as evidence; estimates rely on conduct, trajectory, stated goals, and consented institution interactions only."
+      ],
+      "strongest_case_for": "The applicant has unusually strong direct service signals: 34 months coordinating volunteer shifts, 22 months mentoring junior analysts, ongoing intern mentoring, pro-social interview attribution, and one recorded referral. These support above-base estimates for volunteer, recruiter, cheerleader, and generosity components of donor likelihood.",
+      "strongest_case_against": "Completion risk is material because term scores decline monotonically, goals are explicitly uncertain, hardest course load is only standard, and there is no recorded academic recovery pattern. Since completion gates many alumni outcomes, this constrains all long-term predictions.",
+      "what_would_change_my_mind": [
+        "Completion estimate would rise if recent coursework, instructor feedback, or a support plan showed the score decline has stabilized or reversed.",
+        "Volunteer estimate would fall if the applicant declined a low-cost service invitation or had poor follow-through on a scheduled volunteer commitment.",
+        "Cheerleader estimate would rise if the applicant opted into a testimonial, prospect conversation, or community ambassador activity.",
+        "Donor estimate would rise if career trajectory evidence showed growing responsibility combined with continued reciprocity toward the institution.",
+        "Recruiter estimate would fall if the recorded referral was accidental, low-quality, or not repeated when prompted."
+      ],
+      "proposed_experiment": "Cheapest falsification tests: completion—ask for a short academic plan addressing the score decline and compare next assessment to prior trend; volunteer—invite the applicant to one small alumni/prospect support task and track completion; cheerleader—ask whether they will share a brief authentic program-interest statement with prospects; donor—after receiving institutional value, offer a non-monetary give-back opportunity and observe reciprocity; recruiter—send a structured referral prompt and measure whether a second qualified referral occurs.",
+      "analogy_and_where_it_breaks": "The reference-class analogy is LEAD Certificate alumni base rates. It is useful because the applicant is in the same program context and outcomes are defined over the same 10-year horizon. It breaks because this individual has a rare direct referral signal and unusually long service history, while also showing a declining academic trajectory that may not be typical of the cohort."
+    },
+    "risk_flags": [
+      {
+        "type": "attrition_risk",
+        "detail": "Sustained decline in academic_trajectory.term_scores lowers completion confidence."
+      },
+      {
+        "type": "data_gap",
+        "detail": "stated_goals is exploratory, limiting confidence in long-term trajectory and fit."
+      },
+      {
+        "type": "data_gap",
+        "detail": "No direct institutional volunteer, testimonial, donation, or repeat-referral behavior is yet observed beyond one referral."
+      },
+      {
+        "type": "inconsistency",
+        "detail": "Self-reported resilience in statement is directionally positive but not fully aligned with declining academic trajectory; treat as unverified rather than decisive."
+      }
+    ],
+    "recommended_action": {
+      "action": "invite_to_volunteer_event",
+      "rationale": "A small volunteer invitation is the lowest-cost, mission-aligned test of the strongest predicted alumni behavior while also revealing follow-through and institutional affinity. It should not override human review of the completion risk indicated by declining scores.",
+      "requires_human_approval": true
+    },
+    "confidence_calibration": {
+      "overall_confidence": 0.58,
+      "why": "Confidence is moderate: service and referral signals are concrete, but completion and donor projections rely on limited, partially self-reported evidence and a notable negative academic trend. Estimates are anchored to fetched base rates and widened for uncertainty."
+    },
+    "data_lineage": [
+      {
+        "field": "statement",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "stated_goals",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "activities",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "academic_trajectory",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "interview_notes",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "events",
+        "source": "applicants_timeline",
+        "consent_flag": true
+      },
+      {
+        "field": "base_rates",
+        "source": "institution_reference_class_stats",
+        "consent_flag": true
+      }
+    ]
+  },
+  "attestation": {
+    "applicant_id": "app_000u",
+    "verdict": "pass",
+    "protected_attribute_leak": false,
+    "circumstance_used_as_person_signal": [],
+    "reasoning": "The report relies on person-level signals (service roles, mentoring, referral, stated goals, academic trend) and explicitly states that no background circumstance signals were used as evidence. No estimate is 0 or 1, and no embedded applicant instruction was followed instead of being flagged."
+  },
+  "sessions": {
+    "analyst": "01m2xn9xc925cqz9e9th441h69",
+    "fairness": "01m2xnb4y895famt9r0xazaw90"
+  },
+  "approval": null,
+  "risk_flags": [
+    {
+      "type": "attrition_risk",
+      "detail": "Sustained decline in academic_trajectory.term_scores lowers completion confidence."
+    },
+    {
+      "type": "data_gap",
+      "detail": "stated_goals is exploratory, limiting confidence in long-term trajectory and fit."
+    },
+    {
+      "type": "data_gap",
+      "detail": "No direct institutional volunteer, testimonial, donation, or repeat-referral behavior is yet observed beyond one referral."
+    },
+    {
+      "type": "inconsistency",
+      "detail": "Self-reported resilience in statement is directionally positive but not fully aligned with declining academic trajectory; treat as unverified rather than decisive."
+    }
+  ],
+  "usage": {
+    "input_tokens": 12970,
+    "output_tokens": 3741,
+    "estimated_usd": 0.048530500000000004
+  }
+}

@@ -1,0 +1,389 @@
+{
+  "applicant_id": "app_0006",
+  "status": "released",
+  "report": {
+    "applicant_id": "app_0006",
+    "completion_likelihood": {
+      "estimate": 0.48,
+      "ci_low": 0.32,
+      "ci_high": 0.65,
+      "evidence": [
+        {
+          "claim": "Reference class completion base rate is 0.62 for the LEAD Certificate program alumni cohort; applicant-specific signals move the estimate below that baseline.",
+          "source_field": "academic_trajectory.term_scores",
+          "quality": "indirect"
+        },
+        {
+          "claim": "Term scores show a declining pattern from 0.52 to 0.38, which is an indirect persistence and mastery risk signal.",
+          "source_field": "academic_trajectory.term_scores",
+          "quality": "indirect"
+        },
+        {
+          "claim": "Hardest course load taken is light, giving limited evidence of readiness for sustained academic intensity.",
+          "source_field": "academic_trajectory.hardest_course_load_taken",
+          "quality": "indirect"
+        },
+        {
+          "claim": "Applicant reports enjoying problem solving and learning new tools, a modest positive motivation signal.",
+          "source_field": "statement",
+          "quality": "anecdotal"
+        }
+      ],
+      "counter_evidence": [
+        {
+          "claim": "Sustained 26-month volunteer coordinator role suggests follow-through over time.",
+          "source_field": "activities[0].months",
+          "quality": "indirect"
+        },
+        {
+          "claim": "No setbacks overcome are listed, so there is absent direct evidence about persistence after academic difficulty.",
+          "source_field": "academic_trajectory.setbacks_overcome",
+          "quality": "absent"
+        }
+      ],
+      "missing_signals": [
+        "Recent performance recovery after the last recorded term score",
+        "Evidence of success under heavier course loads",
+        "Specific study plan or time-management plan",
+        "Direct faculty or supervisor assessment of academic persistence"
+      ]
+    },
+    "alumni_engagement_profile": {
+      "volunteer": {
+        "estimate": 0.62,
+        "ci_low": 0.45,
+        "ci_high": 0.77,
+        "evidence": [
+          {
+            "claim": "Applicant held a volunteer coordinator role for 26 months, a direct sustained-service signal above the volunteer base rate of 0.31.",
+            "source_field": "activities[0].months",
+            "quality": "direct"
+          },
+          {
+            "claim": "Coordinating weekend food-bank shifts shows organizing behavior in a service context, relevant to alumni volunteering.",
+            "source_field": "activities[0].description",
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Institution-specific engagement is limited so far, with only one event attended.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Median response time of 52 hours suggests moderate rather than high responsiveness to institution contact.",
+            "source_field": "institution_interaction.median_response_hours",
+            "quality": "indirect"
+          }
+        ],
+        "missing_signals": [
+          "Whether applicant has volunteered for educational or alumni organizations",
+          "Willingness to lead future cohorts or events",
+          "Direct response to an invitation to serve"
+        ]
+      },
+      "cheerleader": {
+        "estimate": 0.3,
+        "ci_low": 0.18,
+        "ci_high": 0.46,
+        "evidence": [
+          {
+            "claim": "Applicant describes the program as a good next step, which is mild positive sentiment but not strong advocacy.",
+            "source_field": "statement",
+            "quality": "anecdotal"
+          },
+          {
+            "claim": "One event attended indicates some institutional interest, close to the cheerleader base rate of 0.28.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Interview notes describe answers as pleasant but somewhat generic, limiting evidence of distinctive enthusiasm.",
+            "source_field": "interview_notes",
+            "quality": "anecdotal"
+          },
+          {
+            "claim": "Stated goals are uncertain, reducing confidence that the applicant will later advocate for the program with a clear story.",
+            "source_field": "stated_goals",
+            "quality": "direct"
+          },
+          {
+            "claim": "Only one question asked suggests limited proactive institutional curiosity at this stage.",
+            "source_field": "institution_interaction.questions_asked",
+            "quality": "indirect"
+          }
+        ],
+        "missing_signals": [
+          "Specific reasons for choosing the institution",
+          "Evidence of public advocacy or peer influence",
+          "Post-event feedback sentiment",
+          "Concrete account of how the program connects to applicant goals"
+        ]
+      },
+      "donor": {
+        "estimate": 0.13,
+        "ci_low": 0.06,
+        "ci_high": 0.25,
+        "future_capacity": {
+          "estimate": 0.34,
+          "ambition_signals": [
+            {
+              "signal": "Goal clarity is weak because applicant is still exploring options.",
+              "source_field": "stated_goals"
+            },
+            {
+              "signal": "Academic trajectory currently declines and hardest course load is light, limiting evidence of future capacity growth.",
+              "source_field": "academic_trajectory.term_scores"
+            },
+            {
+              "signal": "Volunteer coordination shows initiative and responsibility, but not direct career-capacity evidence.",
+              "source_field": "activities[0].role"
+            }
+          ]
+        },
+        "generosity": {
+          "estimate": 0.68,
+          "reciprocity_signals": [
+            {
+              "signal": "Sustained volunteering indicates prosocial contribution over time.",
+              "source_field": "activities[0].months"
+            },
+            {
+              "signal": "Food-bank shift organization indicates helping behavior and coordination of others for a public-benefit activity.",
+              "source_field": "activities[0].description"
+            },
+            {
+              "signal": "One referral already made is a reciprocity signal toward the institution or program network.",
+              "source_field": "institution_interaction.referrals_made"
+            }
+          ]
+        },
+        "horizon_years": 10,
+        "evidence": [
+          {
+            "claim": "Donor prediction uses future_capacity multiplied by generosity; generosity is strong from sustained volunteering, while future_capacity is weaker due to unclear goals and declining scores.",
+            "source_field": "activities[0].description",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Donor base rate is 0.14; applicant's generosity signals are above baseline, but future-capacity signals do not justify a large upward adjustment.",
+            "source_field": "stated_goals",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Applicant made one referral, a direct give-back signal relevant to generosity.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Applicant reports uncertain goals, weakening a 10-year future-capacity trajectory prediction.",
+            "source_field": "stated_goals",
+            "quality": "direct"
+          },
+          {
+            "claim": "No founder, sustained leadership beyond service coordination, or hard academic-load evidence is present.",
+            "source_field": "activities[0].role",
+            "quality": "absent"
+          }
+        ],
+        "missing_signals": [
+          "Career ambition specificity",
+          "Evidence of rapid skill growth or performance rebound",
+          "Examples of mentoring others",
+          "Post-program giving intention or gratitude toward institutions or mentors"
+        ]
+      },
+      "recruiter": {
+        "estimate": 0.34,
+        "ci_low": 0.2,
+        "ci_high": 0.51,
+        "evidence": [
+          {
+            "claim": "Applicant has already made one referral, a direct signal for future recruiting behavior and above the recruiter base rate of 0.22.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          },
+          {
+            "claim": "Volunteer coordinator experience indicates organizing people, an indirect signal for future recruiting or referral activity.",
+            "source_field": "activities[0].role",
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Only one event attended and one question asked suggest limited depth of institutional engagement so far.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Interview notes describe generic answers, limiting evidence that applicant can persuasively articulate the program's value.",
+            "source_field": "interview_notes",
+            "quality": "anecdotal"
+          }
+        ],
+        "missing_signals": [
+          "Quality and outcome of the existing referral",
+          "Size and relevance of applicant's peer network",
+          "Willingness to speak at recruitment events",
+          "Evidence of persuasive communication about the program"
+        ]
+      }
+    },
+    "recruiter_multiplier": {
+      "expected_referrals_5y": 1.7,
+      "ci_low": 0.5,
+      "ci_high": 3.5,
+      "reasoning": "The reference-class recruiter base rate is 0.22. Applicant has already made 1 referral, cited from institution_interaction.referrals_made, which is a direct behavioral signal. However, limited event attendance, few questions, and generic interview notes cap the estimate. Expected referrals over 5 years are therefore above a no-signal baseline but not high-confidence."
+    },
+    "critical_analysis": {
+      "question": "For applicant app_0006, what is the 10-year likelihood of completion and later alumni engagement as volunteer, cheerleader, donor, and recruiter?",
+      "hypotheses": [
+        "H1: The applicant is a service-oriented, reliable participant who will complete the program and later contribute through volunteering and referrals.",
+        "H2: The applicant's unclear goals, declining term scores, light course load, and generic interview responses indicate weaker completion odds and only modest long-term institutional engagement.",
+        "H3: The applicant's strongest long-term fit is nonfinancial contribution rather than donor behavior, because generosity signals are stronger than future-capacity signals."
+      ],
+      "inference_type": "abductive",
+      "base_rate_used": "Reference class: alumni of the LEAD Certificate program. Ten-year base rates fetched before estimation: completion 0.62, volunteer 0.31, cheerleader 0.28, donor 0.14, recruiter 0.22.",
+      "inconsistencies": [
+        "Statement says the program is a good career next step, but stated_goals says the applicant is not sure yet and is exploring options.",
+        "Sustained volunteer coordination suggests reliability, while academic_trajectory.term_scores show decline; these signals point in opposite directions for completion.",
+        "The applicant has already made a referral, but institutional interaction depth is otherwise limited: one event attended and one question asked.",
+        "Potential fallacy checked: I did not infer academic completion directly from volunteering; volunteering is treated only as indirect evidence for follow-through. Potential fallacy in materials: broad statement of interest is not treated as proof of program fit."
+      ],
+      "circumstance_signals_excluded": [
+        "No background-resource, school-prestige, location, or family-context signals were used as evidence.",
+        "No current wealth signal was used for donor prediction; donor was modeled as future_capacity times generosity."
+      ],
+      "strongest_case_for": "The strongest positive case is that the applicant has demonstrated sustained service and coordination over 26 months and has already made one referral. These are direct or near-direct signals for volunteer and recruiter outcomes, and indirect signals of follow-through.",
+      "strongest_case_against": "The strongest negative case is the combination of unclear goals, declining term scores, light course load, limited institutional interaction, and generic interview answers. These reduce confidence in completion, cheerleading, and future-capacity components of donor prediction.",
+      "what_would_change_my_mind": [
+        "Completion estimate would rise if the applicant showed a recent performance rebound, a concrete study plan, or successful work in a heavier course load.",
+        "Volunteer estimate would fall if the applicant declined a low-friction service invitation or if the volunteer role was found to be brief in responsibility despite long duration.",
+        "Cheerleader estimate would rise if the applicant provided specific, credible reasons for program enthusiasm or independently advocated to peers.",
+        "Donor estimate would rise if the applicant demonstrated clearer ambition, rapid skill growth, mentoring, or institution-focused gratitude after receiving support.",
+        "Recruiter estimate would fall if the existing referral was incidental or if the applicant declined to participate in a recruitment conversation."
+      ],
+      "proposed_experiment": "Cheapest falsification tests: completion—ask for a one-page plan for managing coursework and review a short diagnostic assignment; volunteer—invite the applicant to a one-hour alumni-service planning task and observe follow-through; cheerleader—ask for a short explanation to a peer of why this program fits and assess specificity; donor—ask about a time they gave back after receiving help and look for concrete reciprocity; recruiter—ask whether they would make one targeted referral or join a brief prospective-student Q&A, then observe actual behavior.",
+      "analogy_and_where_it_breaks": "The base-rate analogy compares this applicant to LEAD Certificate alumni, which is appropriate for broad calibration. It breaks because the individual record has sparse signals, the applicant's goals are still forming, and alumni outcomes depend on post-admission experiences not yet observed. Therefore estimates remain interval-based and conservative."
+    },
+    "risk_flags": [
+      {
+        "type": "attrition_risk",
+        "detail": "Declining academic_trajectory.term_scores and light hardest_course_load_taken create completion risk."
+      },
+      {
+        "type": "data_gap",
+        "detail": "stated_goals is unclear, limiting prediction for completion, cheerleader, donor future_capacity, and long-term fit."
+      },
+      {
+        "type": "data_gap",
+        "detail": "No direct evidence is available about post-program gratitude, mentoring, career trajectory, or willingness to serve the institution."
+      },
+      {
+        "type": "inconsistency",
+        "detail": "Positive service and referral signals conflict with otherwise limited institutional engagement and generic interview_notes."
+      }
+    ],
+    "recommended_action": {
+      "action": "schedule_interview",
+      "rationale": "A targeted follow-up interview is the cheapest way to test unclear goals, completion plan, specificity of enthusiasm, and willingness to volunteer or recruit. Human review is needed because the estimates depend on sparse and mixed evidence.",
+      "requires_human_approval": true
+    },
+    "confidence_calibration": {
+      "overall_confidence": 0.56,
+      "why": "Confidence is moderate-low: there are direct signals for volunteering and one referral, but completion and donor predictions rely on indirect evidence, sparse interaction data, and unclear goals. Base rates anchor the estimates, and intervals remain wide."
+    },
+    "data_lineage": [
+      {
+        "field": "applicant_id",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "program",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "statement",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "stated_goals",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "activities",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "academic_trajectory",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "interview_notes",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction",
+        "source": "applicants_timeline",
+        "consent_flag": true
+      },
+      {
+        "field": "base_rates",
+        "source": "institution_reference_class_stats",
+        "consent_flag": true
+      }
+    ]
+  },
+  "attestation": {
+    "applicant_id": "app_0006",
+    "verdict": "pass",
+    "protected_attribute_leak": false,
+    "circumstance_used_as_person_signal": [],
+    "reasoning": "The report does not use any protected attribute or circumstance signal as evidence for an estimate. All cited evidence is based on person signals such as term scores, course load, volunteering duration, referral behavior, interview notes, and stated goals. No estimate is empty or exactly 0/1, and no embedded applicant instruction appears to have been followed."
+  },
+  "sessions": {
+    "analyst": "01m2xmxxtt6qwvctxnd4f9wshd",
+    "fairness": "01m2xmz7apdshwvdcfryx9jmve"
+  },
+  "approval": null,
+  "risk_flags": [
+    {
+      "type": "attrition_risk",
+      "detail": "Declining academic_trajectory.term_scores and light hardest_course_load_taken create completion risk."
+    },
+    {
+      "type": "data_gap",
+      "detail": "stated_goals is unclear, limiting prediction for completion, cheerleader, donor future_capacity, and long-term fit."
+    },
+    {
+      "type": "data_gap",
+      "detail": "No direct evidence is available about post-program gratitude, mentoring, career trajectory, or willingness to serve the institution."
+    },
+    {
+      "type": "inconsistency",
+      "detail": "Positive service and referral signals conflict with otherwise limited institutional engagement and generic interview_notes."
+    }
+  ],
+  "usage": {
+    "input_tokens": 12755,
+    "output_tokens": 3641,
+    "estimated_usd": 0.047174749999999994
+  }
+}

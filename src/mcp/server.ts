@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
 import { ApplicantInput, GroundTruth } from '../schema/applicant.js';
+import { LongTermFitReport } from '../schema/report.js';
+import { rescore } from '../metrics/rescore.js';
 import { loadDomainPack } from '../agents/domainPacks.js';
 
 export const MCP_PORT = 8799;
@@ -103,6 +105,39 @@ export function buildMcpServer(store: Store, dataDir = 'data'): McpServer {
       const gt = GroundTruth.parse(args);
       store.outcomes.set(gt.applicant_id, gt);
       return text({ recorded: true });
+    },
+  );
+
+  server.registerTool(
+    'calibration_rescore',
+    {
+      description: 'Re-score every stored Long-Term Fit Report against recorded outcomes and persist updated calibration metrics. Write (metrics only; never touches applicants).',
+      inputSchema: {},
+      annotations: { readOnlyHint: false, destructiveHint: false },
+    },
+    async () => {
+      const reportsDir = `${dataDir}/reports`;
+      const reports: LongTermFitReport[] = existsSync(reportsDir)
+        ? readdirSync(reportsDir)
+            .filter((f) => f.endsWith('.json'))
+            .flatMap((f) => {
+              const parsed = JSON.parse(readFileSync(`${reportsDir}/${f}`, 'utf8')) as { report?: unknown };
+              const r = LongTermFitReport.safeParse(parsed.report);
+              return r.success ? [r.data] : [];
+            })
+        : [];
+      // Recorded outcomes win; the synthetic ground truth fills in until real outcomes arrive.
+      const truth = new Map<string, GroundTruth>();
+      const gtPath = `${dataDir}/ground_truth.json`;
+      if (existsSync(gtPath)) for (const raw of JSON.parse(readFileSync(gtPath, 'utf8')) as unknown[]) {
+        const t = GroundTruth.parse(raw);
+        truth.set(t.applicant_id, t);
+      }
+      for (const [id, t] of store.outcomes) truth.set(id, t);
+      const calibration = rescore(reports, [...truth.values()]);
+      mkdirSync(dataDir, { recursive: true });
+      writeFileSync(`${dataDir}/calibration.json`, JSON.stringify(calibration, null, 2));
+      return text({ reports_scored: reports.length, outcomes_available: truth.size, recorded_outcomes: store.outcomes.size, calibration });
     },
   );
 

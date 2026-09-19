@@ -1,0 +1,394 @@
+{
+  "applicant_id": "app_000k",
+  "status": "withheld",
+  "report": {
+    "applicant_id": "app_000k",
+    "completion_likelihood": {
+      "estimate": 0.61,
+      "ci_low": 0.45,
+      "ci_high": 0.75,
+      "evidence": [
+        {
+          "claim": "Term scores show steady improvement across four terms, supporting persistence and learning momentum.",
+          "source_field": "academic_trajectory.term_scores",
+          "quality": "direct"
+        },
+        {
+          "claim": "Recovered from a layoff by retraining in six months, supporting adaptability after setbacks.",
+          "source_field": "academic_trajectory.setbacks_overcome[0]",
+          "quality": "direct"
+        },
+        {
+          "claim": "Goal is concrete and near-term: promotion.",
+          "source_field": "stated_goals",
+          "quality": "direct"
+        }
+      ],
+      "counter_evidence": [
+        {
+          "claim": "Applicant reports limited time for extracurriculars, which may also indicate limited discretionary time for program engagement.",
+          "source_field": "statement",
+          "quality": "direct"
+        },
+        {
+          "claim": "Hardest course load taken is light, so readiness for sustained workload is not strongly demonstrated.",
+          "source_field": "academic_trajectory.hardest_course_load_taken",
+          "quality": "direct"
+        },
+        {
+          "claim": "Median response time is relatively slow, suggesting possible competing priorities.",
+          "source_field": "institution_interaction.median_response_hours",
+          "quality": "indirect"
+        }
+      ],
+      "missing_signals": [
+        "interview_notes",
+        "direct evidence of weekly study time availability",
+        "recent performance under a heavier course load"
+      ]
+    },
+    "alumni_engagement_profile": {
+      "volunteer": {
+        "estimate": 0.46,
+        "ci_low": 0.3,
+        "ci_high": 0.62,
+        "evidence": [
+          {
+            "claim": "Served as a volunteer coordinator for 23 months, directly indicating sustained service behavior.",
+            "source_field": "activities[0].role",
+            "quality": "direct"
+          },
+          {
+            "claim": "Organised weekend food-bank shifts, suggesting initiative in coordinating others for service.",
+            "source_field": "activities[0].description",
+            "quality": "direct"
+          },
+          {
+            "claim": "Duration of volunteering is substantial at 23 months.",
+            "source_field": "activities[0].months",
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Applicant states they do not have much time for extracurriculars, which could limit future alumni volunteering.",
+            "source_field": "statement",
+            "quality": "direct"
+          }
+        ],
+        "missing_signals": [
+          "specific willingness to volunteer for the institution",
+          "availability after program completion",
+          "prior mentoring or committee service with educational organizations"
+        ]
+      },
+      "cheerleader": {
+        "estimate": 0.24,
+        "ci_low": 0.13,
+        "ci_high": 0.39,
+        "evidence": [
+          {
+            "claim": "Attended one event and made one campus visit, showing some initial contact with the institution.",
+            "source_field": "institution_interaction.events_attended",
+            "quality": "direct"
+          },
+          {
+            "claim": "Volunteer coordination may transfer to community advocacy, but the connection to promoting the institution is indirect.",
+            "source_field": "activities[0].role",
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Statement frames application as primarily employer-sponsored and instrumental, with little expressed enthusiasm for the institution or learning community.",
+            "source_field": "statement",
+            "quality": "direct"
+          },
+          {
+            "claim": "Only one question asked, suggesting modest proactive engagement so far.",
+            "source_field": "institution_interaction.questions_asked",
+            "quality": "indirect"
+          }
+        ],
+        "missing_signals": [
+          "explicit enthusiasm for the program",
+          "prior public advocacy for organizations",
+          "post-event feedback or testimonials"
+        ]
+      },
+      "donor": {
+        "estimate": 0.16,
+        "ci_low": 0.07,
+        "ci_high": 0.3,
+        "future_capacity": {
+          "estimate": 0.42,
+          "ambition_signals": [
+            {
+              "signal": "Concrete advancement goal: promotion.",
+              "source_field": "stated_goals"
+            },
+            {
+              "signal": "Steady improvement in term scores across four observations.",
+              "source_field": "academic_trajectory.term_scores"
+            },
+            {
+              "signal": "Recovered from a layoff by retraining in six months.",
+              "source_field": "academic_trajectory.setbacks_overcome[0]"
+            }
+          ]
+        },
+        "generosity": {
+          "estimate": 0.39,
+          "reciprocity_signals": [
+            {
+              "signal": "Sustained volunteering as coordinator for 23 months.",
+              "source_field": "activities[0].months"
+            },
+            {
+              "signal": "Organised weekend food-bank shifts, indicating service orientation.",
+              "source_field": "activities[0].description"
+            }
+          ]
+        },
+        "horizon_years": 10,
+        "evidence": [
+          {
+            "claim": "Donor prediction combines future capacity and generosity; applicant shows moderate trajectory signals and clear service history.",
+            "source_field": "academic_trajectory.term_scores",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Volunteer coordinator role provides a generosity signal relevant to giving back.",
+            "source_field": "activities[0].role",
+            "quality": "direct"
+          },
+          {
+            "claim": "Promotion goal is a future-capacity signal, but not proof of future giving ability.",
+            "source_field": "stated_goals",
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Hardest course load taken is light, limiting evidence for appetite for demanding workloads.",
+            "source_field": "academic_trajectory.hardest_course_load_taken",
+            "quality": "direct"
+          },
+          {
+            "claim": "No referrals have been made to date, limiting observed reciprocity toward the institution specifically.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          }
+        ],
+        "missing_signals": [
+          "post-program career trajectory evidence",
+          "history of giving back to educational institutions",
+          "explicit gratitude toward mentors or institutions",
+          "leadership scope beyond the listed volunteer activity"
+        ]
+      },
+      "recruiter": {
+        "estimate": 0.16,
+        "ci_low": 0.07,
+        "ci_high": 0.31,
+        "evidence": [
+          {
+            "claim": "Volunteer coordinator experience suggests some ability to mobilize people, though not specifically for program recruitment.",
+            "source_field": "activities[0].role",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Organising weekend food-bank shifts implies outreach and coordination skill.",
+            "source_field": "activities[0].description",
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "No referrals made so far; this is the most direct observed signal for the recruiter outcome.",
+            "source_field": "institution_interaction.referrals_made",
+            "quality": "direct"
+          },
+          {
+            "claim": "Only one question asked and one event attended, suggesting limited active engagement with the institution to date.",
+            "source_field": "institution_interaction.questions_asked",
+            "quality": "indirect"
+          },
+          {
+            "claim": "Statement emphasizes employer sponsorship and promotion rather than community-building or recommending the program to others.",
+            "source_field": "statement",
+            "quality": "direct"
+          }
+        ],
+        "missing_signals": [
+          "expressed intent to refer peers",
+          "social proof behavior after events",
+          "network-building activity related to professional education"
+        ]
+      }
+    },
+    "recruiter_multiplier": {
+      "expected_referrals_5y": 0.25,
+      "ci_low": 0.02,
+      "ci_high": 1.05,
+      "reasoning": "Base recruiter rate for the LEAD Certificate alumni reference class is 0.22 over 10 years. Applicant-specific adjustment is downward because institution_interaction.referrals_made is 0, while modestly offset by volunteer coordination experience that may translate into mobilizing peers. Expected referrals over 5 years are therefore low but nonzero."
+    },
+    "critical_analysis": {
+      "question": "For applicant app_000k, what is the likelihood over a 10-year horizon of completion, alumni volunteering, institutional cheerleading, donating, and recruiting/referring others?",
+      "hypotheses": [
+        "H1: The applicant is a practical, resilient completer who may engage selectively, especially in service-oriented alumni opportunities.",
+        "H2: The applicant is primarily pursuing a credential for promotion and will have limited long-term institutional engagement.",
+        "H3: The applicant's service history indicates broader reciprocity that could develop into volunteering, giving, and referrals if the program creates a strong experience."
+      ],
+      "inference_type": "abductive",
+      "base_rate_used": "Reference class: alumni of the LEAD Certificate program; 10-year base rates: completion 0.62, volunteer 0.31, cheerleader 0.28, donor 0.14, recruiter 0.22.",
+      "inconsistencies": [
+        "Applicant says they do not have much time for extracurriculars, yet reports 23 months as a volunteer coordinator; this may reflect a recent time constraint, selective commitment, or wording imprecision.",
+        "Stated goal is narrowly promotion-focused, while activity history shows community service; engagement may depend strongly on perceived relevance and convenience.",
+        "No interview notes are available, limiting consistency checks across written materials and live discussion."
+      ],
+      "circumstance_signals_excluded": [
+        "Employer sponsorship for program payment from statement; excluded as an external circumstance rather than a person-level signal.",
+        "Single campus visit and single event attendance were treated only as observed engagement, not as access or convenience signals."
+      ],
+      "strongest_case_for": "Premises: term_scores improve steadily; applicant retrained after a layoff; applicant coordinated volunteering for 23 months. Inference: resilience plus sustained service behavior makes completion near the base rate and alumni volunteering above the base rate plausible. Conclusion: the strongest long-term fit is volunteer potential, with completion approximately at the reference-class level.",
+      "strongest_case_against": "Premises: statement is instrumental, time is constrained, hardest course load is light, response time is slow, and referrals_made is 0. Inference: observed institution-specific commitment is limited. Conclusion: cheerleader, recruiter, and donor estimates should remain close to or below their base rates except where service history supports generosity.",
+      "what_would_change_my_mind": [
+        "Completion estimate would fall if a short diagnostic module showed missed deadlines or inability to allocate consistent weekly study time.",
+        "Volunteer estimate would fall if the applicant declined a low-burden alumni service opportunity aligned with food-bank or community logistics experience.",
+        "Cheerleader estimate would rise if the applicant independently shared a positive program reflection or asked how to represent the program to peers.",
+        "Donor estimate would rise if the applicant expressed gratitude for institutional support and sustained giving-back behavior after enrollment.",
+        "Recruiter estimate would rise if the applicant referred at least one qualified peer or asked for referral materials."
+      ],
+      "proposed_experiment": "Cheapest falsification tests: completion—offer a one-week prework module with a deadline; volunteer—invite to a single two-hour alumni service planning session; cheerleader—ask for an optional post-event testimonial; donor—ask about preferred ways to give back after support received; recruiter—provide a trackable referral link and observe whether any referrals occur within 90 days. These are tests, not final decisions, and they separate correlation from causation by looking for new behavior after a clear opportunity.",
+      "analogy_and_where_it_breaks": "The applicant is compared with LEAD Certificate alumni base rates. The analogy is useful because the program and outcome horizon match. It breaks because this record contains unusually specific service coordination evidence, no interview notes, and only early interaction data; base rates describe a cohort, while this prediction concerns one person with sparse signals."
+    },
+    "risk_flags": [
+      {
+        "type": "data_gap",
+        "detail": "interview_notes is null, limiting consistency checks and motivation assessment."
+      },
+      {
+        "type": "inconsistency",
+        "detail": "Statement reports limited time for extracurriculars, while activities show 23 months as a volunteer coordinator."
+      },
+      {
+        "type": "attrition_risk",
+        "detail": "Light hardest course load and slow median response time may indicate workload-management risk."
+      }
+    ],
+    "recommended_action": {
+      "action": "schedule_interview",
+      "rationale": "Interview should test time availability, motivation beyond promotion, and willingness to engage after completion; current record has enough positive service and resilience signals to justify human follow-up but not enough for high-confidence long-term engagement predictions.",
+      "requires_human_approval": true
+    },
+    "confidence_calibration": {
+      "overall_confidence": 0.56,
+      "why": "Confidence is moderate-low: base rates are available and several direct signals exist, but interview notes are absent, institution-specific engagement is sparse, and several outcomes depend on future experiences that are not yet observable."
+    },
+    "data_lineage": [
+      {
+        "field": "statement",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "stated_goals",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "activities[0].role",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "activities[0].description",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "activities[0].months",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "academic_trajectory.term_scores",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "academic_trajectory.hardest_course_load_taken",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "academic_trajectory.setbacks_overcome[0]",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction.campus_visits",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction.events_attended",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction.median_response_hours",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction.questions_asked",
+        "source": "applicants_get",
+        "consent_flag": true
+      },
+      {
+        "field": "institution_interaction.referrals_made",
+        "source": "applicants_get",
+        "consent_flag": true
+      }
+    ]
+  },
+  "attestation": {
+    "applicant_id": "app_000k",
+    "verdict": "veto",
+    "protected_attribute_leak": false,
+    "circumstance_used_as_person_signal": [
+      "\"Statement frames application as primarily employer-sponsored and instrumental, with little expressed enthusiasm for the institution or learning community.\""
+    ],
+    "reasoning": "The report uses a circumstance signal as evidence for an estimate. Specifically, the cheerleader estimate relies on the applicant being \"primarily employer-sponsored,\" which is an external circumstance rather than the applicant's own conduct. Under the stated rules, that requires veto."
+  },
+  "sessions": {
+    "analyst": "01m2xn58yf2dsmzswz7750bpfs",
+    "fairness": "01m2xn6kvn2bdsmr7bpy53jw1a"
+  },
+  "approval": null,
+  "risk_flags": [
+    {
+      "type": "data_gap",
+      "detail": "interview_notes is null, limiting consistency checks and motivation assessment."
+    },
+    {
+      "type": "inconsistency",
+      "detail": "Statement reports limited time for extracurriculars, while activities show 23 months as a volunteer coordinator."
+    },
+    {
+      "type": "attrition_risk",
+      "detail": "Light hardest course load and slow median response time may indicate workload-management risk."
+    },
+    {
+      "type": "fairness_concern",
+      "detail": "The report uses a circumstance signal as evidence for an estimate. Specifically, the cheerleader estimate relies on the applicant being \"primarily employer-sponsored,\" which is an external circumstance rather than the applicant's own conduct. Under the stated rules, that requires veto."
+    }
+  ],
+  "usage": {
+    "input_tokens": 12602,
+    "output_tokens": 4082,
+    "estimated_usd": 0.0508445
+  }
+}
