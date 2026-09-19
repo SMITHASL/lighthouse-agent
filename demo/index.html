@@ -153,6 +153,8 @@ document.getElementById('b-next').onclick = () => show(i + 1);
 document.getElementById('b-restart').onclick = () => { show(0); setPaused(false); };
 // Start paused on the title so the recorder can begin cleanly; click play.
 show(0); paused = true; requestAnimationFrame(tick);
+// Exposed for the automated recorder (demo/record.html).
+window.__player = { show, setPaused, get index() { return i; }, get paused() { return paused; }, count: steps.length };
 </script>
 </body>
 </html>

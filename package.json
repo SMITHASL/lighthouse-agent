@@ -11,7 +11,8 @@
     "eval": "tsx evals/run.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "demo": "node demo/serve.mjs"
+    "demo": "node demo/serve.mjs",
+    "demo:record": "node demo/record.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
