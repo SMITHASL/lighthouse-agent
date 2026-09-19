@@ -67,6 +67,10 @@ npm run eval -- --n=30    # scoreboard → evals/SCOREBOARD.md (~$1.50; --full f
 
 `src/agents/domainPacks.ts` is the contract. A startup recruiter uses `startup-recruiting` (hire → retain 2y → refer → advocate); a corporate talent team uses `corporate-talent`. Same analyst, same auditor, same approval gate, same evals — only outcomes, base rates and vocabulary change. Hosted TrueForge (Postgres + Redis + OIDC) gives multi-tenant deployment without code changes.
 
+## Reviewer UI (next step)
+
+An admissions office will not work in the raw TrueForge chat. The reviewer experience is `@truefoundry/trueforge-ui` themed for the institution: the same Long-Term Fit Report, fairness attestation and Allow / Deny checkpoint, rendered as a review queue against the same TrueForge server — no new backend, no re-implementation of approvals or session history. The agents, MCP tools and evals stay exactly as they are.
+
 ## Known limits (from an adversarial self-review)
 
 - **Domain packs swap instructions and base rates, not the report schema.** `LongTermFitReport` hard-codes the five university outcomes; a startup pack needs a per-pack report schema. The analyst/auditor/approval/eval machinery is pack-agnostic; the schema is not yet.
