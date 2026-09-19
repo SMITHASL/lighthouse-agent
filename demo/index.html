@@ -25,7 +25,8 @@
   .panel p, .panel li { font-size:22px; line-height:1.45; color:var(--panel-text); }
   .panel table { border-collapse:collapse; font-size:20px; margin-top:12px; }
   .panel th, .panel td { padding:8px 16px; border-bottom:1px solid var(--line); text-align:left; }
-  .panel th { color:var(--muted); font-weight:500; }
+  .panel th { color:var(--muted); font-weight:500; vertical-align:bottom; }
+  .panel th small { display:block; font-size:13px; font-weight:400; color:var(--muted); }
   .pass, .panel p.pass, .panel .big.pass { color:var(--pass); } .fail, .panel p.fail { color:var(--fail); }
   .panel pre { color:var(--panel-text); }
   .panel code { background:var(--surface); padding:2px 6px; border-radius:4px; font-size:19px; }
@@ -63,7 +64,7 @@ const steps = [
   { view:'panel:guards', seconds:11, caption:'Under the hood: the input schema physically rejects 20 protected attributes. Budgets: <b>$0.15 per report</b>, $10 per eval. Actual: 5 cents.' },
   { view:'panel:donor', seconds:15, caption:'Donor = <b>future capacity × generosity</b>. A statement that leaks "Atherton, my father\'s firm, our family foundation" is flagged as circumstance, excluded — and the donor estimate <b>does not move</b>. That is a live test, and it passes.' },
   { view:'panel:tests', seconds:11, caption:'<b>Test it.</b> 14 Gherkin scenarios written first. 51 offline tests, 6 live. A traceability test fails if any scenario has no test.' },
-  { view:'panel:scoreboard', seconds:16, caption:'The eval scores ranking, calibration, fairness, hallucination, consistency and cost against a base-rate baseline. Two gates <b>fail</b> at n=30 — we show that, because a harness is for seeing.' },
+  { view:'panel:scoreboard', seconds:16, caption:'The eval asks four plain questions: does it rank people right, are its probabilities accurate, do they mean what they say, and are its error bars honest? Two gates <b>fail</b> at n=30 — we show that, because a harness is for seeing.' },
   { view:`${UI}/schedules`, seconds:10, caption:'Nightly <b>rescoring</b>: a TrueForge schedule re-scores every report as real outcomes arrive and rewrites the calibration curve.' },
   { view:`${UI}/sessions/${S.rescorer}`, seconds:8, caption:'Here is that schedule\'s run — one tool call, calibration refreshed, attention flags if any gate slips.' },
   { view:'panel:scale', seconds:11, caption:'<b>Scale.</b> One domain-pack file turns this into a startup recruiter or a corporate talent agent. Same analyst, same auditor, same gate, same evals. Hosted TrueForge: multi-tenant for free.' },
@@ -98,7 +99,7 @@ const panels = {
   guards: `<h2>Guardrails</h2><div class="grid"><div><p><b>Schema-level exclusion</b></p><p>race · ethnicity · religion · sex · gender · disability · age · national origin · citizenship · family income · first-gen · zip code · legacy · name · school name …</p><p>Each rejected at the boundary, tested one by one.</p></div><div><p><b>Budgets</b></p><div class="big">$0.054 <span style="font-size:24px;color:#9aa0aa">per report (cap $0.15)</span></div><p>Eval cap $10 · projected cost printed before any model call · run aborts if exceeded.</p></div></div>`,
   donor: `<h2>Donor = future capacity × generosity</h2><div class="grid"><div><p><b>Capacity</b> — ambition &amp; trajectory: goal clarity, initiative, setbacks overcome, rising scores, hard course loads, founder roles.</p><p><b>Generosity</b> — reciprocity: volunteering, mentoring, crediting others, gratitude, referrals.</p></div><div><p><b>Live test</b> <code>textual_proxy_does_not_move_estimates</code></p><p>Twin A: clean statement.<br>Twin B: + <i>"I grew up in Atherton; my father's firm sponsors my tuition; our family foundation already gives."</i></p><p class="pass">✓ proxy listed under circumstance_signals_excluded<br>✓ donor estimate within noise of Twin A</p></div></div>`,
   tests: `<h2>BDD → TDD</h2><div class="grid"><div><p><code>features/</code> 14 scenarios</p><ul><li>analysis_is_complete</li><li>no_prediction_without_evidence</li><li>prompt_injection_in_essay_ignored</li><li>protected_attribute_rejected</li><li>textual_proxy_does_not_move_estimates</li><li>fairness_auditor_can_veto</li><li>human_approval_required_for_action</li><li>budget_exhausted_degrades_gracefully</li><li>nightly_rescoring_updates_calibration</li><li>domain_pack_swap …</li></ul></div><div><p><code>npm test</code></p><div class="big pass">51 passed</div><p><code>LIVE=1 npm test</code></p><div class="big pass">6 passed</div><p>traceability test: every scenario name must appear in a test</p></div></div>`,
-  scoreboard: `<h2>Eval scoreboard — n=30</h2><table><tr><th>outcome</th><th>AUROC</th><th>Brier</th><th>Brier (base)</th><th>ECE</th><th>CI cov</th></tr>
+  scoreboard: `<h2>Eval scoreboard — n=30</h2><table><tr><th>outcome</th><th>Ranking (AUROC)<br><small>1.0 = perfect, 0.5 = coin flip</small></th><th>Accuracy (Brier)<br><small>lower is better</small></th><th>Accuracy, base rate only<br><small>the do-nothing baseline</small></th><th>Calibration (ECE)<br><small>stated vs. actual, lower is better</small></th><th>Error bars honest?<br><small>90% interval hit rate, aim 0.90</small></th></tr>
 <tr><td>completion</td><td>0.668</td><td>0.201</td><td>0.208</td><td>0.186</td><td>0.933</td></tr>
 <tr><td>volunteer</td><td>0.722</td><td>0.216</td><td>0.248</td><td>0.092</td><td>0.900</td></tr>
 <tr><td>cheerleader</td><td>0.740</td><td>0.192</td><td>0.225</td><td>0.068</td><td>0.900</td></tr>
