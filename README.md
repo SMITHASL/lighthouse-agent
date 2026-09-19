@@ -6,6 +6,15 @@ Lighthouse reads a LEAD Certificate applicant's record and produces a **Long-Ter
 
 The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Analytical Thinking* course: logical reasoning, evidence, experiment design, analogies.
 
+## Documents
+
+- [FAQ](FAQ.md) — questions institutions, families and judges ask, with answers
+- [Demo narrative](NARRATIVE.md) — 3-minute script in the judges' order: problem, stack, live demo + code
+- [Demo guide](DEMO.md) — how to run and record the captioned demo
+- [Build prompt](PROMPT.md) — the BDD/TDD spec the agent was built from
+- [Eval scoreboard](evals/SCOREBOARD.md) — latest results
+- [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.0/lighthouse-demo.mp4) — 3:16, captions, no audio
+
 ## How it maps to the judging rubric
 
 | Rubric | What Lighthouse does | Where to see it |
