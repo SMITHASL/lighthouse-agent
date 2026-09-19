@@ -37,3 +37,12 @@ Be honest about gates that fail at small n — that is what calibration monitori
 
 ## Backup if Wi-Fi dies
 `data/reports/app_0001.json` is a saved full result; `evals/results/*.json` has full eval output. TrueForge Sessions are persisted locally.
+
+## Captioned, no-audio recording
+
+```bash
+npm run demo      # http://localhost:8797
+```
+Open it in a normal browser window at ≥1280px wide, start the HackerSquad recorder sharing that tab, click **▶ play**. It auto-advances through 17 captioned steps (~3:15), framing the live TrueForge sessions (analyst run, fairness audit, the paused Allow/Deny gate, schedules, rescorer run) between explainer panels. ◀ ▶ step manually, ⏸ to hold on a screen. Ends on the closing card; stop the recorder there.
+
+If you regenerate runs, update the session ids at the top of `demo/index.html`.

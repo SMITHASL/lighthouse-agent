@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Lighthouse — captioned demo</title>
+<style>
+  :root { --bg:#0f1115; --fg:#f3f4f6; --accent:#7c83ff; --muted:#9aa0aa; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0 0 150px 0; }
+  #stage iframe, #stage .panel { position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff; display:none; }
+  #stage .panel { background:var(--bg); padding:48px 64px; box-sizing:border-box; overflow:auto; }
+  #stage .active { display:block; }
+  #caption { position:absolute; left:0; right:0; bottom:0; height:150px; background:linear-gradient(180deg, rgba(15,17,21,.85), #0f1115 40%); display:flex; align-items:center; justify-content:center; padding:0 64px; box-sizing:border-box; }
+  #caption p { font-size:26px; line-height:1.35; max-width:1200px; margin:0; text-align:center; text-shadow:0 2px 8px #000; }
+  #caption b { color:var(--accent); }
+  #bar { position:absolute; left:0; right:0; bottom:0; height:6px; background:#222; }
+  #bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s linear; }
+  #hud { position:absolute; top:12px; right:16px; font-size:13px; color:var(--muted); background:rgba(0,0,0,.6); padding:6px 10px; border-radius:6px; z-index:10; }
+  #hud button { background:#1b1e26; color:var(--fg); border:1px solid #333; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:13px; }
+  #hud button:hover { border-color:var(--accent); }
+  @media (max-width:900px) { #caption p { font-size:18px; } .panel h1 { font-size:32px; } .panel h2 { font-size:22px; } .panel p, .panel li { font-size:17px; } .big { font-size:40px; } .grid { grid-template-columns:1fr; } }
+  .panel h1 { font-size:44px; margin:0 0 12px; }
+  .panel h2 { font-size:28px; color:var(--accent); margin:0 0 16px; font-weight:600; }
+  .panel p, .panel li { font-size:22px; line-height:1.45; color:#d5d8de; }
+  .panel table { border-collapse:collapse; font-size:20px; margin-top:12px; }
+  .panel th, .panel td { padding:8px 16px; border-bottom:1px solid #2a2d35; text-align:left; }
+  .panel th { color:var(--muted); font-weight:500; }
+  .pass { color:#4ade80; } .fail { color:#f87171; }
+  .panel code { background:#1b1e26; padding:2px 6px; border-radius:4px; font-size:19px; }
+  .big { font-size:64px; font-weight:700; color:var(--accent); margin:8px 0; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 48px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="caption"><p id="cap"></p></div>
+<div id="bar"><i id="fill"></i></div>
+<div id="hud"><button id="b-prev">◀</button> <button id="b-play">▶ play</button> <button id="b-next">▶</button> <button id="b-restart">↺</button> <span id="pos"></span></div>
+
+<script>
+// Live TrueForge pages (edit the session ids if you regenerate runs).
+const UI = 'http://localhost:3000';
+const S = {
+  analyst: '01m2xm4ddfh31g6eevqwz6a004',
+  fairness: '01m2xm5nw227k21m67h5rreyde',
+  action:   '01m2xm5r040k3e6ygtnjxk3dbe',
+  rescorer: '01m2xrazm35m4gdafm0ahf0nk3',
+};
+
+// Each step: { view, caption, seconds }. view = 'panel:<id>' or a URL.
+const steps = [
+  { view:'panel:title', seconds:9, caption:'<b>Lighthouse</b> — a long-term-fit admissions agent built on TrueForge. It predicts who will finish, and who will come back as a volunteer, cheerleader, donor and recruiter.' },
+  { view:'panel:problem', seconds:10, caption:'Universities admit on grades and essays, then hope. Nobody predicts the alumni part — and when they try, they end up predicting <b>wealth</b>. That is unfair and wrong.' },
+  { view:'panel:arch', seconds:12, caption:'Three agents, one job each: a <b>critical analyst</b>, an <b>independent fairness auditor</b> with veto power, and an <b>action proposer</b> whose only tool is behind a human approval gate.' },
+  { view:`${UI}/agents`, seconds:8, caption:'<b>Observe it.</b> Every agent is saved in TrueForge; every run is a session you can open.' },
+  { view:`${UI}/sessions/${S.analyst}`, seconds:14, caption:'A real run. The analyst fetches the record, the interaction timeline, and the <b>base rates before estimating</b> — then returns a schema-validated Long-Term Fit Report.' },
+  { view:'panel:reasoning', seconds:16, caption:'Not a score — a critical analysis in the Stanford LEAD style: competing hypotheses, the strongest case <b>against</b>, the cheapest falsifying experiment, and the analogy with where it breaks.' },
+  { view:'panel:evidence', seconds:9, caption:'Every claim cites the input field it came from. In the eval: <b>849 evidence claims, 0</b> pointing at a field that does not exist.' },
+  { view:`${UI}/sessions/${S.fairness}`, seconds:10, caption:'<b>Control it.</b> A separate, cheaper model audits every report cold. It can veto. It vetoed 3 of 30 today — and a zip-code proxy in under two seconds.' },
+  { view:`${UI}/sessions/${S.action}`, seconds:16, caption:'The agent wants to invite this applicant to a volunteer event. It is <b>paused</b>: Allow or Deny. Nothing is written until a human decides — TrueForge enforces the gate on the write tool.' },
+  { view:'panel:guards', seconds:11, caption:'Under the hood: the input schema physically rejects 20 protected attributes. Budgets: <b>$0.15 per report</b>, $10 per eval. Actual: 5 cents.' },
+  { view:'panel:donor', seconds:15, caption:'Donor = <b>future capacity × generosity</b>. A statement that leaks "Atherton, my father\'s firm, our family foundation" is flagged as circumstance, excluded — and the donor estimate <b>does not move</b>. That is a live test, and it passes.' },
+  { view:'panel:tests', seconds:11, caption:'<b>Test it.</b> 14 Gherkin scenarios written first. 51 offline tests, 6 live. A traceability test fails if any scenario has no test.' },
+  { view:'panel:scoreboard', seconds:16, caption:'The eval scores ranking, calibration, fairness, hallucination, consistency and cost against a base-rate baseline. Two gates <b>fail</b> at n=30 — we show that, because a harness is for seeing.' },
+  { view:`${UI}/schedules`, seconds:10, caption:'Nightly <b>rescoring</b>: a TrueForge schedule re-scores every report as real outcomes arrive and rewrites the calibration curve.' },
+  { view:`${UI}/sessions/${S.rescorer}`, seconds:8, caption:'Here is that schedule\'s run — one tool call, calibration refreshed, attention flags if any gate slips.' },
+  { view:'panel:scale', seconds:11, caption:'<b>Scale.</b> One domain-pack file turns this into a startup recruiter or a corporate talent agent. Same analyst, same auditor, same gate, same evals. Hosted TrueForge: multi-tenant for free.' },
+  { view:'panel:end', seconds:9, caption:'Lighthouse: reasons like a critical analyst, is audited like a hiring decision, and never acts without a human. Thank you.' },
+];
+
+const panels = {
+  title: `<h1>Lighthouse</h1><h2>Long-term-fit admissions &amp; alumni-engagement agent</h2><p>Built on TrueForge · Agent Harness Hackathon · Santa Clara · 19 Sep 2026</p><p style="color:#9aa0aa">Observe it · Control it · Test it</p>`,
+  problem: `<h2>The problem</h2><ul><li>Admissions optimises for the next four years, not the next forty.</li><li>Alumni engagement — mentoring, cheering, giving, referring — is unpredicted.</li><li>Naïve models predict <b>wealth</b>, not character or trajectory.</li></ul>`,
+  arch: `<h2>Architecture</h2><pre style="font-size:20px;line-height:1.5;color:#d5d8de">applicant record ──▶ <b>lighthouse-critical-analyst</b> (gpt-5-5) ──▶ LongTermFitReport (JSON schema)
+                        │  MCP: applicants_get · applicants_timeline · institution_reference_class_stats
+                        ▼
+                     <b>lighthouse-fairness-auditor</b> (gpt-5-4-mini) ──▶ pass | VETO
+                        ▼
+                     <b>lighthouse-action-proposer</b> (gpt-5-4-mini)
+                        │  MCP: pipeline_propose_action   [@write → HUMAN APPROVAL]
+                        ▼
+                     TrueForge pauses ──▶ human clicks Allow / Deny
+
+                     <b>lighthouse-rescorer</b> ◀── nightly schedule ── calibration_rescore</pre>`,
+  reasoning: `<h2>critical_analysis (real output, app_0001)</h2>
+<p><b>Hypotheses</b> — H1 strong long-term fit · H2 capable but moderate engagement · H3 <i>"application-stage enthusiasm rather than durable alumni commitment"</i></p>
+<p><b>Base rate used</b> — fetched first: completion 0.62 · volunteer 0.31 · donor 0.14 · recruiter 0.22</p>
+<p><b>Strongest case against</b> — <i>"Correlation is not causation: visits, events and referrals may reflect application tactics rather than durable alumni behavior."</i></p>
+<p><b>Cheapest experiment</b> — <i>"invite to a low-cost peer-mentoring shift and observe follow-through"</i></p>
+<p><b>Analogy &amp; where it breaks</b> — <i>"anchors in LEAD alumni outcomes; breaks because this applicant has individual signals the aggregate lacks."</i></p>`,
+  evidence: `<h2>Evidence lineage</h2><table><tr><th>claim</th><th>source_field</th><th>quality</th></tr>
+<tr><td>Term scores improve across four terms</td><td><code>academic_trajectory.term_scores</code></td><td>direct</td></tr>
+<tr><td>Shipped despite losing a co-founder</td><td><code>academic_trajectory.setbacks_overcome[0]</code></td><td>direct</td></tr>
+<tr><td>One referral already made</td><td><code>institution_interaction.referrals_made</code></td><td>direct</td></tr></table>
+<div class="big">849 claims · 0 unresolvable fields</div>`,
+  guards: `<h2>Guardrails</h2><div class="grid"><div><p><b>Schema-level exclusion</b></p><p>race · ethnicity · religion · sex · gender · disability · age · national origin · citizenship · family income · first-gen · zip code · legacy · name · school name …</p><p>Each rejected at the boundary, tested one by one.</p></div><div><p><b>Budgets</b></p><div class="big">$0.054 <span style="font-size:24px;color:#9aa0aa">per report (cap $0.15)</span></div><p>Eval cap $10 · projected cost printed before any model call · run aborts if exceeded.</p></div></div>`,
+  donor: `<h2>Donor = future capacity × generosity</h2><div class="grid"><div><p><b>Capacity</b> — ambition &amp; trajectory: goal clarity, initiative, setbacks overcome, rising scores, hard course loads, founder roles.</p><p><b>Generosity</b> — reciprocity: volunteering, mentoring, crediting others, gratitude, referrals.</p></div><div><p><b>Live test</b> <code>textual_proxy_does_not_move_estimates</code></p><p>Twin A: clean statement.<br>Twin B: + <i>"I grew up in Atherton; my father's firm sponsors my tuition; our family foundation already gives."</i></p><p class="pass">✓ proxy listed under circumstance_signals_excluded<br>✓ donor estimate within noise of Twin A</p></div></div>`,
+  tests: `<h2>BDD → TDD</h2><div class="grid"><div><p><code>features/</code> 14 scenarios</p><ul><li>analysis_is_complete</li><li>no_prediction_without_evidence</li><li>prompt_injection_in_essay_ignored</li><li>protected_attribute_rejected</li><li>textual_proxy_does_not_move_estimates</li><li>fairness_auditor_can_veto</li><li>human_approval_required_for_action</li><li>budget_exhausted_degrades_gracefully</li><li>nightly_rescoring_updates_calibration</li><li>domain_pack_swap …</li></ul></div><div><p><code>npm test</code></p><div class="big pass">51 passed</div><p><code>LIVE=1 npm test</code></p><div class="big pass">6 passed</div><p>traceability test: every scenario name must appear in a test</p></div></div>`,
+  scoreboard: `<h2>Eval scoreboard — n=30</h2><table><tr><th>outcome</th><th>AUROC</th><th>Brier</th><th>Brier (base)</th><th>ECE</th><th>CI cov</th></tr>
+<tr><td>completion</td><td>0.668</td><td>0.201</td><td>0.208</td><td>0.186</td><td>0.933</td></tr>
+<tr><td>volunteer</td><td>0.722</td><td>0.216</td><td>0.248</td><td>0.092</td><td>0.900</td></tr>
+<tr><td>cheerleader</td><td>0.740</td><td>0.192</td><td>0.225</td><td>0.068</td><td>0.900</td></tr>
+<tr><td>donor</td><td>0.503</td><td>0.209</td><td>0.212</td><td>0.206</td><td>0.733</td></tr>
+<tr><td>recruiter</td><td><b>0.966</b></td><td>0.432</td><td>0.590</td><td>0.624</td><td>0.567</td></tr></table>
+<p style="margin-top:16px">hallucinated fields <b>0 / 849</b> · counter-evidence <b>100%</b> · run-to-run std <b>0.016</b> · $1.78 total</p>
+<p><span class="pass">PASS</span> hallucination · <span class="pass">PASS</span> consistency · <span class="fail">FAIL</span> parity (0.17 on volunteer, ~10 per group) · <span class="fail">FAIL</span> ci_coverage (donor, recruiter)</p>`,
+  scale: `<h2>Domain packs</h2><pre style="font-size:20px;line-height:1.5;color:#d5d8de">'university-admissions': { outcomes: ['completion','volunteer','cheerleader','donor','recruiter'], horizon_years: 10, … }
+'startup-recruiting':    { outcomes: ['hire','retain_2y','refer','advocate'],                       horizon_years: 5,  … }
+'corporate-talent':      { outcomes: ['hire','retain_3y','promote','refer','advocate'],             horizon_years: 7,  … }</pre><p>Reviewer UI: <code>@truefoundry/trueforge-ui</code> themed for the institution, same server, same approvals.</p><p>Hosted mode: Postgres + Redis + OIDC — identical agent features.</p>`,
+  end: `<h1>Lighthouse</h1><h2>Reasons like a critical analyst. Audited like a hiring decision. Never acts without a human.</h2><p>TrueForge · OpenAI · HackerSquad · AI Global Campus</p>`,
+};
+
+const stage = document.getElementById('stage');
+const cap = document.getElementById('cap');
+const fill = document.getElementById('fill');
+const els = steps.map((s, i) => {
+  let el;
+  if (s.view.startsWith('panel:')) { el = document.createElement('div'); el.className = 'panel'; el.innerHTML = panels[s.view.slice(6)]; }
+  else { el = document.createElement('iframe'); el.src = s.view; el.loading = 'eager'; }
+  stage.appendChild(el);
+  return el;
+});
+
+let i = -1, t0 = 0, paused = false, raf;
+const total = steps.reduce((a, s) => a + s.seconds, 0);
+function show(n) {
+  i = Math.max(0, Math.min(steps.length - 1, n));
+  els.forEach((e, k) => e.classList.toggle('active', k === i));
+  cap.innerHTML = steps[i].caption;
+  document.getElementById('pos').textContent = `${i + 1}/${steps.length}`;
+  t0 = performance.now();
+}
+function tick(now) {
+  if (!paused) {
+    const elapsed = (now - t0) / 1000;
+    const before = steps.slice(0, i).reduce((a, s) => a + s.seconds, 0);
+    fill.style.width = `${Math.min(100, ((before + Math.min(elapsed, steps[i].seconds)) / total) * 100)}%`;
+    if (elapsed >= steps[i].seconds) { if (i < steps.length - 1) show(i + 1); else setPaused(true); }
+  }
+  raf = requestAnimationFrame(tick);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { setPaused(!paused); e.preventDefault(); }
+  if (e.code === 'ArrowRight') show(i + 1);
+  if (e.code === 'ArrowLeft') show(i - 1);
+  if (e.key === 'r' || e.key === 'R') { show(0); setPaused(false); }
+});
+const playBtn = document.getElementById('b-play');
+function setPaused(p) { paused = p; if (!p) t0 = performance.now(); playBtn.textContent = p ? '▶ play' : '⏸ pause'; }
+document.getElementById('b-play').onclick = () => setPaused(!paused);
+document.getElementById('b-prev').onclick = () => show(i - 1);
+document.getElementById('b-next').onclick = () => show(i + 1);
+document.getElementById('b-restart').onclick = () => { show(0); setPaused(false); };
+// Start paused on the title so the recorder can begin cleanly; click play.
+show(0); paused = true; requestAnimationFrame(tick);
+</script>
+</body>
+</html>

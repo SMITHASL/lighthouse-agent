@@ -10,7 +10,8 @@
     "report": "tsx src/pipeline/run.ts",
     "eval": "tsx evals/run.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "demo": "node demo/serve.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
