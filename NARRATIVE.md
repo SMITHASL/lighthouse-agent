@@ -34,7 +34,7 @@ Here's a real run. Three tool calls — record, timeline, base rates — then th
 
 Look at what it wrote, not just the number. Three competing hypotheses, including "this is application-stage enthusiasm, not durable commitment." A strongest case *against*. Then — this is the LEAD pillar — the cheapest experiment that would falsify each prediction: "invite to one peer-mentoring shift and see if they show up." And the analogy: "like past founder-alumni, but the cohort was smaller."
 
-Every claim cites the exact field it came from. In our eval, **849 evidence claims, zero pointed at a field that doesn't exist.**
+Every claim cites the exact field it came from. In our eval, **849 evidence claims, zero pointed at a field that doesn't exist** — an existence check today; a claim-support judge is next.
 
 ## Control it (1:30)
 
@@ -54,7 +54,7 @@ Under the hood: the input schema physically rejects race, gender, zip code, inco
 
 People ask: isn't "predict who will donate" just "predict who's rich"?
 
-Not here. Donor = **future capacity × generosity**. Capacity is ambition and trajectory — goal clarity, setbacks overcome, rising grades, founder roles. Generosity is reciprocity — mentoring, volunteering, crediting the people who helped you. We built two applicants identical in every signal and different only in a wealth label the model never sees. **Same donor estimate.** That's a test in the suite, and it passes.
+Not here. Donor = **future capacity × generosity**. Capacity is ambition and trajectory — goal clarity, setbacks overcome, rising grades, founder roles. Generosity is reciprocity — mentoring, volunteering, crediting the people who helped you. We built two applicants identical in every person signal — and then gave one a statement that leaks "I grew up in Atherton, my father's firm pays my tuition, our family foundation already gives." The analyst listed it as a circumstance signal, excluded it, and the **donor estimate did not move.** That's a live test in the suite, and it passes.
 
 ## Test it (2:25)
 
@@ -79,4 +79,5 @@ Lighthouse: an agent that reasons like a critical analyst, is audited like a hir
 - **"Why not one agent with subagents?"** Separation is the safety property: the auditor must not share context with the analyst it audits.
 - **"Real data?"** Synthetic today, with ground truth generated from latent traits only. The metrics prove the machinery; `outcomes_record_ground_truth` + nightly `rescore()` is how real calibration curves are built.
 - **"What broke?"** The first auditor over-vetoed — it called campus visits a "circumstance." We fixed the definition and withheld went 8 → 3. Wi-Fi drops killed four turns; the runner now retries once. Both are in the git log.
+- **"What would you attack?"** The report schema is university-specific, so the domain-pack swap is instructions-deep, not schema-deep. Parity metrics on synthetic labels can't detect real bias — the behavioural tests can. And the approval gate lives in the harness; the tool itself needs caller auth in hosted mode. All written up in the README.
 - **"Cost?"** $0.054 per report, $1.78 for the 30-record eval, under $3 total today.

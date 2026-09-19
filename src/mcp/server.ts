@@ -28,7 +28,15 @@ export function loadStore(dataDir = 'data'): Store {
       applicants.set(a.applicant_id, a);
     }
   }
-  return { applicants, outcomes: new Map(), proposedActions: [] };
+  const outcomes = new Map<string, GroundTruth>();
+  const outcomesPath = `${dataDir}/outcomes.json`;
+  if (existsSync(outcomesPath)) {
+    for (const raw of JSON.parse(readFileSync(outcomesPath, 'utf8')) as unknown[]) {
+      const t = GroundTruth.parse(raw);
+      outcomes.set(t.applicant_id, t);
+    }
+  }
+  return { applicants, outcomes, proposedActions: [] };
 }
 
 const text = (v: unknown) => ({ content: [{ type: 'text' as const, text: JSON.stringify(v) }] });
@@ -104,7 +112,9 @@ export function buildMcpServer(store: Store, dataDir = 'data'): McpServer {
     async (args) => {
       const gt = GroundTruth.parse(args);
       store.outcomes.set(gt.applicant_id, gt);
-      return text({ recorded: true });
+      mkdirSync(dataDir, { recursive: true });
+      writeFileSync(`${dataDir}/outcomes.json`, JSON.stringify([...store.outcomes.values()], null, 2));
+      return text({ recorded: true, total_recorded: store.outcomes.size });
     },
   );
 

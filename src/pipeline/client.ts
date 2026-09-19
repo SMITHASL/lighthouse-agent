@@ -45,7 +45,7 @@ export class TrueForgeClient {
     const list = await this.json<{ data: { id: string; name: string }[] }>('GET', '/api/v1/schedules');
     const existing = list.data.find((s) => s.name === name);
     if (existing) {
-      await this.json('PUT', `/api/v1/schedules/${existing.id}`, { manifest });
+      await this.json('PUT', `/api/v1/schedules/${existing.id}`, { name, manifest });
       return existing.id;
     }
     const created = await this.json<{ data: { id: string } }>('POST', '/api/v1/schedules', { name, agent_name: agentName, manifest });

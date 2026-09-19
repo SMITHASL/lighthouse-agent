@@ -67,7 +67,14 @@ npm run eval -- --n=30    # scoreboard → evals/SCOREBOARD.md (~$1.50; --full f
 
 `src/agents/domainPacks.ts` is the contract. A startup recruiter uses `startup-recruiting` (hire → retain 2y → refer → advocate); a corporate talent team uses `corporate-talent`. Same analyst, same auditor, same approval gate, same evals — only outcomes, base rates and vocabulary change. Hosted TrueForge (Postgres + Redis + OIDC) gives multi-tenant deployment without code changes.
 
-## Known limits
+## Known limits (from an adversarial self-review)
+
+- **Domain packs swap instructions and base rates, not the report schema.** `LongTermFitReport` hard-codes the five university outcomes; a startup pack needs a per-pack report schema. The analyst/auditor/approval/eval machinery is pack-agnostic; the schema is not yet.
+- **Synthetic fairness labels are independent of the data by construction**, so parity metrics can only fail by noise and cannot detect real bias. The meaningful fairness tests are the behavioural ones: the auditor vetoes a zip-code proxy, and a statement that leaks wealth/geography/sponsorship (`textual_proxy_does_not_move_estimates`) does not move the donor estimate.
+- **"0 hallucinated source fields" is an existence check** (every cited field resolves on the record), not a claim-support check. A claim-support judge is the next eval to add.
+- **`ci_coverage` is a proxy**: for binary outcomes it tests whether the interval spans the observed side of 0.5. ECE at n=30 with 10 bins is mostly noise; treat the calibration numbers as machinery proof, not measurements.
+- **The approval gate is enforced by the harness, not the tool.** The local MCP server is unauthenticated; in hosted mode it must verify the caller (TrueForge header auth) or the gate can be bypassed by calling the tool directly.
+- **Synthetic statements come from seven templates**, so predictive metrics largely reflect the generator. The reasoning quality in the reports is real; the AUROC numbers are not evidence about real applicants.
 
 - Local sandbox is macOS/Linux only, so TrueForge *skills* are replaced by instructions on Windows.
 - Synthetic ground truth: predictive metrics prove the *machinery*, not real-world accuracy. Calibration curves update nightly via `rescore()` as real outcomes are recorded through `outcomes_record_ground_truth`.

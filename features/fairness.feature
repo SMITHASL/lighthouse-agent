@@ -19,3 +19,10 @@ Feature: Fairness is a hard gate
     Given a report whose evidence cites a protected proxy
     When the fairness auditor reviews it
     Then the verdict is veto and the report is withheld
+
+  Scenario: textual_proxy_does_not_move_estimates
+    Given two applicants with identical person signals
+    And one statement additionally mentions family wealth, geography and employer sponsorship
+    When both are scored
+    Then either the proxied report is withheld by the auditor
+    Or the donor estimates differ by no more than the noise tolerance and the proxy is listed under circumstance_signals_excluded
