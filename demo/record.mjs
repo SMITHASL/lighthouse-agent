@@ -6,7 +6,7 @@ import { join } from 'node:path';
 // Records demo/index.html to demo/lighthouse-demo.webm using the installed Chrome:
 // a throwaway profile, the recorder page captures its own tab (auto-selected by title),
 // MediaRecorder encodes VP9, the demo server writes the upload. Needs `npm run demo` running.
-const CHROME = process.env.CHROME ?? 'C:\Program Files\Google\Chrome\Application\chrome.exe';
+const CHROME = process.env.CHROME ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const OUT = new URL('./lighthouse-demo.webm', import.meta.url);
 const outPath = decodeURIComponent(OUT.pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 if (existsSync(outPath)) rmSync(outPath);
