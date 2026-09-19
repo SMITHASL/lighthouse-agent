@@ -4,29 +4,31 @@
 <meta charset="utf-8" />
 <title>Lighthouse — captioned demo</title>
 <style>
-  :root { --bg:#0f1115; --fg:#f3f4f6; --accent:#7c83ff; --muted:#9aa0aa; }
+  :root { --bg:#0f1115; --fg:#f3f4f6; --accent:#7c83ff; --muted:#9aa0aa; --panel-text:#d5d8de; --surface:#1b1e26; --line:#2a2d35; --cap-shadow:0 2px 8px #000; --pass:#4ade80; --fail:#f87171; }
+  :root[data-theme=light] { --bg:#f7f7f9; --fg:#14161c; --accent:#4f56d9; --muted:#5b6170; --panel-text:#2a2e38; --surface:#e9eaf0; --line:#d5d7df; --cap-shadow:none; --pass:#15803d; --fail:#b91c1c; }
   html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow:hidden; }
   #stage { position:absolute; inset:0 0 150px 0; }
   #stage iframe, #stage .panel { position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff; display:none; }
   #stage .panel { background:var(--bg); padding:48px 64px; box-sizing:border-box; overflow:auto; }
   #stage .active { display:block; }
-  #caption { position:absolute; left:0; right:0; bottom:0; height:150px; background:linear-gradient(180deg, rgba(15,17,21,.85), #0f1115 40%); display:flex; align-items:center; justify-content:center; padding:0 64px; box-sizing:border-box; }
-  #caption p { font-size:26px; line-height:1.35; max-width:1200px; margin:0; text-align:center; text-shadow:0 2px 8px #000; }
+  #caption { position:absolute; left:0; right:0; bottom:0; height:150px; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:0 64px; box-sizing:border-box; }
+  #caption p { font-size:26px; line-height:1.35; max-width:1200px; margin:0; text-align:center; text-shadow:var(--cap-shadow); }
   #caption b { color:var(--accent); }
-  #bar { position:absolute; left:0; right:0; bottom:0; height:6px; background:#222; }
+  #bar { position:absolute; left:0; right:0; bottom:0; height:6px; background:var(--line); }
   #bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s linear; }
-  #hud { position:absolute; top:12px; right:16px; font-size:13px; color:var(--muted); background:rgba(0,0,0,.6); padding:6px 10px; border-radius:6px; z-index:10; }
-  #hud button { background:#1b1e26; color:var(--fg); border:1px solid #333; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:13px; }
+  #hud { position:absolute; top:12px; right:16px; font-size:13px; color:var(--muted); background:var(--surface); padding:6px 10px; border-radius:6px; z-index:10; }
+  #hud button { background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:4px 10px; cursor:pointer; font-size:13px; }
   #hud button:hover { border-color:var(--accent); }
   @media (max-width:900px) { #caption p { font-size:18px; } .panel h1 { font-size:32px; } .panel h2 { font-size:22px; } .panel p, .panel li { font-size:17px; } .big { font-size:40px; } .grid { grid-template-columns:1fr; } }
   .panel h1 { font-size:44px; margin:0 0 12px; }
   .panel h2 { font-size:28px; color:var(--accent); margin:0 0 16px; font-weight:600; }
-  .panel p, .panel li { font-size:22px; line-height:1.45; color:#d5d8de; }
+  .panel p, .panel li { font-size:22px; line-height:1.45; color:var(--panel-text); }
   .panel table { border-collapse:collapse; font-size:20px; margin-top:12px; }
-  .panel th, .panel td { padding:8px 16px; border-bottom:1px solid #2a2d35; text-align:left; }
+  .panel th, .panel td { padding:8px 16px; border-bottom:1px solid var(--line); text-align:left; }
   .panel th { color:var(--muted); font-weight:500; }
-  .pass { color:#4ade80; } .fail { color:#f87171; }
-  .panel code { background:#1b1e26; padding:2px 6px; border-radius:4px; font-size:19px; }
+  .pass, .panel p.pass, .panel .big.pass { color:var(--pass); } .fail, .panel p.fail { color:var(--fail); }
+  .panel pre { color:var(--panel-text); }
+  .panel code { background:var(--surface); padding:2px 6px; border-radius:4px; font-size:19px; }
   .big { font-size:64px; font-weight:700; color:var(--accent); margin:8px 0; }
   .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 48px; }
 </style>
@@ -35,7 +37,7 @@
 <div id="stage"></div>
 <div id="caption"><p id="cap"></p></div>
 <div id="bar"><i id="fill"></i></div>
-<div id="hud"><button id="b-prev">◀</button> <button id="b-play">▶ play</button> <button id="b-next">▶</button> <button id="b-restart">↺</button> <span id="pos"></span></div>
+<div id="hud"><button id="b-prev">◀</button> <button id="b-play">▶ play</button> <button id="b-next">▶</button> <button id="b-restart">↺</button> <button id="b-theme" title="Toggle light / dark">☀</button> <span id="pos"></span></div>
 
 <script>
 // Live TrueForge pages (edit the session ids if you regenerate runs).
@@ -69,9 +71,9 @@ const steps = [
 ];
 
 const panels = {
-  title: `<h1>Lighthouse</h1><h2>Long-term-fit admissions &amp; alumni-engagement agent</h2><p>Built on TrueForge · Agent Harness Hackathon · Santa Clara · 19 Sep 2026</p><p style="color:#9aa0aa">Observe it · Control it · Test it</p>`,
+  title: `<h1>Lighthouse</h1><h2>Long-term-fit admissions &amp; alumni-engagement agent</h2><p>Built on TrueForge · Agent Harness Hackathon · Santa Clara · 19 Sep 2026</p><p style="color:var(--muted)">Observe it · Control it · Test it</p>`,
   problem: `<h2>The problem</h2><ul><li>Admissions optimises for the next four years, not the next forty.</li><li>Alumni engagement — mentoring, cheering, giving, referring — is unpredicted.</li><li>Naïve models predict <b>wealth</b>, not character or trajectory.</li></ul>`,
-  arch: `<h2>Architecture</h2><pre style="font-size:20px;line-height:1.5;color:#d5d8de">applicant record ──▶ <b>lighthouse-critical-analyst</b> (gpt-5-5) ──▶ LongTermFitReport (JSON schema)
+  arch: `<h2>Architecture</h2><pre style="font-size:20px;line-height:1.5;color:var(--panel-text)">applicant record ──▶ <b>lighthouse-critical-analyst</b> (gpt-5-5) ──▶ LongTermFitReport (JSON schema)
                         │  MCP: applicants_get · applicants_timeline · institution_reference_class_stats
                         ▼
                      <b>lighthouse-fairness-auditor</b> (gpt-5-4-mini) ──▶ pass | VETO
@@ -104,7 +106,7 @@ const panels = {
 <tr><td>recruiter</td><td><b>0.966</b></td><td>0.432</td><td>0.590</td><td>0.624</td><td>0.567</td></tr></table>
 <p style="margin-top:16px">hallucinated fields <b>0 / 849</b> · counter-evidence <b>100%</b> · run-to-run std <b>0.016</b> · $1.78 total</p>
 <p><span class="pass">PASS</span> hallucination · <span class="pass">PASS</span> consistency · <span class="fail">FAIL</span> parity (0.17 on volunteer, ~10 per group) · <span class="fail">FAIL</span> ci_coverage (donor, recruiter)</p>`,
-  scale: `<h2>Domain packs</h2><pre style="font-size:20px;line-height:1.5;color:#d5d8de">'university-admissions': { outcomes: ['completion','volunteer','cheerleader','donor','recruiter'], horizon_years: 10, … }
+  scale: `<h2>Domain packs</h2><pre style="font-size:20px;line-height:1.5;color:var(--panel-text)">'university-admissions': { outcomes: ['completion','volunteer','cheerleader','donor','recruiter'], horizon_years: 10, … }
 'startup-recruiting':    { outcomes: ['hire','retain_2y','refer','advocate'],                       horizon_years: 5,  … }
 'corporate-talent':      { outcomes: ['hire','retain_3y','promote','refer','advocate'],             horizon_years: 7,  … }</pre><p>Reviewer UI: <code>@truefoundry/trueforge-ui</code> themed for the institution, same server, same approvals.</p><p>Hosted mode: Postgres + Redis + OIDC — identical agent features.</p>`,
   end: `<h1>Lighthouse</h1><h2>Reasons like a critical analyst. Audited like a hiring decision. Never acts without a human.</h2><p>TrueForge · OpenAI · HackerSquad · AI Global Campus</p>`,
@@ -145,6 +147,11 @@ document.addEventListener('keydown', (e) => {
   if (e.code === 'ArrowLeft') show(i - 1);
   if (e.key === 'r' || e.key === 'R') { show(0); setPaused(false); }
 });
+const themeBtn = document.getElementById('b-theme');
+function applyTheme(t) { document.documentElement.dataset.theme = t; themeBtn.textContent = t === 'light' ? '☾ dark' : '☀ light'; try { localStorage.setItem('lighthouse-theme', t); } catch {} }
+let savedTheme = 'dark'; try { savedTheme = localStorage.getItem('lighthouse-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch {}
+applyTheme(savedTheme);
+themeBtn.onclick = () => applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
 const playBtn = document.getElementById('b-play');
 function setPaused(p) { paused = p; if (!p) t0 = performance.now(); playBtn.textContent = p ? '▶ play' : '⏸ pause'; }
 document.getElementById('b-play').onclick = () => setPaused(!paused);
