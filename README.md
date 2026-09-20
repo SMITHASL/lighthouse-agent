@@ -14,7 +14,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 - [Build prompt](PROMPT.md) — the BDD/TDD spec the agent was built from
 - [Eval scoreboard](evals/SCOREBOARD.md) — latest results
 - [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.0/lighthouse-demo.mp4) — 3:16, captions, no audio
-- [Reviewer & Advising UI](#reviewer--advising-ui) — `npm run ui`: queue, report, approval gate, coordinator/student chat on the real pipeline. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.2/lighthouse-reviewer-ui-demo.mp4) (2:30)
+- [Reviewer & Advising UI](#reviewer--advising-ui) — `npm run ui`: queue, report, approval gate, coordinator/student chat on the real pipeline. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.2/lighthouse-reviewer-ui-demo.mp4) (3:07)
 
 ## How it maps to the judging rubric
 
@@ -118,7 +118,7 @@ The screen an admissions office uses, on top of the real pipeline and runtime �
 - **Approval gate** — when the action proposer pauses, the reviewer sees **Allow / Deny** with a reason box; the decision, reason and timestamp land on the stored report and nothing is written until they decide.
 - **Advising chat**, grounded in the report, with a hard information boundary: the *coordinator* sees estimates, drivers and the audit and is pushed back on automated denial and stereotype framing; the *student* gets advice and never learns a report exists.
 
-Captioned walkthrough (2:30, no audio): [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.2/lighthouse-reviewer-ui-demo.mp4) — `npm run demo:ui` to play it locally, `npm run demo:ui:record` to re-record (drives the live UI over `postMessage`; one real pipeline run, ~$0.05).
+Captioned walkthrough (3:07, no audio, includes one live pipeline run): [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.2/lighthouse-reviewer-ui-demo.mp4) — `npm run demo:ui` to play it locally, `npm run demo:ui:record` to re-record (drives the live UI over `postMessage`; one real pipeline run, ~$0.05).
 
 ## Known limits (from an adversarial self-review)
 

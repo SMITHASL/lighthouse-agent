@@ -40,7 +40,7 @@
 // stays mounted; steps drive it over postMessage (see the tour hook at the bottom of src/ui/index.html).
 const UI = 'http://localhost:3100';
 const SCORED = 'app_0001';      // has a stored report from the eval
-const FRESH  = 'app_000w';      // unscored: the run step produces a real report live (~45 s, ~$0.05)
+const FRESH = '@unscored';      // the UI resolves this to its first unscored applicant; the run step produces a real report live (~45 s, ~$0.05)
 
 // Each step: { view, caption, seconds, act?, wait? }. view = 'panel:<id>' or 'ui'. act = message for the UI.
 const steps = [
@@ -73,15 +73,18 @@ const frame = document.createElement('iframe'); frame.src = UI; stage.appendChil
 const panelEls = {};
 for (const [id, html] of Object.entries(panels)) { const d = document.createElement('div'); d.className = 'panel'; d.innerHTML = html; stage.appendChild(d); panelEls[id] = d; }
 
-let index = -1, paused = true, timer = null, t0 = 0;
+let index = -1, paused = true, timer = null, t0 = 0, token = 0;
 function post(act, wait = 8000) { return new Promise((ok) => { const h = (e) => { if (e.data?.done === act.action) { window.removeEventListener('message', h); ok(); } }; window.addEventListener('message', h); frame.contentWindow.postMessage(act, '*'); setTimeout(ok, wait); }); }
 async function show(i) {
+  const my = ++token; // a newer show() call supersedes this one (guards against double-start)
+  clearInterval(timer);
   index = Math.max(0, Math.min(steps.length - 1, i));
   const s = steps[index];
   for (const el of stage.children) el.classList.remove('active');
   (s.view === 'ui' ? frame : panelEls[s.view.slice(6)]).classList.add('active');
   cap.innerHTML = s.caption; pos.textContent = `${index + 1}/${steps.length}`;
-  if (s.act) await post(s.act, s.wait);
+  if (s.act) await post(typeof s.act === 'function' ? s.act() : s.act, s.wait);
+  if (my !== token) return;
   clearInterval(timer); t0 = Date.now();
   timer = setInterval(() => {
     const p = paused ? 0 : (Date.now() - t0) / (s.seconds * 1000);

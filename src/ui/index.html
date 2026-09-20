@@ -161,13 +161,19 @@ document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { audi
 // Demo-tour hook (harness-ui/demo drives this page over postMessage).
 window.addEventListener('message', async (e) => {
   const m = e.data || {};
-  if (m.action === 'select') await select(m.id);
-  else if (m.action === 'run') await runPipeline();
-  else if (m.action === 'decide') await decide(m.allow);
-  else if (m.action === 'audience') document.querySelector(`.seg button[data-aud="${m.value}"]`).click();
-  else if (m.action === 'chat') await send(m.text);
-  else return;
-  e.source?.postMessage({ done: m.action }, '*');
+  const known = ['select', 'run', 'decide', 'audience', 'chat'];
+  if (!known.includes(m.action)) return;
+  try {
+    if (m.action === 'select') {
+      // '@unscored' = first applicant in the queue without a report (so a demo can run the pipeline live).
+      const id = m.id === '@unscored' ? [...document.querySelectorAll('.app')].find((el) => el.querySelector('.pill')?.classList.contains('unscored'))?.dataset.id : m.id;
+      if (id) await select(id);
+    } else if (m.action === 'run') await runPipeline();
+    else if (m.action === 'decide') await decide(m.allow);
+    else if (m.action === 'audience') document.querySelector(`.seg button[data-aud="${m.value}"]`).click();
+    else if (m.action === 'chat') await send(m.text);
+  } catch (err) { console.error('tour action failed', m, err); }
+  finally { e.source?.postMessage({ done: m.action }, '*'); }
 });
 init();
 </script>
