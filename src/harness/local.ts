@@ -10,8 +10,9 @@
  *     input resumes it. Nothing is written until a human decides.
  *   - schedules: stored in data/schedules.json; `runScheduleNow` executes one; src/harness/scheduler.ts ticks cron.
  *
- * Event shapes match what src/pipeline/run.ts already reads (model.message usage, turn.done state,
- * tool.approval_required tool_calls), so the pipeline is unchanged between the two runtimes.
+ * Event shapes match what src/pipeline/run.ts and the BDD tests already read from TrueForge
+ * (model.message usage, tool.response content, tool.approval_required tool_calls, turn.done state),
+ * so the pipeline is unchanged between the two runtimes.
  */
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -19,7 +20,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from 'zod';
 import { TOOLS, callTool, loadStore, toolByName, type Store } from '../tools/index.js';
 import type { TurnEvent } from '../pipeline/client.js';
-import { chatCompletion, type ChatMessage, type ChatTool } from './provider.js';
+import { createResponse, type InputItem, type ResponsesTool } from './provider.js';
 
 export type AgentManifest = {
   model: { name: string; params?: { reasoning_effort?: string } };
@@ -29,13 +30,16 @@ export type AgentManifest = {
   config?: { iteration_limit?: number };
 };
 
-type PendingApproval = { tool_call_id: string; name: string; arguments: Record<string, unknown> };
+type PendingApproval = { tool_call_id: string; call_id: string; name: string; arguments: Record<string, unknown> };
 type SessionFile = {
   id: string;
   agent: string;
   created_at: string;
   status: 'idle' | 'running' | 'paused' | 'done' | 'error';
-  messages: ChatMessage[];
+  /** Input items not yet sent to the model (the next call sends only these, chained on response_id). */
+  inbox: InputItem[];
+  /** Last model response id; the provider chains on it so reasoning state carries across calls. */
+  response_id?: string;
   events: TurnEvent[];
   pending?: PendingApproval;
 };
@@ -110,7 +114,7 @@ export class LocalHarness {
     const agent = this.agents.get(agentName);
     if (!agent) throw new Error(`agent "${agentName}" is not registered — run \`npm run setup\``);
     const id = `ls_${Date.now().toString(36)}_${randomUUID().slice(0, 8)}`;
-    this.save({ id, agent: agentName, created_at: new Date().toISOString(), status: 'idle', messages: [{ role: 'system', content: agent.manifest.instructions }], events: [] });
+    this.save({ id, agent: agentName, created_at: new Date().toISOString(), status: 'idle', inbox: [], events: [] });
     return id;
   }
 
@@ -135,16 +139,18 @@ export class LocalHarness {
     const enabled = new Set(m.mcp_servers?.flatMap((x) => x.enable_tools) ?? []);
     const gated = new Set(m.mcp_servers?.flatMap((x) => x.require_approval_for_tools) ?? []);
     const needsApproval = (name: string) => gated.has(name) || (gated.has('@write') && !(toolByName(name)?.readOnly ?? true));
-    const tools: ChatTool[] = TOOLS.filter((t) => enabled.has(t.name)).map((t) => ({
+    const tools: ResponsesTool[] = TOOLS.filter((t) => enabled.has(t.name)).map((t) => ({
       type: 'function',
-      function: { name: t.name, description: t.description, parameters: zodToJsonSchema(z.object(t.inputSchema), { $refStrategy: 'none' }) },
+      name: t.name,
+      description: t.description,
+      parameters: zodToJsonSchema(z.object(t.inputSchema), { $refStrategy: 'none' }),
     }));
 
     s.status = 'running';
     emit('turn.started', { input });
     for (const raw of input) {
       const inp = raw as { type: string; content?: string; tool_call_id?: string; approval?: { status: 'allow' | 'deny'; reason?: string } };
-      if (inp.type === 'user.message') s.messages.push({ role: 'user', content: inp.content ?? '' });
+      if (inp.type === 'user.message') s.inbox.push({ role: 'user', content: inp.content ?? '' });
       else if (inp.type === 'user.tool_approval') {
         const p = s.pending;
         if (!p || p.tool_call_id !== inp.tool_call_id) return done('error', `no pending approval for tool_call ${inp.tool_call_id}`);
@@ -152,12 +158,12 @@ export class LocalHarness {
         if (inp.approval?.status === 'allow') {
           const result = await callTool(p.name, p.arguments, { store: this.store, dataDir: this.dataDir });
           emit('tool.approved', { tool_call_id: p.tool_call_id, name: p.name });
-          emit('tool.result', { tool_call_id: p.tool_call_id, name: p.name, result });
-          s.messages.push({ role: 'tool', tool_call_id: p.tool_call_id, content: JSON.stringify(result) });
+          emit('tool.response', { tool_call_id: p.tool_call_id, name: p.name, content: JSON.stringify(result), result });
+          s.inbox.push({ type: 'function_call_output', call_id: p.call_id, output: JSON.stringify(result) });
         } else {
           const reason = inp.approval?.reason ?? 'denied by reviewer';
           emit('tool.denied', { tool_call_id: p.tool_call_id, name: p.name, reason });
-          s.messages.push({ role: 'tool', tool_call_id: p.tool_call_id, content: JSON.stringify({ error: 'denied_by_human', reason }) });
+          s.inbox.push({ type: 'function_call_output', call_id: p.call_id, output: JSON.stringify({ error: 'denied_by_human', reason }) });
         }
       }
     }
@@ -166,27 +172,36 @@ export class LocalHarness {
     for (let i = 0; i < limit; i++) {
       let reply;
       try {
-        reply = await chatCompletion({ model: m.model.name, messages: s.messages, tools, response_format: m.response_format, reasoning_effort: m.model.params?.reasoning_effort });
+        reply = await createResponse({
+          model: m.model.name,
+          instructions: m.instructions,
+          input: s.inbox,
+          previous_response_id: s.response_id,
+          tools,
+          json_schema: m.response_format?.json_schema,
+          reasoning_effort: m.model.params?.reasoning_effort,
+        });
       } catch (err) {
         emit('model.error', { error: err instanceof Error ? err.message : String(err) });
         return done('error', null);
       }
-      emit('model.message', { role: 'assistant', content: reply.content, tool_calls: reply.tool_calls, usage: reply.usage, model: reply.model });
-      s.messages.push({ role: 'assistant', content: reply.content ?? '', tool_calls: reply.tool_calls?.length ? reply.tool_calls : undefined });
+      s.response_id = reply.response_id;
+      s.inbox = [];
+      emit('model.message', { role: 'assistant', content: reply.content, tool_calls: reply.tool_calls, usage: reply.usage, model: reply.model, response_id: reply.response_id });
       if (!reply.tool_calls?.length) return done('done', reply.content);
 
       for (const tc of reply.tool_calls) {
         let args: Record<string, unknown> = {};
-        try { args = JSON.parse(tc.function.arguments || '{}') as Record<string, unknown>; } catch { /* leave empty; validation reports it */ }
-        if (needsApproval(tc.function.name)) {
+        try { args = JSON.parse(tc.arguments || '{}') as Record<string, unknown>; } catch { /* leave empty; validation reports it */ }
+        if (needsApproval(tc.name)) {
           // The gate: persist the pending call and stop. Nothing runs until a human resumes the session.
-          s.pending = { tool_call_id: tc.id, name: tc.function.name, arguments: args };
-          emit('tool.approval_required', { tool_calls: [{ id: tc.id, name: tc.function.name, arguments: args }] });
+          s.pending = { tool_call_id: tc.call_id, call_id: tc.call_id, name: tc.name, arguments: args };
+          emit('tool.approval_required', { tool_calls: [{ id: tc.call_id, name: tc.name, arguments: args }] });
           return done('paused', null);
         }
-        const result = await callTool(tc.function.name, args, { store: this.store, dataDir: this.dataDir });
-        emit('tool.result', { tool_call_id: tc.id, name: tc.function.name, result });
-        s.messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
+        const result = await callTool(tc.name, args, { store: this.store, dataDir: this.dataDir });
+        emit('tool.response', { tool_call_id: tc.call_id, name: tc.name, content: JSON.stringify(result), result });
+        s.inbox.push({ type: 'function_call_output', call_id: tc.call_id, output: JSON.stringify(result) });
       }
     }
     emit('model.error', { error: `iteration limit ${limit} reached` });

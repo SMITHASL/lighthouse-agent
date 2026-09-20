@@ -13,16 +13,22 @@ import { finalOutput } from '../../src/pipeline/client.js';
  * Drives the local runtime against a scripted fake OpenAI endpoint, so the loop, the tool
  * calls and the approval gate are tested without a model or a network.
  */
-type Req = { messages: { role: string; content?: string; tool_calls?: unknown[] }[]; tools?: { function: { name: string } }[]; response_format?: unknown };
+type Item = { role?: string; content?: string; type?: string; call_id?: string; output?: string };
+type Req = { instructions: string; input: Item[]; previous_response_id?: string; tools?: { name: string }[]; text?: unknown };
 const seen: Req[] = [];
 let script: ((req: Req) => unknown)[] = [];
 let server: Server;
 let dataDir: string;
 
+let n = 0;
 const reply = (content: string | null, tool_calls: { id: string; name: string; args: unknown }[] = []) => ({
+  id: `resp_${++n}`,
   model: 'fake',
-  choices: [{ message: { content, tool_calls: tool_calls.map((t) => ({ id: t.id, type: 'function', function: { name: t.name, arguments: JSON.stringify(t.args) } })) } }],
-  usage: { prompt_tokens: 100, completion_tokens: 20 },
+  output: [
+    ...tool_calls.map((t) => ({ type: 'function_call', id: `fc_${t.id}`, call_id: t.id, name: t.name, arguments: JSON.stringify(t.args) })),
+    ...(content === null ? [] : [{ type: 'message', content: [{ type: 'output_text', text: content }] }]),
+  ],
+  usage: { input_tokens: 100, output_tokens: 20 },
 });
 
 beforeAll(async () => {
@@ -60,18 +66,22 @@ describe('LocalHarness', () => {
     script = [
       () => reply(null, [{ id: 'c1', name: 'applicants_get', args: { applicant_id: 'app_0001' } }]),
       (req) => {
-        // The tool result must have been fed back as a tool message.
-        const toolMsg = req.messages.find((m) => m.role === 'tool');
-        expect(toolMsg?.content).toContain('"applicant_id":"app_0001"');
+        // Only the tool output is sent, chained on the previous response id.
+        const toolMsg = req.input.find((m) => m.type === 'function_call_output');
+        expect(toolMsg?.call_id).toBe('c1');
+        expect(toolMsg?.output).toContain('"applicant_id":"app_0001"');
+        expect(req.previous_response_id).toBe('resp_1');
+        expect(req.input.some((m) => m.role === 'user')).toBe(false);
         return reply('{"done":true}');
       },
     ];
     const events = await h.runTurn(session, [{ type: 'user.message', content: 'go' }]);
     expect(finalOutput(events)).toEqual({ status: 'done', content: '{"done":true}' });
     // Only the analyst's enabled tools are offered; write tools are not.
-    const offered = seen.at(-1)!.tools!.map((t) => t.function.name).sort();
+    const offered = seen.at(-1)!.tools!.map((t) => t.name).sort();
     expect(offered).toEqual(['applicants_get', 'applicants_timeline', 'institution_reference_class_stats']);
-    expect(seen.at(-1)!.response_format).toBeTruthy();
+    expect(seen.at(-1)!.text).toBeTruthy();
+    expect(seen[0]!.instructions).toContain('critical analyst');
     // Usage flows through model.message events (the pipeline's cost accounting reads these).
     expect(events.filter((e) => e.type === 'model.message').length).toBe(2);
     expect(existsSync(join(dataDir, 'sessions', `${session}.json`))).toBe(true);
@@ -93,7 +103,7 @@ describe('LocalHarness', () => {
 
     // Deny: the tool never runs; the model is told and the turn completes.
     script = [(req) => {
-      expect(req.messages.at(-1)?.content).toContain('denied_by_human');
+      expect(req.input.at(-1)?.output).toContain('denied_by_human');
       return reply('acknowledged denial');
     }];
     const denied = await h.runTurn(session, [{ type: 'user.tool_approval', thread_id: 'main', tool_call_id: 'c9', approval: { status: 'deny', reason: 'not this cycle' } }]);
@@ -135,7 +145,7 @@ describe('LocalHarness', () => {
     script = [
       () => reply(null, [{ id: 'r1', name: 'calibration_rescore', args: {} }]),
       (req) => {
-        expect(req.messages.at(-1)?.content).toContain('reports_scored');
+        expect(req.input.at(-1)?.output).toContain('reports_scored');
         return reply('scored 0 reports');
       },
     ];
