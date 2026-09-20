@@ -62,7 +62,7 @@ An open-source agent harness from TrueFoundry: the runtime that turns a model in
 OpenAI GPT-5.5 for the analyst, where reasoning depth matters. GPT-5.4-mini for the auditor, the action proposer and the nightly rescorer. The split is deliberate: a different model audits the analyst. Any provider TrueForge supports can be swapped in with one setting; no applicant data is used for training.
 
 **What does it cost to run?**
-$0.054 per report on the 30-applicant evaluation (about 13,600 input and 4,300 output tokens). Hard caps: $0.15 per report, $10 per evaluation run. The eval runner prints projected cost before any model call and refuses to exceed the cap; a report that hits its budget degrades to a partial report with a data-gap flag rather than overspending.
+$0.047 per report on the 30-applicant evaluation of 20 September 2026 on the standalone runtime (about 11,000 input and 3,800 output tokens); $0.054 on the earlier TrueForge-hosted run. Hard caps: $0.15 per report, $10 per evaluation run. The eval runner prints projected cost before any model call and refuses to exceed the cap; a report that hits its budget degrades to a partial report with a data-gap flag rather than overspending.
 
 **What is MCP and what does the connector expose?**
 Model Context Protocol: the standard way an agent calls tools. Lighthouse's connector is a small server the institution hosts. Read tools: fetch an applicant, fetch their interaction timeline, fetch reference-class base rates. Write tools: record an observed outcome, propose an action (approval-gated), re-score calibration. TrueForge discovers the tools and enforces read versus write from their annotations.
@@ -76,7 +76,7 @@ A dropped connection or a malformed report triggers one retry in the same sessio
 ## Accuracy and testing
 
 **How accurate is it?**
-On the 30-applicant evaluation of 19 September 2026 it beat the base-rate baseline on every outcome. Ranking quality (AUROC): recruiter 0.97, cheerleader 0.74, volunteer 0.72, completion 0.67, donor 0.50. The data is synthetic, so these numbers prove the machinery, not real-world accuracy; a pilot on real applicants is what establishes that.
+On the 30-applicant evaluation of 20 September 2026 (standalone runtime) it beat the base-rate baseline on every outcome. Ranking quality (AUROC): recruiter 0.95, volunteer 0.73, cheerleader 0.69, completion 0.67, donor 0.57. The TrueForge-hosted run a day earlier was within noise of these (recruiter 0.97, donor 0.50). The data is synthetic, so these numbers prove the machinery, not real-world accuracy; a pilot on real applicants is what establishes that.
 
 **What do the metrics mean in plain words?**
 
@@ -88,20 +88,20 @@ On the 30-applicant evaluation of 19 September 2026 it beat the base-rate baseli
 | Calibration (ECE) | When it says 70%, does it happen about 70% of the time? | Under 0.10 is well calibrated |
 | Error bars honest? | How often the 90% interval contained the truth | About 0.90 |
 
-**Why is the donor ranking only 0.50?**
+**Why is the donor ranking only 0.57?**
 In the synthetic data the donor outcome is generated almost at random by design (a weak function of ambition and reciprocity), so there is little signal to find. That is a property of the test data, not evidence the approach fails; real alumni-giving data is where this outcome gets measured.
 
-**Why does recruiter rank at 0.97 but calibrate badly?**
+**Why does recruiter rank at 0.95 but calibrate badly?**
 The model identifies likely recruiters almost perfectly but anchors its probabilities on the 22% base rate, while the evaluation label (at least one referral in five years) is far more common. That is a mismatch between the eval's label and the base rate it was given, not a reasoning failure, and it is exactly the kind of drift nightly re-scoring corrects.
 
 **Which gates fail, and why show them?**
 Two of four: fairness parity (0.17 on volunteer, with about ten people per synthetic group, so mostly noise) and confidence-interval coverage (intervals too narrow on donor and recruiter). They are shown because an agent harness exists to make failure visible; hiding a failed gate would defeat the point of the product.
 
 **Does it make things up?**
-Across 849 evidence claims in the evaluation, zero cited a field that does not exist on the record. This is an existence check on the cited field, not yet a check that the claim is supported by that field; a claim-support judge is the next evaluation to add.
+Across 869 evidence claims in the evaluation, zero cited a field that does not exist on the record. This is an existence check on the cited field, not yet a check that the claim is supported by that field; a claim-support judge is the next evaluation to add.
 
 **Is it consistent?**
-The same applicant scored three times varied by 0.016 on the completion estimate. Counter-evidence was present in 100% of reports.
+The same applicant scored three times varied by 0.009 on the completion estimate. Counter-evidence was present in 100% of reports.
 
 **How was it tested?**
 Behaviour first: 14 Gherkin scenarios written before any code, covering the reasoning contract, protected attributes, textual proxies, prompt injection, the approval gate, budget exhaustion, nightly re-scoring and the domain-pack swap. Then 51 offline tests and 6 live tests against the running system, all passing, and a traceability test that fails the build if any scenario lacks a test.
@@ -170,7 +170,7 @@ The first auditor over-vetoed: it treated the applicant's own behaviour (campus 
 The domain-pack swap is instructions-deep, not schema-deep. Parity metrics on synthetic labels cannot detect real bias, only the behavioural tests can. The hallucination metric checks that a cited field exists, not that it supports the claim. The approval gate is enforced by the harness, so the MCP tool needs caller authentication in hosted mode. Seven statement templates mean the predictive numbers say more about the generator than the agent. Each of these is written up in the README.
 
 **How much did it cost to build and run today?**
-Under $4 of model usage: $1.78 for the 30-record evaluation, the rest on live tests and demo runs.
+Under $4 of model usage on hackathon day: $1.78 for the 30-record evaluation, the rest on live tests and demo runs. Re-running the evaluation on the standalone runtime cost $1.54; the six live scenarios about $0.30.
 
 **Where is everything?**
 Code: https://github.com/SMITHASL/lighthouse-agent. Demo video (3 minutes, captions, no audio): https://github.com/SMITHASL/lighthouse-agent/releases/tag/v0.1.0. Built at the Agent Harness Hackathon, Santa Clara, 19 September 2026, on TrueForge with OpenAI.

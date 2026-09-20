@@ -82,12 +82,23 @@ TRUEFORGE_BASE_URL=http://localhost:8790 npm run setup
 TRUEFORGE_BASE_URL=http://localhost:8790 npm run report -- app_0001
 ```
 
-## Results (n=20 first run, before instruction fixes)
+## Results (n=30, standalone runtime, 20 Sep 2026)
 
-- 0 hallucinated evidence fields across 414 claims; counter-evidence present in 100% of reports; run-to-run std of the completion estimate 0.01.
-- Cost $0.040 per report (cap $0.15).
-- Fairness parity and CI coverage gates **failed at n=14** — mostly group-size noise, but reported honestly; see `evals/SCOREBOARD.md` for the latest run.
-- The first auditor version over-vetoed by treating the applicant's own behaviour (campus visits, response time) as "circumstance"; fixed by defining person vs. circumstance signals explicitly.
+From [`evals/SCOREBOARD.md`](evals/SCOREBOARD.md), produced by the local runtime in this repo (GPT-5.5 analyst, GPT-5.4-mini auditor), no TrueForge involved. The earlier TrueForge-hosted run of 19 Sep gave the same picture (27/3 released/withheld, 849 claims, 0 hallucinated, $0.054/report).
+
+| outcome | AUROC | Brier | Brier (base rate) | 90% CI coverage |
+|---|---|---|---|---|
+| completion | 0.665 | 0.201 | 0.208 | 0.93 |
+| volunteer | 0.731 | 0.212 | 0.248 | 0.93 |
+| cheerleader | 0.685 | 0.196 | 0.225 | 0.87 |
+| donor | 0.568 | 0.199 | 0.212 | 0.77 |
+| recruiter | 0.948 | 0.442 | 0.590 | 0.70 |
+
+- Beats the base-rate baseline on every outcome. **869 evidence claims, 0 hallucinated source fields**; counter-evidence present in 100% of reports; run-to-run std of the completion estimate **0.009**.
+- 27 released / 3 withheld by the fairness auditor / 0 partial. **$1.54 total, $0.047 per report** (cap $0.15); ~11.0k input / 3.8k output tokens per report.
+- Two gates **fail**, as before: fairness parity (0.19 on volunteer, ~10 people per synthetic group, mostly noise) and CI coverage (intervals too narrow on donor and recruiter). Shown deliberately — a harness exists to make failure visible.
+- The synthetic donor outcome is near-random by construction, so donor AUROC (0.57) says little; recruiter ranks at 0.95 but anchors on a 22% base rate while the eval label is far more common, hence the poor calibration — the drift nightly rescoring is for.
+- History: the first auditor version over-vetoed by treating the applicant's own behaviour (campus visits, response time) as "circumstance"; fixed by defining person vs. circumstance signals explicitly (withheld 8 → 3 of 30).
 
 ## Scaling path
 

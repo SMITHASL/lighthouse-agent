@@ -50,10 +50,20 @@ const results = await pool(applicants, concurrency, async (a) => {
   spent += r.usage.estimated_usd;
   process.stderr.write(`${a.applicant_id} ${r.status} $${r.usage.estimated_usd.toFixed(3)} (total $${spent.toFixed(2)})\n`);
   if (spent > CAP_USD_PER_RUN) throw new Error('cost cap exceeded mid-run');
+  // A report that failed before any model call is an infrastructure fault (agents not registered,
+  // no API key, wrong endpoint), not a model result. Abort rather than score an empty run.
+  if (r.report === null && r.usage.input_tokens === 0) {
+    const why = r.risk_flags.map((f) => f.detail).join('; ') || 'unknown';
+    throw new Error(`${a.applicant_id}: no model call was made (${why}). Run \`npm run setup\` and check OPENAI_API_KEY before evaluating.`);
+  }
   return r;
 });
 
 const released = results.filter((r): r is PipelineResult & { report: LongTermFitReport } => r.report !== null);
+if (released.length === 0) {
+  console.error('no reports were released; refusing to write a scoreboard with no data');
+  process.exit(1);
+}
 
 // --- A. Predictive quality vs. base-rate baseline
 const pack = loadDomainPack('university-admissions');

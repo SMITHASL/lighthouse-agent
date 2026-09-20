@@ -1,0 +1,194 @@
+{
+  "id": "ls_mu9dckz3_85aa68c1",
+  "agent": "lighthouse-critical-analyst",
+  "created_at": "2026-09-20T05:21:37.839Z",
+  "status": "done",
+  "inbox": [],
+  "events": [
+    {
+      "type": "turn.started",
+      "id": "c4fdd488-ca81-40ca-aa91-549b1f685b9d",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:21:37.845Z",
+      "input": [
+        {
+          "type": "user.message",
+          "content": "Produce the Long-Term Fit Report for applicant_id app_0001. Return only the JSON."
+        }
+      ]
+    },
+    {
+      "type": "model.message",
+      "id": "ea39d0bf-8e61-4b52-81a5-c2c91e13289c",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:21:39.634Z",
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "fc_0cdada6190b9da7b006aaf6d63b62887d0a76a8f04941baac7",
+          "call_id": "call_2bQzBo6xtYp72CHzFBfkwanf",
+          "name": "applicants_get",
+          "arguments": "{\"applicant_id\":\"app_0001\"}"
+        },
+        {
+          "id": "fc_0cdada6190b9da7b006aaf6d63b63887d0b9c100bfb4d50b31",
+          "call_id": "call_MlRzy3zMWn3XfQTTsLFI9pbI",
+          "name": "applicants_timeline",
+          "arguments": "{\"applicant_id\":\"app_0001\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 2282,
+        "output_tokens": 84
+      },
+      "model": "gpt-5.5-2026-04-23",
+      "response_id": "resp_0cdada6190b9da7b006aaf6d62799c87d0aed65aa468a71884"
+    },
+    {
+      "type": "tool.response",
+      "id": "8e672251-c89b-4d7b-8561-94abdb01597c",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:21:39.634Z",
+      "tool_call_id": "call_2bQzBo6xtYp72CHzFBfkwanf",
+      "name": "applicants_get",
+      "content": "{\"applicant_id\":\"app_0001\",\"program\":\"LEAD Certificate\",\"statement\":\"I have worked in operations for four years and want to broaden my skills. I have helped colleagues when asked and enjoy team projects.\",\"stated_goals\":\"Move from engineering into general management and run a business unit.\",\"activities\":[{\"kind\":\"team_sport\",\"role\":\"Team captain\",\"months\":24,\"description\":\"Captained a recreational league team.\"}],\"academic_trajectory\":{\"term_scores\":[0.49194797061383727,0.616946108210832,0.6912332388013601,0.7791815111786128],\"hardest_course_load_taken\":\"standard\",\"setbacks_overcome\":[\"Lost a co-founder mid-project and shipped anyway\"]},\"institution_interaction\":{\"campus_visits\":2,\"events_attended\":3,\"median_response_hours\":26,\"questions_asked\":2,\"referrals_made\":1},\"interview_notes\":null,\"consent\":{\"application_data\":true,\"interaction_tracking\":true}}",
+      "result": {
+        "applicant_id": "app_0001",
+        "program": "LEAD Certificate",
+        "statement": "I have worked in operations for four years and want to broaden my skills. I have helped colleagues when asked and enjoy team projects.",
+        "stated_goals": "Move from engineering into general management and run a business unit.",
+        "activities": [
+          {
+            "kind": "team_sport",
+            "role": "Team captain",
+            "months": 24,
+            "description": "Captained a recreational league team."
+          }
+        ],
+        "academic_trajectory": {
+          "term_scores": [
+            0.49194797061383727,
+            0.616946108210832,
+            0.6912332388013601,
+            0.7791815111786128
+          ],
+          "hardest_course_load_taken": "standard",
+          "setbacks_overcome": [
+            "Lost a co-founder mid-project and shipped anyway"
+          ]
+        },
+        "institution_interaction": {
+          "campus_visits": 2,
+          "events_attended": 3,
+          "median_response_hours": 26,
+          "questions_asked": 2,
+          "referrals_made": 1
+        },
+        "interview_notes": null,
+        "consent": {
+          "application_data": true,
+          "interaction_tracking": true
+        }
+      }
+    },
+    {
+      "type": "tool.response",
+      "id": "7c846506-06c5-4943-816a-f2bc0d83de45",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:21:39.634Z",
+      "tool_call_id": "call_MlRzy3zMWn3XfQTTsLFI9pbI",
+      "name": "applicants_timeline",
+      "content": "{\"consent\":true,\"events\":{\"campus_visits\":2,\"events_attended\":3,\"median_response_hours\":26,\"questions_asked\":2,\"referrals_made\":1}}",
+      "result": {
+        "consent": true,
+        "events": {
+          "campus_visits": 2,
+          "events_attended": 3,
+          "median_response_hours": 26,
+          "questions_asked": 2,
+          "referrals_made": 1
+        }
+      }
+    },
+    {
+      "type": "model.message",
+      "id": "2deb193e-e465-4cc7-ad81-aad173914d97",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:21:40.893Z",
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "fc_0cdada6190b9da7b006aaf6d64ef6887d0a3c104d0bf330cd6",
+          "call_id": "call_tfdcFQpzVFeh0wHzgpDg0HN7",
+          "name": "institution_reference_class_stats",
+          "arguments": "{\"domain_pack\":\"university-admissions\"}"
+        }
+      ],
+      "usage": {
+        "input_tokens": 2642,
+        "output_tokens": 25
+      },
+      "model": "gpt-5.5-2026-04-23",
+      "response_id": "resp_0cdada6190b9da7b006aaf6d64343c87d09cc179c0b302dac8"
+    },
+    {
+      "type": "tool.response",
+      "id": "ba8db312-b01a-450b-9df1-4b474d96fd30",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:21:40.894Z",
+      "tool_call_id": "call_tfdcFQpzVFeh0wHzgpDg0HN7",
+      "name": "institution_reference_class_stats",
+      "content": "{\"domain_pack\":\"university-admissions\",\"horizon_years\":10,\"base_rates\":{\"completion\":0.62,\"volunteer\":0.31,\"cheerleader\":0.28,\"donor\":0.14,\"recruiter\":0.22},\"cohort\":\"alumni of the LEAD Certificate program\"}",
+      "result": {
+        "domain_pack": "university-admissions",
+        "horizon_years": 10,
+        "base_rates": {
+          "completion": 0.62,
+          "volunteer": 0.31,
+          "cheerleader": 0.28,
+          "donor": 0.14,
+          "recruiter": 0.22
+        },
+        "cohort": "alumni of the LEAD Certificate program"
+      }
+    },
+    {
+      "type": "model.message",
+      "id": "7e778979-bef9-42dc-8013-80a4e0ea4ece",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:22:10.716Z",
+      "role": "assistant",
+      "content": "{\"applicant_id\":\"app_0001\",\"completion_likelihood\":{\"estimate\":0.74,\"ci_low\":0.62,\"ci_high\":0.84,\"evidence\":[{\"claim\":\"Term scores show a consistent upward trajectory across four terms, suggesting learning velocity and persistence.\",\"source_field\":\"academic_trajectory.term_scores\",\"quality\":\"direct\"},{\"claim\":\"Applicant reports shipping a project despite losing a co-founder, suggesting follow-through under disruption.\",\"source_field\":\"academic_trajectory.setbacks_overcome[0]\",\"quality\":\"direct\"},{\"claim\":\"Stated goal is coherent with the program: broadening skills to move from engineering into general management.\",\"source_field\":\"stated_goals\",\"quality\":\"indirect\"},{\"claim\":\"Applicant has attended multiple institution events and visits, indicating engagement before enrollment.\",\"source_field\":\"institution_interaction.events_attended\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"Hardest course load taken is listed as standard rather than unusually demanding, limiting evidence about performance under heavy academic load.\",\"source_field\":\"academic_trajectory.hardest_course_load_taken\",\"quality\":\"direct\"},{\"claim\":\"No interview notes are available to validate motivation, time capacity, or self-management.\",\"source_field\":\"interview_notes\",\"quality\":\"absent\"}],\"missing_signals\":[\"Interview assessment of time availability and program fit\",\"External validation of academic workload tolerance\",\"Direct evidence of sustained performance in a rigorous management curriculum\"]},\"alumni_engagement_profile\":{\"volunteer\":{\"estimate\":0.36,\"ci_low\":0.22,\"ci_high\":0.52,\"evidence\":[{\"claim\":\"Applicant says they have helped colleagues when asked, a modest reciprocity signal.\",\"source_field\":\"statement\",\"quality\":\"direct\"},{\"claim\":\"Team captain role suggests willingness to coordinate group activity and support peers.\",\"source_field\":\"activities[0].role\",\"quality\":\"indirect\"},{\"claim\":\"Enjoyment of team projects suggests comfort contributing in collaborative settings.\",\"source_field\":\"statement\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"No explicit record of formal volunteering, mentoring programs, or service roles is present.\",\"source_field\":\"activities\",\"quality\":\"absent\"},{\"claim\":\"Helping is framed as occurring when asked, not as self-initiated service.\",\"source_field\":\"statement\",\"quality\":\"direct\"}],\"missing_signals\":[\"History of sustained volunteering\",\"Mentoring or coaching commitments\",\"Evidence of initiating service without being asked\"]},\"cheerleader\":{\"estimate\":0.39,\"ci_low\":0.25,\"ci_high\":0.56,\"evidence\":[{\"claim\":\"Applicant attended three institution events, indicating above-minimal engagement with the institution.\",\"source_field\":\"institution_interaction.events_attended\",\"quality\":\"direct\"},{\"claim\":\"Applicant made two campus visits, suggesting interest beyond application submission.\",\"source_field\":\"institution_interaction.campus_visits\",\"quality\":\"direct\"},{\"claim\":\"Applicant reports enjoying team projects, which can translate into positive peer advocacy if the experience is strong.\",\"source_field\":\"statement\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"Only two questions asked; engagement is present but not highly proactive in the available data.\",\"source_field\":\"institution_interaction.questions_asked\",\"quality\":\"direct\"},{\"claim\":\"No interview notes or applicant comments directly expressing institutional affinity are available.\",\"source_field\":\"interview_notes\",\"quality\":\"absent\"}],\"missing_signals\":[\"Direct statement of enthusiasm for this institution\",\"Evidence of public advocacy for organizations or communities\",\"Post-event feedback sentiment\"]},\"donor\":{\"estimate\":0.2,\"ci_low\":0.1,\"ci_high\":0.34,\"future_capacity\":{\"estimate\":0.62,\"ambition_signals\":[{\"signal\":\"Clear goal to move into general management and run a business unit.\",\"source_field\":\"stated_goals\"},{\"signal\":\"Rising term-score trajectory suggests growth over time.\",\"source_field\":\"academic_trajectory.term_scores\"},{\"signal\":\"Shipped a project despite losing a co-founder, suggesting persistence through setbacks.\",\"source_field\":\"academic_trajectory.setbacks_overcome[0]\"},{\"signal\":\"Team captain role shows some leadership experience.\",\"source_field\":\"activities[0].role\"}]},\"generosity\":{\"estimate\":0.33,\"reciprocity_signals\":[{\"signal\":\"Reports helping colleagues when asked.\",\"source_field\":\"statement\"},{\"signal\":\"Has already made one referral to the institution.\",\"source_field\":\"institution_interaction.referrals_made\"},{\"signal\":\"Enjoys team projects, indicating some collaborative orientation.\",\"source_field\":\"statement\"}]},\"horizon_years\":10,\"evidence\":[{\"claim\":\"Donor potential is above base rate because future-capacity signals are moderate and generosity signals are present but limited.\",\"source_field\":\"stated_goals\",\"quality\":\"indirect\"},{\"claim\":\"One prior referral is a direct give-back behavior toward the institution, though not a financial gift.\",\"source_field\":\"institution_interaction.referrals_made\",\"quality\":\"direct\"},{\"claim\":\"Upward academic trajectory and persistence through a project setback support future capacity.\",\"source_field\":\"academic_trajectory.term_scores\",\"quality\":\"direct\"}],\"counter_evidence\":[{\"claim\":\"No direct evidence of prior charitable giving or sustained philanthropic behavior is available.\",\"source_field\":\"activities\",\"quality\":\"absent\"},{\"claim\":\"The statement describes helping colleagues when asked rather than a proactive pattern of generosity.\",\"source_field\":\"statement\",\"quality\":\"direct\"}],\"missing_signals\":[\"Prior giving behavior from the applicant personally\",\"Sustained mentoring or service activity\",\"Longitudinal career progression after program completion\"]},\"recruiter\":{\"estimate\":0.43,\"ci_low\":0.27,\"ci_high\":0.6,\"evidence\":[{\"claim\":\"Applicant has already made one referral, the strongest direct signal for future recruiting behavior.\",\"source_field\":\"institution_interaction.referrals_made\",\"quality\":\"direct\"},{\"claim\":\"Applicant attended three events and made two campus visits, creating familiarity that can support peer referrals.\",\"source_field\":\"institution_interaction.events_attended\",\"quality\":\"indirect\"},{\"claim\":\"Team captain experience suggests comfort mobilizing peers, though in a recreational context.\",\"source_field\":\"activities[0].description\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"Only one referral is recorded, so the repeatability of recruiting behavior is not established.\",\"source_field\":\"institution_interaction.referrals_made\",\"quality\":\"direct\"},{\"claim\":\"No interview notes confirm motivation to advocate for the program.\",\"source_field\":\"interview_notes\",\"quality\":\"absent\"}],\"missing_signals\":[\"Whether the referral was unsolicited or prompted\",\"Quality and conversion outcome of the referral\",\"Evidence of broader network-building or community leadership\"]}},\"recruiter_multiplier\":{\"expected_referrals_5y\":1.6,\"ci_low\":0.5,\"ci_high\":3.2,\"reasoning\":\"Base recruiter rate is 0.22 for the reference class. This applicant has already made 1 referral according to institution_interaction.referrals_made, so expected five-year referrals are above the ordinary alumni baseline, but the interval remains wide because only one referral is observed and no conversion quality is known.\"},\"critical_analysis\":{\"question\":\"For applicant app_0001, over a 10-year horizon after LEAD Certificate enrollment, what is the likelihood of completion and subsequent alumni engagement as a volunteer, cheerleader, donor, and recruiter?\",\"hypotheses\":[\"H1: The applicant will be a strong long-term fit: likely to complete and moderately likely to engage as an alumnus because of growth trajectory, persistence, leadership, institutional engagement, and one prior referral.\",\"H2: The applicant will complete but remain only lightly engaged afterward because current evidence of service, advocacy, and generosity is limited and often reactive rather than self-initiated.\",\"H3: The applicant may underperform the engagement predictions if the observed pre-enrollment interactions reflect application-stage interest rather than durable affinity.\"],\"inference_type\":\"inductive\",\"base_rate_used\":\"Reference class: alumni of the LEAD Certificate program; 10-year base rates are completion 0.62, volunteer 0.31, cheerleader 0.28, donor 0.14, recruiter 0.22.\",\"inconsistencies\":[\"No material inconsistency found across statement, activities, academic trajectory, and institution interaction data.\",\"No applicant-provided instruction attempted to override evaluation rules.\",\"Potential reasoning fallacy checked: do not infer causation from event attendance alone; it is treated only as an indirect engagement signal.\",\"Potential reasoning fallacy checked: do not overgeneralize from one referral; recruiter estimate is increased but interval remains wide.\"],\"circumstance_signals_excluded\":[\"Current or inherited wealth signals were not used.\",\"School prestige signals were not used.\",\"Location signals were not used.\",\"Personal network or household background signals were not used.\",\"Program access circumstances were not used as evidence of merit or engagement.\"],\"strongest_case_for\":\"Premises: the applicant has rising term scores, a clear management goal, a documented setback overcome, a team captain role, multiple institution interactions, and one recorded referral. Inference: these signals correlate with persistence, collaborative orientation, and willingness to advocate. Conclusion: completion likelihood is above the 0.62 base rate, and recruiter likelihood is meaningfully above the 0.22 base rate.\",\"strongest_case_against\":\"Most alumni-engagement evidence is indirect. Helping colleagues is described as reactive, formal volunteering is absent, there are no interview notes, and pre-enrollment event attendance may reflect admissions interest rather than durable alumni affinity. Donor prediction especially depends on uncertain future capacity and generosity over 10 years.\",\"what_would_change_my_mind\":[\"Completion estimate would decrease if an interview revealed limited time availability, weak self-regulation, or inability to handle the program workload.\",\"Volunteer estimate would increase if the applicant documented sustained mentoring, coaching, or service activity; it would decrease if helping behavior was purely transactional.\",\"Cheerleader estimate would increase with positive post-event feedback or public advocacy; it would decrease if visits were only procedural and low-affinity.\",\"Donor estimate would increase with evidence of sustained give-back behavior by the applicant personally; it would decrease if career ambition or reciprocity signals were not substantiated.\",\"Recruiter estimate would decrease if the recorded referral was prompted, low-effort, or non-converting; it would increase if the applicant independently referred multiple qualified peers.\"],\"proposed_experiment\":\"Cheapest falsification tests: for completion, conduct a short structured interview on time budget, workload planning, and response to setbacks; for volunteer, invite the applicant to a low-stakes peer-mentoring or admitted-student support event and observe whether they opt in; for cheerleader, request brief post-event feedback and permission to share a testimonial only if authentic; for donor, track voluntary mentoring/referral participation before any fundraising inference; for recruiter, ask whether they can identify one additional qualified prospect without incentives and track follow-through.\",\"analogy_and_where_it_breaks\":\"The applicant is compared to the LEAD Certificate alumni reference class, which is appropriate because the same program and outcomes define the base rates. The analogy breaks because individual data are sparse, pre-enrollment behavior may not persist after admission, and no interview notes are available to validate motivation or constraints.\"},\"risk_flags\":[{\"type\":\"data_gap\",\"detail\":\"interview_notes is null, limiting validation of motivation, communication style, and time capacity.\"},{\"type\":\"data_gap\",\"detail\":\"No direct record of formal volunteering, prior giving, or public advocacy is present.\"}],\"recommended_action\":{\"action\":\"schedule_interview\",\"rationale\":\"The applicant shows above-base completion and recruiter potential, but interview validation is needed to test workload readiness, durable motivation, and whether engagement signals are self-initiated.\",\"requires_human_approval\":true},\"confidence_calibration\":{\"overall_confidence\":0.63,\"why\":\"Confidence is moderate: academic trajectory, setback persistence, institutional engagement, and one referral are useful signals, but alumni outcomes over 10 years are inherently uncertain and several engagement signals are indirect or absent.\"},\"data_lineage\":[{\"field\":\"applicant_id\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"program\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"statement\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"stated_goals\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"activities\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"academic_trajectory.term_scores\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"academic_trajectory.hardest_course_load_taken\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"academic_trajectory.setbacks_overcome\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.campus_visits\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.events_attended\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.median_response_hours\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.questions_asked\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.referrals_made\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"interview_notes\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"reference_class_base_rates\",\"source\":\"institution_reference_class_stats\",\"consent_flag\":true}]}",
+      "tool_calls": [],
+      "usage": {
+        "input_tokens": 2748,
+        "output_tokens": 3262
+      },
+      "model": "gpt-5.5-2026-04-23",
+      "response_id": "resp_0cdada6190b9da7b006aaf6d65703487d0b04cd10519e08238"
+    },
+    {
+      "type": "turn.done",
+      "id": "8a011cf8-248f-4354-8602-736d6070a31e",
+      "thread_id": "main",
+      "session_id": "ls_mu9dckz3_85aa68c1",
+      "at": "2026-09-20T05:22:10.717Z",
+      "state": {
+        "status": "done",
+        "output": {
+          "content": "{\"applicant_id\":\"app_0001\",\"completion_likelihood\":{\"estimate\":0.74,\"ci_low\":0.62,\"ci_high\":0.84,\"evidence\":[{\"claim\":\"Term scores show a consistent upward trajectory across four terms, suggesting learning velocity and persistence.\",\"source_field\":\"academic_trajectory.term_scores\",\"quality\":\"direct\"},{\"claim\":\"Applicant reports shipping a project despite losing a co-founder, suggesting follow-through under disruption.\",\"source_field\":\"academic_trajectory.setbacks_overcome[0]\",\"quality\":\"direct\"},{\"claim\":\"Stated goal is coherent with the program: broadening skills to move from engineering into general management.\",\"source_field\":\"stated_goals\",\"quality\":\"indirect\"},{\"claim\":\"Applicant has attended multiple institution events and visits, indicating engagement before enrollment.\",\"source_field\":\"institution_interaction.events_attended\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"Hardest course load taken is listed as standard rather than unusually demanding, limiting evidence about performance under heavy academic load.\",\"source_field\":\"academic_trajectory.hardest_course_load_taken\",\"quality\":\"direct\"},{\"claim\":\"No interview notes are available to validate motivation, time capacity, or self-management.\",\"source_field\":\"interview_notes\",\"quality\":\"absent\"}],\"missing_signals\":[\"Interview assessment of time availability and program fit\",\"External validation of academic workload tolerance\",\"Direct evidence of sustained performance in a rigorous management curriculum\"]},\"alumni_engagement_profile\":{\"volunteer\":{\"estimate\":0.36,\"ci_low\":0.22,\"ci_high\":0.52,\"evidence\":[{\"claim\":\"Applicant says they have helped colleagues when asked, a modest reciprocity signal.\",\"source_field\":\"statement\",\"quality\":\"direct\"},{\"claim\":\"Team captain role suggests willingness to coordinate group activity and support peers.\",\"source_field\":\"activities[0].role\",\"quality\":\"indirect\"},{\"claim\":\"Enjoyment of team projects suggests comfort contributing in collaborative settings.\",\"source_field\":\"statement\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"No explicit record of formal volunteering, mentoring programs, or service roles is present.\",\"source_field\":\"activities\",\"quality\":\"absent\"},{\"claim\":\"Helping is framed as occurring when asked, not as self-initiated service.\",\"source_field\":\"statement\",\"quality\":\"direct\"}],\"missing_signals\":[\"History of sustained volunteering\",\"Mentoring or coaching commitments\",\"Evidence of initiating service without being asked\"]},\"cheerleader\":{\"estimate\":0.39,\"ci_low\":0.25,\"ci_high\":0.56,\"evidence\":[{\"claim\":\"Applicant attended three institution events, indicating above-minimal engagement with the institution.\",\"source_field\":\"institution_interaction.events_attended\",\"quality\":\"direct\"},{\"claim\":\"Applicant made two campus visits, suggesting interest beyond application submission.\",\"source_field\":\"institution_interaction.campus_visits\",\"quality\":\"direct\"},{\"claim\":\"Applicant reports enjoying team projects, which can translate into positive peer advocacy if the experience is strong.\",\"source_field\":\"statement\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"Only two questions asked; engagement is present but not highly proactive in the available data.\",\"source_field\":\"institution_interaction.questions_asked\",\"quality\":\"direct\"},{\"claim\":\"No interview notes or applicant comments directly expressing institutional affinity are available.\",\"source_field\":\"interview_notes\",\"quality\":\"absent\"}],\"missing_signals\":[\"Direct statement of enthusiasm for this institution\",\"Evidence of public advocacy for organizations or communities\",\"Post-event feedback sentiment\"]},\"donor\":{\"estimate\":0.2,\"ci_low\":0.1,\"ci_high\":0.34,\"future_capacity\":{\"estimate\":0.62,\"ambition_signals\":[{\"signal\":\"Clear goal to move into general management and run a business unit.\",\"source_field\":\"stated_goals\"},{\"signal\":\"Rising term-score trajectory suggests growth over time.\",\"source_field\":\"academic_trajectory.term_scores\"},{\"signal\":\"Shipped a project despite losing a co-founder, suggesting persistence through setbacks.\",\"source_field\":\"academic_trajectory.setbacks_overcome[0]\"},{\"signal\":\"Team captain role shows some leadership experience.\",\"source_field\":\"activities[0].role\"}]},\"generosity\":{\"estimate\":0.33,\"reciprocity_signals\":[{\"signal\":\"Reports helping colleagues when asked.\",\"source_field\":\"statement\"},{\"signal\":\"Has already made one referral to the institution.\",\"source_field\":\"institution_interaction.referrals_made\"},{\"signal\":\"Enjoys team projects, indicating some collaborative orientation.\",\"source_field\":\"statement\"}]},\"horizon_years\":10,\"evidence\":[{\"claim\":\"Donor potential is above base rate because future-capacity signals are moderate and generosity signals are present but limited.\",\"source_field\":\"stated_goals\",\"quality\":\"indirect\"},{\"claim\":\"One prior referral is a direct give-back behavior toward the institution, though not a financial gift.\",\"source_field\":\"institution_interaction.referrals_made\",\"quality\":\"direct\"},{\"claim\":\"Upward academic trajectory and persistence through a project setback support future capacity.\",\"source_field\":\"academic_trajectory.term_scores\",\"quality\":\"direct\"}],\"counter_evidence\":[{\"claim\":\"No direct evidence of prior charitable giving or sustained philanthropic behavior is available.\",\"source_field\":\"activities\",\"quality\":\"absent\"},{\"claim\":\"The statement describes helping colleagues when asked rather than a proactive pattern of generosity.\",\"source_field\":\"statement\",\"quality\":\"direct\"}],\"missing_signals\":[\"Prior giving behavior from the applicant personally\",\"Sustained mentoring or service activity\",\"Longitudinal career progression after program completion\"]},\"recruiter\":{\"estimate\":0.43,\"ci_low\":0.27,\"ci_high\":0.6,\"evidence\":[{\"claim\":\"Applicant has already made one referral, the strongest direct signal for future recruiting behavior.\",\"source_field\":\"institution_interaction.referrals_made\",\"quality\":\"direct\"},{\"claim\":\"Applicant attended three events and made two campus visits, creating familiarity that can support peer referrals.\",\"source_field\":\"institution_interaction.events_attended\",\"quality\":\"indirect\"},{\"claim\":\"Team captain experience suggests comfort mobilizing peers, though in a recreational context.\",\"source_field\":\"activities[0].description\",\"quality\":\"indirect\"}],\"counter_evidence\":[{\"claim\":\"Only one referral is recorded, so the repeatability of recruiting behavior is not established.\",\"source_field\":\"institution_interaction.referrals_made\",\"quality\":\"direct\"},{\"claim\":\"No interview notes confirm motivation to advocate for the program.\",\"source_field\":\"interview_notes\",\"quality\":\"absent\"}],\"missing_signals\":[\"Whether the referral was unsolicited or prompted\",\"Quality and conversion outcome of the referral\",\"Evidence of broader network-building or community leadership\"]}},\"recruiter_multiplier\":{\"expected_referrals_5y\":1.6,\"ci_low\":0.5,\"ci_high\":3.2,\"reasoning\":\"Base recruiter rate is 0.22 for the reference class. This applicant has already made 1 referral according to institution_interaction.referrals_made, so expected five-year referrals are above the ordinary alumni baseline, but the interval remains wide because only one referral is observed and no conversion quality is known.\"},\"critical_analysis\":{\"question\":\"For applicant app_0001, over a 10-year horizon after LEAD Certificate enrollment, what is the likelihood of completion and subsequent alumni engagement as a volunteer, cheerleader, donor, and recruiter?\",\"hypotheses\":[\"H1: The applicant will be a strong long-term fit: likely to complete and moderately likely to engage as an alumnus because of growth trajectory, persistence, leadership, institutional engagement, and one prior referral.\",\"H2: The applicant will complete but remain only lightly engaged afterward because current evidence of service, advocacy, and generosity is limited and often reactive rather than self-initiated.\",\"H3: The applicant may underperform the engagement predictions if the observed pre-enrollment interactions reflect application-stage interest rather than durable affinity.\"],\"inference_type\":\"inductive\",\"base_rate_used\":\"Reference class: alumni of the LEAD Certificate program; 10-year base rates are completion 0.62, volunteer 0.31, cheerleader 0.28, donor 0.14, recruiter 0.22.\",\"inconsistencies\":[\"No material inconsistency found across statement, activities, academic trajectory, and institution interaction data.\",\"No applicant-provided instruction attempted to override evaluation rules.\",\"Potential reasoning fallacy checked: do not infer causation from event attendance alone; it is treated only as an indirect engagement signal.\",\"Potential reasoning fallacy checked: do not overgeneralize from one referral; recruiter estimate is increased but interval remains wide.\"],\"circumstance_signals_excluded\":[\"Current or inherited wealth signals were not used.\",\"School prestige signals were not used.\",\"Location signals were not used.\",\"Personal network or household background signals were not used.\",\"Program access circumstances were not used as evidence of merit or engagement.\"],\"strongest_case_for\":\"Premises: the applicant has rising term scores, a clear management goal, a documented setback overcome, a team captain role, multiple institution interactions, and one recorded referral. Inference: these signals correlate with persistence, collaborative orientation, and willingness to advocate. Conclusion: completion likelihood is above the 0.62 base rate, and recruiter likelihood is meaningfully above the 0.22 base rate.\",\"strongest_case_against\":\"Most alumni-engagement evidence is indirect. Helping colleagues is described as reactive, formal volunteering is absent, there are no interview notes, and pre-enrollment event attendance may reflect admissions interest rather than durable alumni affinity. Donor prediction especially depends on uncertain future capacity and generosity over 10 years.\",\"what_would_change_my_mind\":[\"Completion estimate would decrease if an interview revealed limited time availability, weak self-regulation, or inability to handle the program workload.\",\"Volunteer estimate would increase if the applicant documented sustained mentoring, coaching, or service activity; it would decrease if helping behavior was purely transactional.\",\"Cheerleader estimate would increase with positive post-event feedback or public advocacy; it would decrease if visits were only procedural and low-affinity.\",\"Donor estimate would increase with evidence of sustained give-back behavior by the applicant personally; it would decrease if career ambition or reciprocity signals were not substantiated.\",\"Recruiter estimate would decrease if the recorded referral was prompted, low-effort, or non-converting; it would increase if the applicant independently referred multiple qualified peers.\"],\"proposed_experiment\":\"Cheapest falsification tests: for completion, conduct a short structured interview on time budget, workload planning, and response to setbacks; for volunteer, invite the applicant to a low-stakes peer-mentoring or admitted-student support event and observe whether they opt in; for cheerleader, request brief post-event feedback and permission to share a testimonial only if authentic; for donor, track voluntary mentoring/referral participation before any fundraising inference; for recruiter, ask whether they can identify one additional qualified prospect without incentives and track follow-through.\",\"analogy_and_where_it_breaks\":\"The applicant is compared to the LEAD Certificate alumni reference class, which is appropriate because the same program and outcomes define the base rates. The analogy breaks because individual data are sparse, pre-enrollment behavior may not persist after admission, and no interview notes are available to validate motivation or constraints.\"},\"risk_flags\":[{\"type\":\"data_gap\",\"detail\":\"interview_notes is null, limiting validation of motivation, communication style, and time capacity.\"},{\"type\":\"data_gap\",\"detail\":\"No direct record of formal volunteering, prior giving, or public advocacy is present.\"}],\"recommended_action\":{\"action\":\"schedule_interview\",\"rationale\":\"The applicant shows above-base completion and recruiter potential, but interview validation is needed to test workload readiness, durable motivation, and whether engagement signals are self-initiated.\",\"requires_human_approval\":true},\"confidence_calibration\":{\"overall_confidence\":0.63,\"why\":\"Confidence is moderate: academic trajectory, setback persistence, institutional engagement, and one referral are useful signals, but alumni outcomes over 10 years are inherently uncertain and several engagement signals are indirect or absent.\"},\"data_lineage\":[{\"field\":\"applicant_id\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"program\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"statement\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"stated_goals\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"activities\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"academic_trajectory.term_scores\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"academic_trajectory.hardest_course_load_taken\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"academic_trajectory.setbacks_overcome\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.campus_visits\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.events_attended\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.median_response_hours\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.questions_asked\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"institution_interaction.referrals_made\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"interview_notes\",\"source\":\"applicants_get\",\"consent_flag\":true},{\"field\":\"reference_class_base_rates\",\"source\":\"institution_reference_class_stats\",\"consent_flag\":true}]}"
+        }
+      }
+    }
+  ],
+  "response_id": "resp_0cdada6190b9da7b006aaf6d65703487d0b04cd10519e08238"
+}
