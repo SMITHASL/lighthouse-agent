@@ -55,11 +55,11 @@ Predicting "who will donate" from wealth would be both unfair and lazy. Lighthou
 
 ## Run it
 
-Prereqs: Node 20+ and `OPENAI_API_KEY` (any OpenAI-compatible endpoint via `OPENAI_BASE_URL`). Nothing else to run.
+Prereqs: Node 20+ and an OpenAI key in `.env` (any OpenAI-compatible endpoint via `OPENAI_BASE_URL`). Nothing else to run.
 
 ```bash
 npm install
-export OPENAI_API_KEY=sk-...
+cp .env.example .env         # put OPENAI_API_KEY in .env (git-ignored, loaded automatically)
 npm run gen:data             # 500 synthetic applicants → data/
 npm run setup                # registers the 4 agents + nightly schedule (data/agents.json, data/schedules.json)
 npm run report -- app_0001   # one full pipeline run; pauses at the approval gate and prints the approve command
