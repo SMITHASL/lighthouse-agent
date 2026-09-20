@@ -1,0 +1,21 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci            # typescript + @types/node only; the runtime has no dependencies
+      - run: npm run typecheck
+      - run: npm test          # 71 offline tests on node:test; live scenarios stay skipped without LIVE=1
+      - name: Zero runtime dependencies
+        run: node -e "const p=require('./package.json'); if (Object.keys(p.dependencies||{}).length||Object.keys(p.optionalDependencies||{}).length) { console.error('runtime dependencies found', p.dependencies, p.optionalDependencies); process.exit(1) }"
+      - name: Report migration is a no-op
+        run: node evals/migrateReports.ts | tee /dev/stderr | grep -q 'migrated 0, unchanged 31, failed 0'

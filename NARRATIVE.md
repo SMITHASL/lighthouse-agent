@@ -1,6 +1,8 @@
 # Lighthouse — demo narrative
 
-*Spoken script, ~3 minutes, in the judges' order: Problem → Tech stack → Live demo + code. Bold = what's on screen. Numbers are from `evals/SCOREBOARD.md` (n=30, 20 Sep 2026, standalone runtime). The TrueForge screens referenced below map to `npm run sessions` / `npm run approve` on the standalone runtime.*
+*Spoken script, ~3 minutes, in the judges' order: Problem → Tech stack → Live demo + code. Bold = what's on screen.*
+
+> **As presented on 19 Sep 2026, when Lighthouse ran on TrueForge.** The repo has since become standalone (its own runtime, zero dependencies, a reviewer UI); the TrueForge screens below map to `npm run ui`, `npm run sessions` and `npm run approve`. Numbers are refreshed from `evals/SCOREBOARD.md` (n=30, 20 Sep 2026) — see the README for the current state and [DEMO.md](DEMO.md) for the current demo.
 
 ---
 
@@ -38,7 +40,7 @@ Here's a real run. Three tool calls — record, timeline, base rates *before* es
 
 **[scroll to critical_analysis]**
 
-Look at what it wrote, not just the number. Three competing hypotheses, including "this is application-stage enthusiasm, not durable commitment." A strongest case *against*. The cheapest experiment that would falsify each prediction: "invite to one peer-mentoring shift and see if they show up." Every claim cites the exact field it came from — **869 claims in our eval, zero pointing at a field that doesn't exist.**
+Look at what it wrote, not just the number. Three competing hypotheses, including "this is application-stage enthusiasm, not durable commitment." A strongest case *against*. The cheapest experiment that would falsify each prediction: "invite to one peer-mentoring shift and see if they show up." Every claim cites the exact field it came from — **926 claims in our eval, zero pointing at a field that doesn't exist — and an independent judge finds 96.5% of them supported or partially supported by the field's actual value.**
 
 **[Sessions → lighthouse-fairness-auditor]**
 
@@ -62,7 +64,7 @@ Three files, twenty seconds each.
 
 **[features/fairness.feature → textual_proxy_does_not_move_estimates]** — two applicants identical in every person signal; one statement adds "I grew up in Atherton, my father's firm pays my tuition, our family foundation already gives." The analyst excluded it and the donor estimate did not move. That's a live test, and it passes.
 
-**[evals/SCOREBOARD.md]** — beats the base-rate baseline on every outcome; recruiter ranking 0.95. And two gates **fail** — donor confidence intervals too narrow, volunteer parity 0.19 with ten people per group. We show that, because a harness is for seeing.
+**[evals/SCOREBOARD.md]** — beats the base-rate baseline on every outcome; recruiter ranking 0.97. And two gates **fail** — donor and recruiter confidence intervals too narrow, volunteer parity 0.17 with ten people per group. We show that, because a harness is for seeing.
 
 ## Close (2:50 – 3:00)
 
@@ -83,4 +85,4 @@ One domain-pack file turns this into a startup recruiter or a corporate talent a
 - **"Real data?"** Synthetic today, ground truth generated from latent traits only. The metrics prove the machinery; `outcomes_record_ground_truth` plus nightly `rescore()` is how real calibration curves are built.
 - **"What would you attack?"** The report schema is university-specific, so the domain-pack swap is instructions-deep, not schema-deep. Parity metrics on synthetic labels can't detect real bias — the behavioural tests can. The approval gate lives in the harness; the MCP tool needs caller auth in hosted mode. All in the README.
 - **"What broke?"** The first auditor over-vetoed — it called campus visits a "circumstance." Fixed the definition; withheld went 8 → 3. Wi-Fi drops killed four turns; the runner now retries once. Both in the git log.
-- **"Cost?"** $0.047 per report, $1.54 for the 30-record eval on our own runtime; under $4 total on hackathon day.
+- **"Cost?"** $0.056 per report, $1.84 for the 30-record eval on our own runtime; under $4 total on hackathon day.
