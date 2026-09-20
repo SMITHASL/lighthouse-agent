@@ -1,6 +1,6 @@
 # Lighthouse — Long-Term-Fit Admissions & Alumni-Engagement Agent
 
-Built on [TrueForge](https://trueforge.dev) for the Agent Harness Hackathon (Santa Clara, 19 Sep 2026).
+Built for the Agent Harness Hackathon (Santa Clara, 19 Sep 2026). **Standalone**: its own runtime layer (`src/harness/`) runs the agents, the approval gate and the schedules with no external server — `npm install`, an OpenAI key, done. The original [TrueForge](https://trueforge.dev) runtime remains an optional mode (`TRUEFORGE_BASE_URL`).
 
 Lighthouse reads a LEAD Certificate applicant's record and produces a **Long-Term Fit Report**: a critically reasoned, evidence-traced, calibrated estimate of whether they will **complete the course** and become a **volunteer, cheerleader, donor and recruiter** for the University over a 10-year horizon. Every recommendation goes to a human; the agent never acts alone.
 
@@ -20,30 +20,32 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 
 | Rubric | What Lighthouse does | Where to see it |
 |---|---|---|
-| **Observe it** | Every stage is a TrueForge session with tool calls, tokens and timing | TrueForge → Sessions |
-| **Schedule it** | `lighthouse-nightly-rescore` runs `lighthouse-rescorer` at 02:00 PT: re-scores every stored report against recorded outcomes and refreshes `data/calibration.json`. Trigger it manually from TrueForge → Schedules. | TrueForge → Schedules |
-| **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | Sessions → `lighthouse-action-proposer` |
-| **Test it** | 13 Gherkin scenarios (BDD) → 50 offline + 5 live tests (TDD). `pnpm eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
+| **Observe it** | Every stage is a persisted session (`data/sessions/*.json`) with every model message, tool call, token count and timing | `npm run sessions`, `npm run sessions -- <id>` |
+| **Schedule it** | `lighthouse-nightly-rescore` runs `lighthouse-rescorer` at 02:00 PT: re-scores every stored report against recorded outcomes and refreshes `data/calibration.json`. | `npm run scheduler` (cron loop) · `npm run schedule:run` (now) |
+| **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides; the gate is our own code, in-process, so the tool cannot be reached around it. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | `npm run report` pauses → `npm run approve -- <session> allow\|deny "reason"` |
+| **Test it** | 14 Gherkin scenarios (BDD) → 56 offline (incl. 5 runtime tests against a scripted fake model: loop, gate, deny, allow, schedules) + 6 live tests (TDD). `npm run eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
 
 ## Architecture
 
 ```
 applicant record ─▶ lighthouse-critical-analyst (gpt-5-5)  ──▶ LongTermFitReport (JSON schema)
-                       │  MCP: applicants_get, applicants_timeline,
-                       │       institution_reference_class_stats
+                       │  tools: applicants_get, applicants_timeline,
+                       │         institution_reference_class_stats
                        ▼
                     lighthouse-fairness-auditor (gpt-5-4-mini) ──▶ pass | VETO (report withheld)
                        ▼
                     lighthouse-action-proposer (gpt-5-4-mini)
-                       │  MCP: pipeline_propose_action  [@write → HUMAN APPROVAL]
+                       │  tool: pipeline_propose_action  [@write → HUMAN APPROVAL]
                        ▼
-                    TrueForge pauses → human clicks Allow / Deny
+                    harness pauses the turn → human runs `npm run approve` allow / deny
 ```
 
 - `src/schema/` — Zod contracts. `ApplicantInput` is `strict`: any protected attribute (race, gender, zip code, family income, name, …) is rejected at the boundary. `LongTermFitReport` refuses an estimate with no evidence.
-- `src/mcp/` — local Streamable-HTTP MCP server (port 8799) exposing applicant data, base rates, outcome recording and the approval-gated action tool.
+- `src/tools/` — the seven tools as plain functions (applicant data, base rates, outcome recording, calibration rescore, the approval-gated action) with a `readOnly` flag that `@write` gating keys on.
+- `src/harness/` — **the runtime layer**: agent registry, persisted sessions, the model ↔ tool loop over plain `fetch`, the approval pause/resume, cron schedules, and the operator CLI. ~300 lines, no dependencies.
+- `src/mcp/` — optional: the same tools over MCP Streamable-HTTP (port 8799) for TrueForge mode.
 - `src/agents/` — agent manifests (instructions encode the reasoning contract) and **domain packs**: swap `university-admissions` for `startup-recruiting` or `corporate-talent` and the outcomes/base rates/vocabulary change with zero core changes.
-- `src/pipeline/` — thin TrueForge client (SSE) and the runner: analyst → auditor → action, with one retry on transport failure or schema violation, and budget checks.
+- `src/pipeline/` — the runner: analyst → auditor → action, with one retry on transport failure or schema violation, and budget checks. Runtime-agnostic: `createHarness()` returns the local runtime or a TrueForge client with the same interface.
 - `src/metrics/` — pure eval math (AUROC, Brier, ECE, CI coverage, parity) and nightly `rescore()`.
 - `src/data/` — deterministic synthetic dataset (500 records) with ground truth and **separately stored** protected labels used only by the evaluator.
 
@@ -53,17 +55,31 @@ Predicting "who will donate" from wealth would be both unfair and lazy. Lighthou
 
 ## Run it
 
-Prereqs: TrueForge running on `http://localhost:8790` with an OpenAI provider configured (Settings → Models).
+Prereqs: Node 20+ and `OPENAI_API_KEY` (any OpenAI-compatible endpoint via `OPENAI_BASE_URL`). Nothing else to run.
 
 ```bash
 npm install
-npm run gen:data          # 500 synthetic applicants → data/
-npm run mcp               # MCP tools on :8799 (keep running)
-npm run setup             # registers MCP server + 4 agents + nightly schedule in TrueForge
-npm run report -- app_0001   # one full pipeline run; pauses at the approval gate
-npm test                  # 50 offline tests (schemas, metrics, BDD traceability)
-LIVE=1 npm test           # + 5 live BDD scenarios against TrueForge (~$0.30)
-npm run eval -- --n=30    # scoreboard → evals/SCOREBOARD.md (~$1.50; --full for 500)
+export OPENAI_API_KEY=sk-...
+npm run gen:data             # 500 synthetic applicants → data/
+npm run setup                # registers the 4 agents + nightly schedule (data/agents.json, data/schedules.json)
+npm run report -- app_0001   # one full pipeline run; pauses at the approval gate and prints the approve command
+npm run sessions             # every run is an inspectable session; `-- <id>` prints its events
+npm run approve -- <session> deny "not this cycle"   # or allow — nothing is written until you decide
+npm run schedule:run         # fire the nightly rescore now; `npm run scheduler` keeps it on cron
+npm test                     # 56 offline tests (schemas, metrics, BDD traceability, runtime)
+LIVE=1 npm test              # + 6 live BDD scenarios through the local runtime (~$0.30)
+npm run eval -- --n=30       # scoreboard → evals/SCOREBOARD.md (~$1.50; --full for 500)
+```
+
+### Optional: run on TrueForge instead
+
+The same pipeline runs unchanged against a [TrueForge](https://trueforge.dev) server — useful for its session UI and hosted multi-tenant mode.
+
+```bash
+npm install --include=optional     # @modelcontextprotocol/sdk + express, only needed here
+npm run mcp                        # exposes src/tools over MCP on :8799 (keep running)
+TRUEFORGE_BASE_URL=http://localhost:8790 npm run setup
+TRUEFORGE_BASE_URL=http://localhost:8790 npm run report -- app_0001
 ```
 
 ## Results (n=20 first run, before instruction fixes)
@@ -75,13 +91,11 @@ npm run eval -- --n=30    # scoreboard → evals/SCOREBOARD.md (~$1.50; --full f
 
 ## Scaling path
 
-`src/agents/domainPacks.ts` is the contract. A startup recruiter uses `startup-recruiting` (hire → retain 2y → refer → advocate); a corporate talent team uses `corporate-talent`. Same analyst, same auditor, same approval gate, same evals — only outcomes, base rates and vocabulary change. Hosted TrueForge (Postgres + Redis + OIDC) gives multi-tenant deployment without code changes.
+`src/agents/domainPacks.ts` is the contract. A startup recruiter uses `startup-recruiting` (hire → retain 2y → refer → advocate); a corporate talent team uses `corporate-talent`. Same analyst, same auditor, same approval gate, same evals — only outcomes, base rates and vocabulary change. Multi-tenant hosting: the runtime persists to plain JSON under `data/`; swap that for a database, or run the TrueForge mode (Postgres + Redis + OIDC).
 
 ## Reviewer UI
 
-A working prototype of the reviewer screen is in [`harness-ui/`](harness-ui/README.md): case queue, agent run with cited evidence, and a coordinator/student advising chat with an enforced information boundary. It runs standalone today (its own lightweight agents over markdown cases); wiring it to TrueForge sessions is the next step.
-
-An admissions office will not work in the raw TrueForge chat. The reviewer experience is `@truefoundry/trueforge-ui` themed for the institution: the same Long-Term Fit Report, fairness attestation and Allow / Deny checkpoint, rendered as a review queue against the same TrueForge server — no new backend, no re-implementation of approvals or session history. The agents, MCP tools and evals stay exactly as they are.
+A working prototype of the reviewer screen is in [`harness-ui/`](harness-ui/README.md): case queue, agent run with cited evidence, and a coordinator/student advising chat with an enforced information boundary. It runs standalone today (its own lightweight agents over markdown cases); wiring it to the runtime's sessions (`data/sessions/*.json`) and the `approve` gate is the next step — the same Long-Term Fit Report, fairness attestation and Allow / Deny checkpoint, rendered as a review queue.
 
 ## Known limits (from an adversarial self-review)
 
@@ -89,8 +103,8 @@ An admissions office will not work in the raw TrueForge chat. The reviewer exper
 - **Synthetic fairness labels are independent of the data by construction**, so parity metrics can only fail by noise and cannot detect real bias. The meaningful fairness tests are the behavioural ones: the auditor vetoes a zip-code proxy, and a statement that leaks wealth/geography/sponsorship (`textual_proxy_does_not_move_estimates`) does not move the donor estimate.
 - **"0 hallucinated source fields" is an existence check** (every cited field resolves on the record), not a claim-support check. A claim-support judge is the next eval to add.
 - **`ci_coverage` is a proxy**: for binary outcomes it tests whether the interval spans the observed side of 0.5. ECE at n=30 with 10 bins is mostly noise; treat the calibration numbers as machinery proof, not measurements.
-- **The approval gate is enforced by the harness, not the tool.** The local MCP server is unauthenticated; in hosted mode it must verify the caller (TrueForge header auth) or the gate can be bypassed by calling the tool directly.
+- **The approval gate is enforced by the runtime, not the tool.** In the local runtime tools are in-process functions, so there is no network path around the gate. In TrueForge mode the MCP server is unauthenticated and must verify the caller in hosted deployments, or the gate can be bypassed by calling the tool directly.
 - **Synthetic statements come from seven templates**, so predictive metrics largely reflect the generator. The reasoning quality in the reports is real; the AUROC numbers are not evidence about real applicants.
 
-- Local sandbox is macOS/Linux only, so TrueForge *skills* are replaced by instructions on Windows.
+- The local runtime is deliberately minimal: no streaming, no sub-agents, no sandbox — Lighthouse never needed them. Model provider is OpenAI-compatible chat completions only.
 - Synthetic ground truth: predictive metrics prove the *machinery*, not real-world accuracy. Calibration curves update nightly via `rescore()` as real outcomes are recorded through `outcomes_record_ground_truth`.

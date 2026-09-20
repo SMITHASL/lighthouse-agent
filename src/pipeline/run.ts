@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { AGENT_NAMES } from '../agents/manifests.js';
 import { FairnessAttestation, LongTermFitReport } from '../schema/report.js';
-import { TrueForgeClient, finalOutput, indexEvents, type TurnEvent } from './client.js';
+import { finalOutput, indexEvents, type TurnEvent } from './client.js';
+import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.js';
 
 export type Budget = { max_usd_per_report: number; spent_usd: number };
 
@@ -46,7 +47,7 @@ function parseJson<T>(schema: { safeParse: (v: unknown) => { success: boolean; d
 }
 
 export type RunOptions = {
-  client?: TrueForgeClient;
+  client?: Harness;
   budget?: Budget;
   /** When false the action stage is skipped (evals never propose real actions). */
   proposeAction?: boolean;
@@ -54,7 +55,7 @@ export type RunOptions = {
 };
 
 export async function runReport(applicantId: string, opts: RunOptions = {}): Promise<PipelineResult> {
-  const client = opts.client ?? new TrueForgeClient();
+  const client = opts.client ?? createHarness();
   const log = opts.log ?? (() => {});
   const budget = opts.budget ?? { max_usd_per_report: 0.15, spent_usd: 0 };
   const result: PipelineResult = {
@@ -123,7 +124,7 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
     }
     result.status = 'released';
 
-    // 3. Propose the action — TrueForge pauses at the approval gate; a human resumes it.
+    // 3. Propose the action — the harness pauses at the approval gate; a human resumes it.
     if (opts.proposeAction !== false && report.value.recommended_action.action !== 'no_action') {
       const actionSession = await client.createSession(AGENT_NAMES.action);
       result.sessions.action = actionSession;
@@ -153,15 +154,19 @@ function addUsage(r: PipelineResult, u: PipelineResult['usage']) {
 }
 
 /** Resume a paused action session with a human decision. */
-export async function decideApproval(sessionId: string, threadId: string, toolCallId: string, allow: boolean, reason?: string, client = new TrueForgeClient()) {
+export async function decideApproval(sessionId: string, threadId: string, toolCallId: string, allow: boolean, reason?: string, client: Harness = createHarness()) {
   const approval = allow ? { status: 'allow' } : { status: 'deny', reason: reason ?? 'denied by reviewer' };
   return client.runTurn(sessionId, [{ type: 'user.tool_approval', thread_id: threadId, tool_call_id: toolCallId, approval }]);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const id = process.argv[2] ?? 'app_0001';
+  console.error(`harness: ${HARNESS_MODE}`);
   const res = await runReport(id, { log: (l) => console.error(l) });
-  mkdirSync('data/reports', { recursive: true });
-  writeFileSync(`data/reports/${id}.json`, JSON.stringify(res, null, 2));
+  const dataDir = process.env.LIGHTHOUSE_DATA_DIR ?? 'data';
+  mkdirSync(`${dataDir}/reports`, { recursive: true });
+  writeFileSync(`${dataDir}/reports/${id}.json`, JSON.stringify(res, null, 2));
   console.log(JSON.stringify({ status: res.status, sessions: res.sessions, approval: res.approval, usage: res.usage, risk_flags: res.risk_flags }, null, 2));
+  if (res.approval?.paused && HARNESS_MODE === 'local')
+    console.error(`paused for approval → npm run approve -- ${res.sessions.action} allow|deny "reason"`);
 }

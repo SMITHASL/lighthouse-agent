@@ -5,19 +5,20 @@
   "type": "module",
   "scripts": {
     "gen:data": "tsx src/data/generate.ts",
-    "mcp": "tsx src/mcp/server.ts",
     "setup": "tsx src/agents/register.ts",
     "report": "tsx src/pipeline/run.ts",
+    "approve": "tsx src/harness/cli.ts approve",
+    "sessions": "tsx src/harness/cli.ts sessions",
+    "schedule:run": "tsx src/harness/cli.ts schedule:run",
+    "scheduler": "tsx src/harness/cli.ts scheduler",
     "eval": "tsx evals/run.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "mcp": "tsx src/mcp/server.ts",
     "demo": "node demo/serve.mjs",
     "demo:record": "node demo/record.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.20.0",
-    "@truefoundry/trueforge-sdk": "^0.2.0",
-    "express": "^5.1.0",
     "zod": "^3.25.0",
     "zod-to-json-schema": "^3.24.0"
   },
@@ -27,5 +28,9 @@
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vitest": "^3.2.0"
+  },
+  "optionalDependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "express": "^5.1.0"
   }
 }

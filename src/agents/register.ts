@@ -1,9 +1,9 @@
 import { fileURLToPath } from 'node:url';
-import { TrueForgeClient } from '../pipeline/client.js';
+import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.js';
 import { MCP_URL } from '../mcp/server.js';
 import { AGENT_NAMES, MCP_SERVER_NAME, SCHEDULE_NAME, actionManifest, analystManifest, fairnessManifest, rescorerManifest } from './manifests.js';
 
-export async function registerAll(client = new TrueForgeClient(), domainPack = 'university-admissions'): Promise<void> {
+export async function registerAll(client: Harness = createHarness(), domainPack = 'university-admissions'): Promise<void> {
   await client.upsertMcpServer({
     type: 'remote',
     name: MCP_SERVER_NAME,
@@ -23,6 +23,6 @@ export async function registerAll(client = new TrueForgeClient(), domainPack = '
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  await registerAll(new TrueForgeClient(), process.argv[2] ?? 'university-admissions');
-  console.log('registered MCP server and agents:', Object.values(AGENT_NAMES).join(', '));
+  await registerAll(createHarness(), process.argv[2] ?? 'university-admissions');
+  console.log(`registered agents (${HARNESS_MODE} harness):`, Object.values(AGENT_NAMES).join(', '));
 }

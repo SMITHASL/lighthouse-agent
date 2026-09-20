@@ -2,8 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { registerAll } from '../../src/agents/register.js';
 import { AGENT_NAMES } from '../../src/agents/manifests.js';
 import { generateDataset, makeApplicant, mulberry32 } from '../../src/data/generate.js';
-import { loadStore, startMcpServer } from '../../src/mcp/server.js';
+import { loadStore } from '../../src/tools/index.js';
 import { TrueForgeClient, finalOutput } from '../../src/pipeline/client.js';
+import { LocalHarness } from '../../src/harness/local.js';
+import { HARNESS_MODE, type Harness } from '../../src/harness/index.js';
 import { decideApproval, runReport } from '../../src/pipeline/run.js';
 import { FairnessAttestation } from '../../src/schema/report.js';
 
@@ -11,20 +13,22 @@ const LIVE = process.env.LIVE === '1';
 const NOISE = 0.15;
 
 async function serverUp(): Promise<boolean> {
+  if (HARNESS_MODE === 'local') return Boolean(process.env.OPENAI_API_KEY);
   try {
-    return (await fetch('http://localhost:8790/healthz')).ok;
+    return (await fetch(`${process.env.TRUEFORGE_BASE_URL}/healthz`)).ok;
   } catch {
     return false;
   }
 }
 
-describe.skipIf(!LIVE)('live scenarios (LIVE=1, needs TrueForge on :8790)', () => {
-  const client = new TrueForgeClient();
+describe.skipIf(!LIVE)(`live scenarios (LIVE=1; ${HARNESS_MODE} harness — needs OPENAI_API_KEY, or TRUEFORGE_BASE_URL for TrueForge mode)`, () => {
   const store = loadStore('/nonexistent');
+  // Local: the harness reads this store in-process. TrueForge: it reaches the same store over MCP.
+  const client: Harness = HARNESS_MODE === 'local' ? new LocalHarness(`${process.cwd()}/data/live-test`, store) : new TrueForgeClient(process.env.TRUEFORGE_BASE_URL);
   let stop: () => Promise<void>;
 
   beforeAll(async () => {
-    expect(await serverUp()).toBe(true);
+    expect(await serverUp(), 'no model credentials / harness reachable').toBe(true);
     const ds = generateDataset(10, 42);
     for (const a of ds.inputs) store.applicants.set(a.applicant_id, a);
     // Deterministic pairs for the fairness scenarios.
@@ -40,7 +44,7 @@ describe.skipIf(!LIVE)('live scenarios (LIVE=1, needs TrueForge on :8790)', () =
     store.applicants.set('app_inject', injected);
     const referrer = { ...ds.inputs[1]!, applicant_id: 'app_ref3', institution_interaction: { ...ds.inputs[1]!.institution_interaction, referrals_made: 3 }, consent: { application_data: true as const, interaction_tracking: true } };
     store.applicants.set('app_ref3', referrer);
-    stop = await startMcpServer(store);
+    if (HARNESS_MODE === 'trueforge') stop = await (await import('../../src/mcp/server.js')).startMcpServer(store);
     await registerAll(client);
   });
   afterAll(async () => {
