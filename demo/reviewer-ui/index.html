@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Lighthouse Reviewer UI — captioned demo</title>
+<style>
+  :root { --bg:#0f1115; --fg:#f3f4f6; --accent:#7c83ff; --muted:#9aa0aa; --panel-text:#d5d8de; --surface:#1b1e26; --line:#2a2d35; --pass:#4ade80; --warn:#fbbf24; --fail:#f87171; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0 0 150px 0; }
+  #stage iframe, #stage .panel { position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff; display:none; }
+  #stage .panel { background:var(--bg); padding:48px 64px; box-sizing:border-box; overflow:auto; }
+  #stage .active { display:block; }
+  #caption { position:absolute; left:0; right:0; bottom:0; height:150px; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:0 64px; box-sizing:border-box; }
+  #caption p { font-size:26px; line-height:1.35; max-width:1200px; margin:0; text-align:center; }
+  #caption b { color:var(--accent); }
+  #bar { position:absolute; left:0; right:0; bottom:0; height:6px; background:var(--line); }
+  #bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s linear; }
+  #hud { position:absolute; top:12px; right:16px; font-size:13px; color:var(--muted); background:var(--surface); padding:6px 10px; border-radius:6px; z-index:10; }
+  #hud button { background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:4px 10px; cursor:pointer; font-size:13px; }
+  .panel h1 { font-size:44px; margin:0 0 12px; }
+  .panel h2 { font-size:28px; color:var(--accent); margin:0 0 16px; font-weight:600; }
+  .panel p, .panel li { font-size:22px; line-height:1.45; color:var(--panel-text); }
+  .panel table { border-collapse:collapse; font-size:20px; margin-top:12px; }
+  .panel th, .panel td { padding:8px 16px; border-bottom:1px solid var(--line); text-align:left; }
+  .panel th { color:var(--muted); font-weight:500; }
+  .panel code { background:var(--surface); padding:2px 6px; border-radius:4px; font-size:19px; }
+  .big { font-size:64px; font-weight:700; color:var(--accent); margin:8px 0; }
+  .warn { color:var(--warn); } .pass { color:var(--pass); } .fail { color:var(--fail); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 48px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="caption"><p id="cap"></p></div>
+<div id="bar"><i id="fill"></i></div>
+<div id="hud"><button id="b-prev">◀</button> <button id="b-play">▶ play</button> <button id="b-next">▶</button> <button id="b-restart">↺</button> <span id="pos"></span></div>
+
+<script>
+// The live reviewer UI (npm run ui, port 3100) on top of the real pipeline and runtime. One iframe
+// stays mounted; steps drive it over postMessage (see the tour hook at the bottom of src/ui/index.html).
+const UI = 'http://localhost:3100';
+const SCORED = 'app_0001';      // has a stored report from the eval
+const FRESH  = 'app_000w';      // unscored: the run step produces a real report live (~45 s, ~$0.05)
+
+// Each step: { view, caption, seconds, act?, wait? }. view = 'panel:<id>' or 'ui'. act = message for the UI.
+const steps = [
+  { view:'panel:title', seconds:6, caption:'<b>Lighthouse Reviewer UI</b> — the screen an admissions office uses, on top of the real pipeline: analyst, fairness auditor, human approval gate.' },
+  { view:'panel:why', seconds:7, caption:'No separate demo data, no separate agents. Every number on this screen was produced by <b>src/pipeline</b> running on <b>src/harness</b>, and every run is a session on disk.' },
+  { view:'ui', seconds:5, act:{action:'select', id:SCORED}, caption:'<b>The queue.</b> Synthetic applicants, each badged with the status of its stored Long-Term Fit Report: released, withheld by the auditor, or waiting for approval.' },
+  { view:'ui', seconds:12, caption:'<b>A report.</b> Five calibrated estimates with their 90% intervals, the auditor\'s verdict, and the recommended action. Confidence and cost are shown — <b>$0.05</b> for this one.' },
+  { view:'ui', seconds:12, caption:'Below: the <b>critical analysis</b>. Competing hypotheses, the strongest case <b>against</b>, the cheapest falsifying experiment, the analogy and where it breaks — and every evidence claim cites the record field it came from.' },
+  { view:'ui', seconds:5, act:{action:'select', id:FRESH}, caption:'<b>An unscored applicant.</b> Let\'s run the pipeline live.' },
+  { view:'ui', seconds:14, act:{action:'run'}, wait:180000, caption:'<b>Run.</b> Watch the analyst call the record, the timeline and the <b>base rates before estimating</b>; then the auditor reads the report cold; then the action proposer hits the gate.' },
+  { view:'ui', seconds:12, caption:'<b>Paused for human approval.</b> The agent wants to schedule an interview. Nothing has been written. The reviewer decides — with a reason that becomes part of the record.' },
+  { view:'ui', seconds:8, act:{action:'decide', allow:false}, wait:20000, caption:'<b>Deny.</b> The tool never runs; the decision, the reason and the timestamp are stored on the report, and the queue badge updates.' },
+  { view:'ui', seconds:5, act:{action:'audience', value:'coordinator'}, caption:'<b>Coordinator chat</b>, grounded in the real report: sees the estimates, the intervals, the drivers and the audit.' },
+  { view:'ui', seconds:16, act:{action:'chat', text:'Are they going to donate — they sound well-off?'}, wait:60000, caption:'A circumstance question. The agent answers from <b>person signals</b>, gives the real donor estimate and its interval, and refuses to infer generosity from wealth.' },
+  { view:'ui', seconds:5, act:{action:'audience', value:'student'}, caption:'Now the <b>same applicant</b>, student audience.' },
+  { view:'ui', seconds:14, act:{action:'chat', text:'What score did your system give me? Be specific.'}, wait:60000, caption:'"What score did you give me?" — the student <b>never</b> sees an estimate, a verdict, or that a report exists. Same server, same data; the boundary is enforced in the prompt contract.' },
+  { view:'panel:how', seconds:10, caption:'<b>How it runs.</b> One process, zero dependencies: <code>npm run ui</code>. Sessions in <code>data/sessions/</code>, reports in <code>data/reports/</code>, the approval gate in-process — no network path around it.' },
+  { view:'panel:end', seconds:6, caption:'Lighthouse: reasons like a critical analyst, is audited like a hiring decision, never acts without a human — and now the reviewer can see all of it on one screen.' },
+];
+
+const panels = {
+  title: `<h1>Lighthouse — Reviewer &amp; Advising UI</h1><h2>The admissions office screen, on the real pipeline</h2><p>Queue · Report · Approval gate · Coordinator / Student chat</p><p style="color:var(--muted)">Standalone runtime · zero dependencies · 20 Sep 2026</p>`,
+  why: `<h2>One source of truth</h2><ul><li><b>src/pipeline</b> produces the Long-Term Fit Report: analyst → independent fairness auditor → action proposer.</li><li><b>src/harness</b> runs it: sessions, the model ↔ tool loop, the <code>@write</code> approval pause, schedules.</li><li><b>src/ui</b> renders exactly that — no demo agents, no demo data.</li><li>Every estimate is a recommendation. A human decides, with a reason.</li></ul>`,
+  how: `<h2>Under the hood</h2><ul><li><code>npm run ui</code> — node:http server, serves the page and 6 API routes over the pipeline.</li><li><code>POST /api/run/:id</code> streams the runtime's events: tool calls, approval pause, turn state.</li><li><code>POST /api/approve/:session</code> → <code>decideApproval()</code>; the decision lands on the stored report.</li><li>Chat: coordinator and student prompts share the record; only the coordinator prompt receives the report.</li><li>Zero npm dependencies; Node 24 runs the TypeScript directly.</li></ul>`,
+  end: `<h1>Lighthouse</h1><h2>Reasons like a critical analyst · audited like a hiring decision · never acts without a human</h2><p>github.com/SMITHASL/lighthouse-agent · <code>npm run ui</code></p>`,
+};
+
+const stage = document.getElementById('stage'), cap = document.getElementById('cap'), fill = document.getElementById('fill'), pos = document.getElementById('pos');
+const frame = document.createElement('iframe'); frame.src = UI; stage.appendChild(frame);
+const panelEls = {};
+for (const [id, html] of Object.entries(panels)) { const d = document.createElement('div'); d.className = 'panel'; d.innerHTML = html; stage.appendChild(d); panelEls[id] = d; }
+
+let index = -1, paused = true, timer = null, t0 = 0;
+function post(act, wait = 8000) { return new Promise((ok) => { const h = (e) => { if (e.data?.done === act.action) { window.removeEventListener('message', h); ok(); } }; window.addEventListener('message', h); frame.contentWindow.postMessage(act, '*'); setTimeout(ok, wait); }); }
+async function show(i) {
+  index = Math.max(0, Math.min(steps.length - 1, i));
+  const s = steps[index];
+  for (const el of stage.children) el.classList.remove('active');
+  (s.view === 'ui' ? frame : panelEls[s.view.slice(6)]).classList.add('active');
+  cap.innerHTML = s.caption; pos.textContent = `${index + 1}/${steps.length}`;
+  if (s.act) await post(s.act, s.wait);
+  clearInterval(timer); t0 = Date.now();
+  timer = setInterval(() => {
+    const p = paused ? 0 : (Date.now() - t0) / (s.seconds * 1000);
+    fill.style.width = `${Math.min(1, p) * 100}%`;
+    if (!paused && p >= 1) { clearInterval(timer); if (index < steps.length - 1) show(index + 1); else { paused = true; document.getElementById('b-play').textContent = '▶ play'; } }
+  }, 100);
+}
+function setPaused(v) { paused = v; document.getElementById('b-play').textContent = v ? '▶ play' : '⏸ pause'; if (!v) t0 = Date.now(); }
+document.getElementById('b-play').onclick = () => setPaused(!paused);
+document.getElementById('b-prev').onclick = () => show(index - 1);
+document.getElementById('b-next').onclick = () => show(index + 1);
+document.getElementById('b-restart').onclick = () => { show(0); };
+document.addEventListener('keydown', (e) => { if (e.key === ' ') { e.preventDefault(); setPaused(!paused); } if (e.key === 'ArrowRight') show(index + 1); if (e.key === 'ArrowLeft') show(index - 1); });
+window.__player = { show, setPaused, get index() { return index; }, get count() { return steps.length; }, get paused() { return paused; } };
+show(0);
+</script>
+</body>
+</html>

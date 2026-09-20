@@ -13,7 +13,7 @@ export type PipelineResult = {
   report: LongTermFitReport | null;
   attestation: FairnessAttestation | null;
   sessions: { analyst?: string; fairness?: string; action?: string };
-  approval: { paused: boolean; tool_call_id?: string; thread_id?: string } | null;
+  approval: { paused: boolean; tool_call_id?: string; thread_id?: string; decision?: 'allowed' | 'denied'; reason?: string | null; decided_at?: string } | null;
   risk_flags: { type: string; detail: string }[];
   usage: { input_tokens: number; output_tokens: number; estimated_usd: number };
 };
@@ -52,6 +52,8 @@ export type RunOptions = {
   /** When false the action stage is skipped (evals never propose real actions). */
   proposeAction?: boolean;
   log?: (line: string) => void;
+  /** Live progress: every runtime event, tagged with the pipeline stage it belongs to. */
+  onEvent?: (stage: 'analyst' | 'fairness' | 'action', event: TurnEvent) => void;
 };
 
 export async function runReport(applicantId: string, opts: RunOptions = {}): Promise<PipelineResult> {
@@ -83,7 +85,7 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
     let report: { ok: true; value: LongTermFitReport } | { ok: false; reason: string } = { ok: false, reason: 'not run' };
     let message = `Produce the Long-Term Fit Report for applicant_id ${applicantId}. Return only the JSON.`;
     for (let attempt = 1; attempt <= 2; attempt++) {
-      const analystEvents = await client.runTurn(analystSession, [{ type: 'user.message', content: message }]);
+      const analystEvents = await client.runTurn(analystSession, [{ type: 'user.message', content: message }], (e) => opts.onEvent?.('analyst', e));
       addUsage(result, usageFromEvents(analystEvents, 'openai/gpt-5-5'));
       const analystOut = finalOutput(analystEvents);
       if (analystOut.status !== 'done') {
@@ -106,9 +108,11 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
     // 2. Independent fairness audit (veto power)
     const fairnessSession = await client.createSession(AGENT_NAMES.fairness);
     result.sessions.fairness = fairnessSession;
-    const fairnessEvents = await client.runTurn(fairnessSession, [
-      { type: 'user.message', content: `Audit this report and return only the JSON attestation:\n${JSON.stringify(report.value)}` },
-    ]);
+    const fairnessEvents = await client.runTurn(
+      fairnessSession,
+      [{ type: 'user.message', content: `Audit this report and return only the JSON attestation:\n${JSON.stringify(report.value)}` }],
+      (e) => opts.onEvent?.('fairness', e),
+    );
     addUsage(result, usageFromEvents(fairnessEvents, 'openai/gpt-5-4-mini'));
     const attestation = parseJson(FairnessAttestation, finalOutput(fairnessEvents).content);
     if (!attestation.ok) {
@@ -129,9 +133,11 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
       const actionSession = await client.createSession(AGENT_NAMES.action);
       result.sessions.action = actionSession;
       const { action, rationale } = report.value.recommended_action;
-      const actionEvents = await client.runTurn(actionSession, [
-        { type: 'user.message', content: `applicant_id: ${applicantId}\naction: ${action}\nrationale: ${rationale}` },
-      ]);
+      const actionEvents = await client.runTurn(
+        actionSession,
+        [{ type: 'user.message', content: `applicant_id: ${applicantId}\naction: ${action}\nrationale: ${rationale}` }],
+        (e) => opts.onEvent?.('action', e),
+      );
       addUsage(result, usageFromEvents(actionEvents, 'openai/gpt-5-4-mini'));
       const pending = actionEvents.find((e) => e.type === 'tool.approval_required');
       const calls = (pending?.tool_calls as { id: string }[] | undefined) ?? [];

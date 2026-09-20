@@ -3,7 +3,7 @@ import { existsSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-// Records harness-ui/demo/index.html to demo/lighthouse-reviewer-ui-demo.mp4 using the installed Chrome:
+// Records demo/reviewer-ui/index.html to demo/lighthouse-reviewer-ui-demo.mp4 using the installed Chrome:
 // a throwaway profile, the recorder page captures its own tab (auto-selected by title),
 // MediaRecorder encodes VP9, the demo server writes the upload. Needs `npm run demo` running.
 const CHROME = process.env.CHROME ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';

@@ -16,7 +16,10 @@
     "typecheck": "tsc --noEmit",
     "mcp": "node src/mcp/server.ts",
     "demo": "node demo/serve.mjs",
-    "demo:record": "node demo/record.mjs"
+    "demo:record": "node demo/record.mjs",
+    "ui": "node src/ui/server.ts",
+    "demo:ui": "node demo/reviewer-ui/serve.mjs",
+    "demo:ui:record": "node demo/reviewer-ui/record.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

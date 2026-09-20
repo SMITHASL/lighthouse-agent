@@ -14,7 +14,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 - [Build prompt](PROMPT.md) — the BDD/TDD spec the agent was built from
 - [Eval scoreboard](evals/SCOREBOARD.md) — latest results
 - [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.0/lighthouse-demo.mp4) — 3:16, captions, no audio
-- [Reviewer & Advising UI](harness-ui/README.md) — how the admissions office uses it: case queue, agent run, coordinator/student chat. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4) (2:11) · [presenter card](harness-ui/PRESENTER.md)
+- [Reviewer & Advising UI](#reviewer--advising-ui) — `npm run ui`: queue, report, approval gate, coordinator/student chat on the real pipeline. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.2/lighthouse-reviewer-ui-demo.mp4) (2:30)
 
 ## How it maps to the judging rubric
 
@@ -22,7 +22,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 |---|---|---|
 | **Observe it** | Every stage is a persisted session (`data/sessions/*.json`) with every model message, tool call, token count and timing | `npm run sessions`, `npm run sessions -- <id>` |
 | **Schedule it** | `lighthouse-nightly-rescore` runs `lighthouse-rescorer` at 02:00 PT: re-scores every stored report against recorded outcomes and refreshes `data/calibration.json`. | `npm run scheduler` (cron loop) · `npm run schedule:run` (now) |
-| **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides; the gate is our own code, in-process, so the tool cannot be reached around it. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | `npm run report` pauses → `npm run approve -- <session> allow\|deny "reason"` |
+| **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides; the gate is our own code, in-process, so the tool cannot be reached around it. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | `npm run ui` → Allow / Deny on screen, or `npm run approve -- <session> allow\|deny "reason"` |
 | **Test it** | 14 Gherkin scenarios (BDD) → 56 offline on `node:test` (incl. 5 runtime tests against a scripted fake model: loop, gate, deny, allow, schedules) + 6 live tests (TDD). `npm run eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
 
 ## Architecture
@@ -43,6 +43,7 @@ applicant record ─▶ lighthouse-critical-analyst (gpt-5-5)  ──▶ LongTer
 - `src/lib/schema.ts` — a ~200-line schema library (strict objects, enums, refinements, JSON-Schema export) that replaced zod; the contracts read the same.
 - `src/schema/` — the contracts. `ApplicantInput` is `strict`: any protected attribute (race, gender, zip code, family income, name, …) is rejected at the boundary. `LongTermFitReport` refuses an estimate with no evidence.
 - `src/tools/` — the seven tools as plain functions (applicant data, base rates, outcome recording, calibration rescore, the approval-gated action) with a `readOnly` flag that `@write` gating keys on.
+- `src/ui/` — the reviewer & advising UI: one node:http server over the pipeline, the runtime's sessions and the approval gate; coordinator/student chat with an information boundary.
 - `src/harness/` — **the runtime layer**: agent registry, persisted sessions, the model ↔ tool loop over plain `fetch`, the approval pause/resume, cron schedules, and the operator CLI. ~300 lines, no dependencies.
 - `src/mcp/` — optional: the same tools over MCP Streamable-HTTP (port 8799) for TrueForge mode; JSON-RPC on `node:http`, no SDK.
 - `src/agents/` — agent manifests (instructions encode the reasoning contract) and **domain packs**: swap `university-admissions` for `startup-recruiting` or `corporate-talent` and the outcomes/base rates/vocabulary change with zero core changes.
@@ -104,9 +105,20 @@ From [`evals/SCOREBOARD.md`](evals/SCOREBOARD.md), produced by the local runtime
 
 `src/agents/domainPacks.ts` is the contract. A startup recruiter uses `startup-recruiting` (hire → retain 2y → refer → advocate); a corporate talent team uses `corporate-talent`. Same analyst, same auditor, same approval gate, same evals — only outcomes, base rates and vocabulary change. Multi-tenant hosting: the runtime persists to plain JSON under `data/`; swap that for a database, or run the TrueForge mode (Postgres + Redis + OIDC).
 
-## Reviewer UI
+## Reviewer & Advising UI
 
-A working prototype of the reviewer screen is in [`harness-ui/`](harness-ui/README.md): case queue, agent run with cited evidence, and a coordinator/student advising chat with an enforced information boundary. It runs standalone today (its own lightweight agents over markdown cases); wiring it to the runtime's sessions (`data/sessions/*.json`) and the `approve` gate is the next step — the same Long-Term Fit Report, fairness attestation and Allow / Deny checkpoint, rendered as a review queue.
+```bash
+npm run ui                # http://localhost:3100
+```
+
+The screen an admissions office uses, on top of the real pipeline and runtime — no separate agents, no separate data (`src/ui/`, zero dependencies):
+
+- **Queue** — every applicant, badged with the status of its stored report: released, withheld by the auditor, waiting for approval, or unscored.
+- **Report** — the five calibrated estimates with 90% intervals, the fairness attestation, the recommended action, the full critical analysis (hypotheses, strongest case against, falsifying experiment, analogy) and every evidence claim with the record field it cites. **Run** streams the runtime's events live: tool calls, the approval pause, turn state.
+- **Approval gate** — when the action proposer pauses, the reviewer sees **Allow / Deny** with a reason box; the decision, reason and timestamp land on the stored report and nothing is written until they decide.
+- **Advising chat**, grounded in the report, with a hard information boundary: the *coordinator* sees estimates, drivers and the audit and is pushed back on automated denial and stereotype framing; the *student* gets advice and never learns a report exists.
+
+Captioned walkthrough (2:30, no audio): [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.2/lighthouse-reviewer-ui-demo.mp4) — `npm run demo:ui` to play it locally, `npm run demo:ui:record` to re-record (drives the live UI over `postMessage`; one real pipeline run, ~$0.05).
 
 ## Known limits (from an adversarial self-review)
 

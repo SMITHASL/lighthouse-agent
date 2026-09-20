@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lighthouse — Reviewer &amp; Advising UI</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1a1d23;--muted:#6b7280;--line:#e5e7eb;--accent:#0055a2;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--gold:#e5a823}
+  *{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--accent);color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px}
+  header h1{font-size:17px;margin:0;font-weight:600}header h1 small{font-weight:400;opacity:.8}header .mode{margin-left:auto;font-size:12px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px}
+  main{display:grid;grid-template-columns:270px 1fr 380px;gap:16px;padding:16px 24px;min-height:calc(100vh - 48px)}
+  @media(max-width:1100px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px}
+  h3{font-size:13px;margin:16px 0 6px}
+  .queue{max-height:calc(100vh - 140px);overflow:auto}
+  .app{padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .app:hover{border-color:var(--accent)}.app.active{border-color:var(--accent);background:#eef4fb}
+  .app b{font-family:ui-monospace,monospace;font-size:12px}.app small{color:var(--muted);display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;text-transform:uppercase;white-space:nowrap}
+  .unscored{background:#eee;color:var(--muted)}.released{background:#dcfce7;color:var(--ok)}.withheld{background:#fee2e2;color:var(--bad)}.partial{background:#fef3c7;color:var(--warn)}.paused{background:#fef3c7;color:var(--warn)}
+  button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:8px 14px;font-weight:600;cursor:pointer}button:disabled{opacity:.5;cursor:default}
+  button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}button.deny{background:#fff;color:var(--bad);border:1px solid var(--bad)}button.allow{background:var(--ok)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .est{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+  .stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}.stat small{color:var(--muted);display:block;font-size:11px}.stat b{font-size:20px}.stat .ci{font-size:11px;color:var(--muted)}
+  .bar{height:6px;background:#eee;border-radius:3px;margin-top:6px;position:relative}.bar i{position:absolute;top:0;height:100%;background:#c7d7ea;border-radius:3px}.bar b{position:absolute;top:-2px;width:2px;height:10px;background:var(--accent)}
+  .gate{border:2px solid var(--gold);background:#fffbeb;border-radius:10px;padding:12px;margin:12px 0}
+  .gate.done{border-color:var(--line);background:#fafafa}
+  .ev{margin:3px 0 3px 8px;font-size:13px}.ev code{font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:4px;color:var(--muted)}.q{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase}
+  .flag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#f3f4f6;margin:2px 4px 2px 0}.flag.fairness_concern{background:#fee2e2;color:var(--bad)}.flag.attrition_risk{background:#fef3c7;color:var(--warn)}
+  .attest{border-left:3px solid var(--ok);padding:8px 12px;background:#fafafa;border-radius:0 8px 8px 0;margin:8px 0}.attest.veto{border-color:var(--bad)}
+  .progress{font-family:ui-monospace,monospace;font-size:12px;background:#0f1115;color:#d5d8de;border-radius:8px;padding:10px;max-height:180px;overflow:auto;white-space:pre-wrap}
+  .chat{display:flex;flex-direction:column}.log{flex:1;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fafafa;min-height:260px;max-height:50vh}
+  .msg{margin:6px 0;padding:8px 10px;border-radius:8px;max-width:95%;white-space:pre-wrap}.msg.user{background:#eef4fb;margin-left:auto}.msg.bot{background:#fff;border:1px solid var(--line)}
+  .chat form{display:flex;gap:6px;margin-top:8px}.chat input{flex:1;padding:8px;border:1px solid var(--line);border-radius:7px}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.chip{font-size:11px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 8px;cursor:pointer}.chip:hover{border-color:var(--accent)}
+  .seg{display:inline-flex;border:1px solid var(--accent);border-radius:7px;overflow:hidden}.seg button{border-radius:0;background:#fff;color:var(--accent)}.seg button.on{background:var(--accent);color:#fff}
+  details summary{cursor:pointer;color:var(--muted);font-size:12px}pre{font-size:11px;background:#f3f4f6;padding:8px;border-radius:6px;overflow:auto;max-height:260px}
+  .muted{color:var(--muted)}.empty{color:var(--muted);padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<header><h1>Lighthouse <small>· Reviewer &amp; Advising UI</small></h1><span class="mode" id="mode">…</span></header>
+<main>
+  <section class="card"><h2>Applicant queue</h2><div class="queue" id="queue"></div></section>
+
+  <section class="card" id="report"><div class="empty">Select an applicant.</div></section>
+
+  <section class="card chat">
+    <div class="row"><h2 style="margin:0">Advising chat</h2><span style="flex:1"></span>
+      <span class="seg"><button class="on" data-aud="coordinator">Coordinator</button><button data-aud="student">Student</button></span></div>
+    <div class="chips" id="chips"></div>
+    <div class="log" id="log"></div>
+    <form id="chatForm"><input id="chatInput" placeholder="Ask as the selected audience…" autocomplete="off"><button>Send</button></form>
+  </section>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let current = null, data = null, audience = 'coordinator', history = { coordinator: [], student: [] };
+const OUTCOMES = [['completion', (r) => r.completion_likelihood], ['volunteer', (r) => r.alumni_engagement_profile.volunteer], ['cheerleader', (r) => r.alumni_engagement_profile.cheerleader], ['donor', (r) => r.alumni_engagement_profile.donor], ['recruiter', (r) => r.alumni_engagement_profile.recruiter]];
+const CHIPS = {
+  coordinator: ['Summarize this applicant.', 'What is the strongest case against?', 'Should we deny them?', 'What is the cheapest experiment to run next?', 'Did the auditor find anything?', 'Are they going to donate — they sound well-off?'],
+  student: ['How can I strengthen my application?', 'What score did your system give me?', 'What does a reviewer look for?', 'Can you round my grades up?', 'How do I show I can finish the program?'],
+};
+
+async function init() {
+  const s = await (await fetch('/api/status')).json();
+  $('#mode').textContent = `${s.harness} runtime · ${s.model_key ? 'model key set' : 'NO OPENAI_API_KEY'} · ${s.applicants} applicants`;
+  await loadQueue();
+  renderChips(); renderLog();
+}
+async function loadQueue() {
+  const list = await (await fetch('/api/applicants?limit=40')).json();
+  $('#queue').innerHTML = list.map((a) => `<div class="app ${a.applicant_id === current ? 'active' : ''}" data-id="${a.applicant_id}"><div><b>${a.applicant_id}</b><small>${esc(a.goals)}</small></div><span class="pill ${a.paused ? 'paused' : a.status}">${a.paused ? 'approve?' : a.status}</span></div>`).join('');
+  document.querySelectorAll('.app').forEach((el) => el.onclick = () => select(el.dataset.id));
+}
+async function select(id) {
+  current = id; history = { coordinator: [], student: [] }; renderLog();
+  document.querySelectorAll('.app').forEach((el) => el.classList.toggle('active', el.dataset.id === id));
+  data = await (await fetch(`/api/applicants/${id}`)).json();
+  renderReport();
+}
+function bar(e) {
+  if (e.estimate === null) return '<div class="bar"></div>';
+  const lo = (e.ci_low ?? e.estimate) * 100, hi = (e.ci_high ?? e.estimate) * 100;
+  return `<div class="bar"><i style="left:${lo}%;width:${Math.max(1, hi - lo)}%"></i><b style="left:${e.estimate * 100}%"></b></div>`;
+}
+function evidence(list, label) {
+  if (!list?.length) return '';
+  return `<h3>${label}</h3>` + list.map((e) => `<div class="ev"><span class="q">${e.quality}</span> ${esc(e.claim)} <code>${esc(e.source_field)}</code></div>`).join('');
+}
+function renderReport(progress) {
+  const a = data.applicant, r = data.result, rep = r?.report;
+  let html = `<div class="row"><h2 style="margin:0">${a.applicant_id} · ${esc(a.program)}</h2><span style="flex:1"></span><button id="run" ${progress ? 'disabled' : ''}>${rep ? 'Re-run' : 'Run'} pipeline</button></div>`;
+  html += `<div class="muted" style="font-size:13px"><b>Goals:</b> ${esc(a.stated_goals)}<br><b>Statement:</b> ${esc(a.statement)}</div>`;
+  if (progress) html += `<div class="progress" id="progress">${esc(progress)}</div>`;
+  if (!rep) { html += r ? `<p class="muted">Status: <b>${r.status}</b>. ${r.risk_flags.map((f) => esc(f.detail)).join(' ')}</p>` : '<p class="muted">No report yet.</p>'; $('#report').innerHTML = html; wire(); return; }
+
+  html += `<div class="row" style="margin-top:12px"><span class="pill ${r.status}">${r.status}</span>${r.attestation ? `<span class="pill ${r.attestation.verdict === 'veto' ? 'withheld' : 'released'}">audit: ${r.attestation.verdict}</span>` : ''}<span class="muted" style="font-size:12px">confidence ${rep.confidence_calibration.overall_confidence} · $${r.usage.estimated_usd.toFixed(3)} · ${r.usage.input_tokens + r.usage.output_tokens} tokens</span></div>`;
+  html += `<div class="est">${OUTCOMES.map(([k, get]) => { const e = get(rep); return `<div class="stat"><small>${k}</small><b>${e.estimate === null ? '—' : e.estimate.toFixed(2)}</b><span class="ci">${e.estimate === null ? 'not enough signal' : `${e.ci_low}–${e.ci_high}`}</span>${bar(e)}</div>`; }).join('')}</div>`;
+
+  // Approval gate
+  const ap = r.approval, ra = rep.recommended_action;
+  if (ap?.paused) html += `<div class="gate"><b>⏸ Paused for human approval</b> — the agent wants to <b>${ra.action.replace(/_/g, ' ')}</b>.<div class="muted" style="margin:4px 0 8px">${esc(ra.rationale)}</div><div class="row"><button class="allow" data-decide="allow">Allow</button><button class="deny" data-decide="deny">Deny</button><input id="reason" placeholder="reason (optional)" style="flex:1;padding:8px;border:1px solid var(--line);border-radius:7px"></div><small class="muted">Nothing is written until you decide. Session ${r.sessions.action}</small></div>`;
+  else if (ap?.decision) html += `<div class="gate done"><b>${ap.decision === 'allowed' ? '✅ Allowed' : '⛔ Denied'}</b> — ${ra.action.replace(/_/g, ' ')}${ap.reason ? ` · "${esc(ap.reason)}"` : ''} <span class="muted">${ap.decided_at?.slice(0, 16).replace('T', ' ')}</span></div>`;
+  else html += `<div class="gate done"><b>Recommended action:</b> ${ra.action.replace(/_/g, ' ')} <span class="muted">— ${esc(ra.rationale)}</span></div>`;
+
+  if (r.attestation) html += `<div class="attest ${r.attestation.verdict}"><b>Fairness auditor: ${r.attestation.verdict.toUpperCase()}</b> <span class="muted">(independent model, no shared context)</span><div style="font-size:13px">${esc(r.attestation.reasoning)}</div>${r.attestation.circumstance_used_as_person_signal.length ? `<div class="muted" style="font-size:12px">circumstance used as evidence: ${r.attestation.circumstance_used_as_person_signal.map(esc).join('; ')}</div>` : ''}</div>`;
+
+  const ca = rep.critical_analysis;
+  html += `<h3>Critical analysis</h3><div style="font-size:13px"><b>Question:</b> ${esc(ca.question)}<br><b>Hypotheses:</b><ol style="margin:4px 0">${ca.hypotheses.map((h) => `<li>${esc(h)}</li>`).join('')}</ol><b>Strongest case for:</b> ${esc(ca.strongest_case_for)}<br><b>Strongest case against:</b> ${esc(ca.strongest_case_against)}<br><b>Cheapest falsifying experiment:</b> ${esc(ca.proposed_experiment)}<br><b>Analogy &amp; where it breaks:</b> ${esc(ca.analogy_and_where_it_breaks)}<br><b>Base rate used:</b> ${esc(ca.base_rate_used)} · <b>inference:</b> ${ca.inference_type}${ca.circumstance_signals_excluded.length ? `<br><b>Circumstance signals excluded:</b> ${ca.circumstance_signals_excluded.map(esc).join('; ')}` : ''}${ca.inconsistencies.length ? `<br><b>Inconsistencies:</b> ${ca.inconsistencies.map(esc).join('; ')}` : ''}</div>`;
+  html += `<div style="margin-top:8px">${r.risk_flags.map((f) => `<span class="flag ${f.type}" title="${esc(f.detail)}">${f.type.replace(/_/g, ' ')}</span>`).join('')}</div>`;
+  html += evidence(rep.completion_likelihood.evidence, 'Evidence — completion') + evidence(rep.completion_likelihood.counter_evidence, 'Counter-evidence — completion');
+  const d = rep.alumni_engagement_profile.donor;
+  html += `<h3>Donor = future capacity × generosity</h3><div class="ev">capacity ${d.future_capacity.estimate ?? '—'}: ${d.future_capacity.ambition_signals.map((s) => `${esc(s.signal)} <code>${esc(s.source_field)}</code>`).join(' · ') || '<span class="muted">no ambition signals</span>'}</div><div class="ev">generosity ${d.generosity.estimate ?? '—'}: ${d.generosity.reciprocity_signals.map((s) => `${esc(s.signal)} <code>${esc(s.source_field)}</code>`).join(' · ') || '<span class="muted">no reciprocity signals</span>'}</div>`;
+  html += `<details style="margin-top:12px"><summary>Sessions &amp; raw result</summary><div class="muted" style="font-size:12px">${Object.entries(r.sessions).map(([k, v]) => `${k}: <a href="/api/sessions/${v}" target="_blank">${v}</a>`).join(' · ')}</div><pre>${esc(JSON.stringify(r, null, 2))}</pre></details>`;
+  $('#report').innerHTML = html; wire();
+}
+function wire() {
+  const run = $('#run'); if (run) run.onclick = runPipeline;
+  document.querySelectorAll('[data-decide]').forEach((b) => b.onclick = () => decide(b.dataset.decide === 'allow'));
+}
+async function runPipeline() {
+  let lines = '';
+  renderReport('starting…');
+  const res = await fetch(`/api/run/${current}`, { method: 'POST' });
+  const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+  while (true) {
+    const { value, done } = await reader.read(); if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i; while ((i = buf.indexOf('\n')) >= 0) {
+      const ev = JSON.parse(buf.slice(0, i)); buf = buf.slice(i + 1);
+      if (ev.stage === 'result') { data.result = ev.result; await loadQueue(); renderReport(); return; }
+      const e = ev.event;
+      const line = ev.stage === 'log' ? ev.line : e?.type === 'model.message' ? `[${ev.stage}] model → ${e.tool_calls?.length ? 'calls ' + e.tool_calls.join(', ') : 'final answer'} (${e.usage?.input_tokens}/${e.usage?.output_tokens} tok)` : e?.type === 'tool.response' ? `[${ev.stage}] tool ${e.name} responded` : e?.type === 'tool.approval_required' ? `[${ev.stage}] ⏸ APPROVAL REQUIRED: ${e.tool_calls?.[0]?.name}` : e?.type === 'turn.done' ? `[${ev.stage}] turn ${e.state?.status}` : e?.type === 'model.error' ? `[${ev.stage}] ERROR ${e.error}` : `[${ev.stage}] ${e?.type ?? ev.stage}`;
+      lines += line + '\n';
+      const p = $('#progress'); if (p) { p.textContent = lines; p.scrollTop = 1e9; } else renderReport(lines);
+    }
+  }
+}
+async function decide(allow) {
+  const reason = $('#reason')?.value || undefined;
+  const r = await (await fetch(`/api/approve/${data.result.sessions.action}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ allow, reason }) })).json();
+  if (r.error) return alert(r.error);
+  await select(current); await loadQueue();
+}
+function renderChips() { $('#chips').innerHTML = CHIPS[audience].map((c) => `<span class="chip">${c}</span>`).join(''); document.querySelectorAll('.chip').forEach((el) => el.onclick = () => send(el.textContent)); }
+function renderLog() { $('#log').innerHTML = history[audience].map((m) => `<div class="msg ${m.role === 'user' ? 'user' : 'bot'}">${esc(m.content)}</div>`).join(''); $('#log').scrollTop = 1e9; }
+async function send(text) {
+  if (!text.trim() || !current) return;
+  history[audience].push({ role: 'user', content: text }); renderLog();
+  const bot = { role: 'assistant', content: '…' }; history[audience].push(bot); renderLog();
+  const res = await fetch(`/api/chat/${current}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ audience, messages: history[audience].slice(0, -1) }) });
+  bot.content = await res.text(); renderLog();
+}
+$('#chatForm').onsubmit = (e) => { e.preventDefault(); send($('#chatInput').value); $('#chatInput').value = ''; };
+document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { audience = b.dataset.aud; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); renderChips(); renderLog(); });
+// Demo-tour hook (harness-ui/demo drives this page over postMessage).
+window.addEventListener('message', async (e) => {
+  const m = e.data || {};
+  if (m.action === 'select') await select(m.id);
+  else if (m.action === 'run') await runPipeline();
+  else if (m.action === 'decide') await decide(m.allow);
+  else if (m.action === 'audience') document.querySelector(`.seg button[data-aud="${m.value}"]`).click();
+  else if (m.action === 'chat') await send(m.text);
+  else return;
+  e.source?.postMessage({ done: m.action }, '*');
+});
+init();
+</script>
+</body>
+</html>

@@ -5,9 +5,9 @@ evals/results
 demo/lighthouse-demo.webm
 demo/lighthouse-demo.mp4
 
-harness-ui/demo/lighthouse-reviewer-ui-demo.mp4
-harness-ui/demo/lighthouse-reviewer-ui-demo.webm
-harness-ui/node_modules
+demo/reviewer-ui/lighthouse-reviewer-ui-demo.mp4
+demo/reviewer-ui/lighthouse-reviewer-ui-demo.webm
+
 
 .env
 .env.*
