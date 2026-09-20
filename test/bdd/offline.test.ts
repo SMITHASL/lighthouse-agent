@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { loadDomainPack } from '../../src/agents/domainPacks.js';
-import { analystInstructions } from '../../src/agents/manifests.js';
-import { runReport } from '../../src/pipeline/run.js';
-import { sampleReport } from '../fixtures.js';
-import { LongTermFitReport } from '../../src/schema/report.js';
+import { describe, expect, it } from '../harness.ts';
+import { loadDomainPack } from '../../src/agents/domainPacks.ts';
+import { analystInstructions } from '../../src/agents/manifests.ts';
+import { runReport } from '../../src/pipeline/run.ts';
+import { sampleReport } from '../fixtures.ts';
+import { LongTermFitReport } from '../../src/schema/report.ts';
 
 describe('control.feature', () => {
   it('budget_exhausted_degrades_gracefully', async () => {

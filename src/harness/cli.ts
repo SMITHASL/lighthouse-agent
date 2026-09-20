@@ -7,8 +7,8 @@
  *   npm run scheduler           keep running; fire schedules on their cron
  */
 import { fileURLToPath } from 'node:url';
-import { localHarness } from './index.js';
-import { finalState } from './local.js';
+import { localHarness } from './index.ts';
+import { finalState } from './local.ts';
 
 function cronMatches(expr: string, timezone: string, now = new Date()): boolean {
   // Five-field cron, numbers / * / lists / step (*/n). Enough for "0 2 * * *"-style schedules.

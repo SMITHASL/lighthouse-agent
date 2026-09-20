@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { LongTermFitReport } from '../../src/schema/report.js';
-import { sampleReport } from '../fixtures.js';
+import { describe, expect, it } from '../harness.ts';
+import { LongTermFitReport } from '../../src/schema/report.ts';
+import { sampleReport } from '../fixtures.ts';
 
 describe('LongTermFitReport', () => {
   it('accepts a complete report', () => {

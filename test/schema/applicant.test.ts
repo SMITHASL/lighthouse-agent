@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { ApplicantInput, PROTECTED_ATTRIBUTES } from '../../src/schema/applicant.js';
-import { generateDataset } from '../../src/data/generate.js';
+import { describe, expect, it } from '../harness.ts';
+import { ApplicantInput, PROTECTED_ATTRIBUTES } from '../../src/schema/applicant.ts';
+import { generateDataset } from '../../src/data/generate.ts';
 
 const valid = generateDataset(1).inputs[0]!;
 

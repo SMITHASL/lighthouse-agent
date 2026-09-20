@@ -1,8 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { loadDomainPack } from '../src/agents/domainPacks.js';
-import { auroc, brier, ciCoverage, demographicParityDifference, ece, equalOpportunityDifference, mean, stddev } from '../src/metrics/index.js';
-import { runReport, type PipelineResult } from '../src/pipeline/run.js';
-import { GroundTruth, ProtectedLabels, type LongTermFitReport } from '../src/schema/index.js';
+import { loadDomainPack } from '../src/agents/domainPacks.ts';
+import { auroc, brier, ciCoverage, demographicParityDifference, ece, equalOpportunityDifference, mean, stddev } from '../src/metrics/index.ts';
+import { runReport, type PipelineResult } from '../src/pipeline/run.ts';
+import { GroundTruth, ProtectedLabels, type LongTermFitReport } from '../src/schema/index.ts';
 
 // Caps from PROMPT.md §9a. The projected cost is printed before any model call.
 const CAP_USD_PER_RUN = 10;

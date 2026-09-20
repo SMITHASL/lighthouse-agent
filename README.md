@@ -1,6 +1,6 @@
 # Lighthouse — Long-Term-Fit Admissions & Alumni-Engagement Agent
 
-Built for the Agent Harness Hackathon (Santa Clara, 19 Sep 2026). **Standalone**: its own runtime layer (`src/harness/`) runs the agents, the approval gate and the schedules with no external server — `npm install`, an OpenAI key, done. The original [TrueForge](https://trueforge.dev) runtime remains an optional mode (`TRUEFORGE_BASE_URL`).
+Built for the Agent Harness Hackathon (Santa Clara, 19 Sep 2026). **Standalone, zero dependencies**: its own runtime layer (`src/harness/`) runs the agents, the approval gate and the schedules with no external server and no npm packages — Node 24 and an OpenAI key, done. `package.json` has no `dependencies`; the only dev packages are `typescript` + `@types/node` for `npm run typecheck`. The original [TrueForge](https://trueforge.dev) runtime remains an optional mode (`TRUEFORGE_BASE_URL`).
 
 Lighthouse reads a LEAD Certificate applicant's record and produces a **Long-Term Fit Report**: a critically reasoned, evidence-traced, calibrated estimate of whether they will **complete the course** and become a **volunteer, cheerleader, donor and recruiter** for the University over a 10-year horizon. Every recommendation goes to a human; the agent never acts alone.
 
@@ -23,7 +23,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 | **Observe it** | Every stage is a persisted session (`data/sessions/*.json`) with every model message, tool call, token count and timing | `npm run sessions`, `npm run sessions -- <id>` |
 | **Schedule it** | `lighthouse-nightly-rescore` runs `lighthouse-rescorer` at 02:00 PT: re-scores every stored report against recorded outcomes and refreshes `data/calibration.json`. | `npm run scheduler` (cron loop) · `npm run schedule:run` (now) |
 | **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides; the gate is our own code, in-process, so the tool cannot be reached around it. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | `npm run report` pauses → `npm run approve -- <session> allow\|deny "reason"` |
-| **Test it** | 14 Gherkin scenarios (BDD) → 56 offline (incl. 5 runtime tests against a scripted fake model: loop, gate, deny, allow, schedules) + 6 live tests (TDD). `npm run eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
+| **Test it** | 14 Gherkin scenarios (BDD) → 56 offline on `node:test` (incl. 5 runtime tests against a scripted fake model: loop, gate, deny, allow, schedules) + 6 live tests (TDD). `npm run eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
 
 ## Architecture
 
@@ -40,10 +40,11 @@ applicant record ─▶ lighthouse-critical-analyst (gpt-5-5)  ──▶ LongTer
                     harness pauses the turn → human runs `npm run approve` allow / deny
 ```
 
-- `src/schema/` — Zod contracts. `ApplicantInput` is `strict`: any protected attribute (race, gender, zip code, family income, name, …) is rejected at the boundary. `LongTermFitReport` refuses an estimate with no evidence.
+- `src/lib/schema.ts` — a ~200-line schema library (strict objects, enums, refinements, JSON-Schema export) that replaced zod; the contracts read the same.
+- `src/schema/` — the contracts. `ApplicantInput` is `strict`: any protected attribute (race, gender, zip code, family income, name, …) is rejected at the boundary. `LongTermFitReport` refuses an estimate with no evidence.
 - `src/tools/` — the seven tools as plain functions (applicant data, base rates, outcome recording, calibration rescore, the approval-gated action) with a `readOnly` flag that `@write` gating keys on.
 - `src/harness/` — **the runtime layer**: agent registry, persisted sessions, the model ↔ tool loop over plain `fetch`, the approval pause/resume, cron schedules, and the operator CLI. ~300 lines, no dependencies.
-- `src/mcp/` — optional: the same tools over MCP Streamable-HTTP (port 8799) for TrueForge mode.
+- `src/mcp/` — optional: the same tools over MCP Streamable-HTTP (port 8799) for TrueForge mode; JSON-RPC on `node:http`, no SDK.
 - `src/agents/` — agent manifests (instructions encode the reasoning contract) and **domain packs**: swap `university-admissions` for `startup-recruiting` or `corporate-talent` and the outcomes/base rates/vocabulary change with zero core changes.
 - `src/pipeline/` — the runner: analyst → auditor → action, with one retry on transport failure or schema violation, and budget checks. Runtime-agnostic: `createHarness()` returns the local runtime or a TrueForge client with the same interface.
 - `src/metrics/` — pure eval math (AUROC, Brier, ECE, CI coverage, parity) and nightly `rescore()`.
@@ -55,10 +56,10 @@ Predicting "who will donate" from wealth would be both unfair and lazy. Lighthou
 
 ## Run it
 
-Prereqs: Node 20+ and an OpenAI key in `.env` (any OpenAI-compatible endpoint via `OPENAI_BASE_URL`). Nothing else to run.
+Prereqs: **Node 24+** (runs TypeScript natively; no build step) and an OpenAI key in `.env` (any OpenAI-compatible endpoint via `OPENAI_BASE_URL`). Nothing else to run.
 
 ```bash
-npm install
+npm install                  # only typescript + @types/node, for typecheck; skip it if you never typecheck
 cp .env.example .env         # put OPENAI_API_KEY in .env (git-ignored, loaded automatically)
 npm run gen:data             # 500 synthetic applicants → data/
 npm run setup                # registers the 4 agents + nightly schedule (data/agents.json, data/schedules.json)
@@ -66,7 +67,7 @@ npm run report -- app_0001   # one full pipeline run; pauses at the approval gat
 npm run sessions             # every run is an inspectable session; `-- <id>` prints its events
 npm run approve -- <session> deny "not this cycle"   # or allow — nothing is written until you decide
 npm run schedule:run         # fire the nightly rescore now; `npm run scheduler` keeps it on cron
-npm test                     # 56 offline tests (schemas, metrics, BDD traceability, runtime)
+npm test                     # 56 offline tests on node:test (schemas, metrics, BDD traceability, runtime)
 LIVE=1 npm test              # + 6 live BDD scenarios through the local runtime (~$0.30)
 npm run eval -- --n=30       # scoreboard → evals/SCOREBOARD.md (~$1.50; --full for 500)
 ```
@@ -76,7 +77,6 @@ npm run eval -- --n=30       # scoreboard → evals/SCOREBOARD.md (~$1.50; --ful
 The same pipeline runs unchanged against a [TrueForge](https://trueforge.dev) server — useful for its session UI and hosted multi-tenant mode.
 
 ```bash
-npm install --include=optional     # @modelcontextprotocol/sdk + express, only needed here
 npm run mcp                        # exposes src/tools over MCP on :8799 (keep running)
 TRUEFORGE_BASE_URL=http://localhost:8790 npm run setup
 TRUEFORGE_BASE_URL=http://localhost:8790 npm run report -- app_0001

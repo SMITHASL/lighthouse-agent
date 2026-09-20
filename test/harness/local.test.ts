@@ -2,12 +2,12 @@ import { createServer, type Server } from 'node:http';
 import { mkdtempSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { LocalHarness } from '../../src/harness/local.js';
-import { actionManifest, analystManifest, rescorerManifest, AGENT_NAMES } from '../../src/agents/manifests.js';
-import { generateDataset } from '../../src/data/generate.js';
-import { loadStore } from '../../src/tools/index.js';
-import { finalOutput } from '../../src/pipeline/client.js';
+import { afterAll, beforeAll, describe, expect, it } from '../harness.ts';
+import { LocalHarness } from '../../src/harness/local.ts';
+import { actionManifest, analystManifest, rescorerManifest, AGENT_NAMES } from '../../src/agents/manifests.ts';
+import { generateDataset } from '../../src/data/generate.ts';
+import { loadStore } from '../../src/tools/index.ts';
+import { finalOutput } from '../../src/pipeline/client.ts';
 
 /**
  * Drives the local runtime against a scripted fake OpenAI endpoint, so the loop, the tool

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { generateDataset } from '../../src/data/generate.js';
-import { ApplicantInput } from '../../src/schema/applicant.js';
+import { describe, expect, it } from '../harness.ts';
+import { generateDataset } from '../../src/data/generate.ts';
+import { ApplicantInput } from '../../src/schema/applicant.ts';
 
 describe('synthetic dataset', () => {
   it('is deterministic for a seed and schema-valid', () => {

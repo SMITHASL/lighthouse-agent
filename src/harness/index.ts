@@ -2,9 +2,9 @@
  * Runtime selection. Default is the standalone LocalHarness; set TRUEFORGE_BASE_URL to run the
  * same pipeline against a TrueForge server instead. Both expose the same methods.
  */
-import './env.js'; // loads .env before HARNESS_MODE is evaluated
-import { TrueForgeClient } from '../pipeline/client.js';
-import { LocalHarness } from './local.js';
+import './env.ts'; // loads .env before HARNESS_MODE is evaluated
+import { TrueForgeClient } from '../pipeline/client.ts';
+import { LocalHarness } from './local.ts';
 
 export type Harness = Pick<TrueForgeClient, 'upsertMcpServer' | 'listAgents' | 'upsertAgent' | 'upsertSchedule' | 'runScheduleNow' | 'createSession' | 'runTurn'>;
 

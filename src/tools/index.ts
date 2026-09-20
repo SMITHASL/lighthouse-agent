@@ -5,11 +5,11 @@
  */
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { z } from 'zod';
-import { ApplicantInput, GroundTruth } from '../schema/applicant.js';
-import { LongTermFitReport } from '../schema/report.js';
-import { rescore } from '../metrics/rescore.js';
-import { loadDomainPack } from '../agents/domainPacks.js';
+import { z, type Shape } from '../lib/schema.ts';
+import { ApplicantInput, GroundTruth } from '../schema/applicant.ts';
+import { LongTermFitReport } from '../schema/report.ts';
+import { rescore } from '../metrics/rescore.ts';
+import { loadDomainPack } from '../agents/domainPacks.ts';
 
 export type Store = {
   applicants: Map<string, ApplicantInput>;
@@ -40,8 +40,8 @@ export function loadStore(dataDir = 'data'): Store {
 export type ToolDef = {
   name: string;
   description: string;
-  /** Zod raw shape (object keys), the same form MCP's registerTool takes. */
-  inputSchema: z.ZodRawShape;
+  /** Object shape (key → schema); z.object(inputSchema) is the validator, .toJsonSchema() the wire form. */
+  inputSchema: Shape;
   readOnly: boolean;
   handler: (args: Record<string, unknown>, ctx: { store: Store; dataDir: string }) => Promise<unknown>;
 };

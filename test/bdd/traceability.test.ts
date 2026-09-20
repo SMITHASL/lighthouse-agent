@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '../harness.ts';
 
 /** Every Gherkin scenario must be referenced by name in at least one test file. */
 describe('BDD traceability', () => {

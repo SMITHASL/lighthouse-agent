@@ -28,7 +28,7 @@ Plus JSON-schema response format for structured reports, and MCP tool discovery.
 
 **OpenAI GPT-5.5** runs the critical analyst for reasoning depth. **GPT-5.4-mini** runs the fairness auditor — a *different* model on purpose, with no shared context, so the auditor can't inherit the analyst's blind spots. Five cents per report.
 
-**Zod, Vitest, Gherkin.** The input schema is the fairness boundary: twenty protected attributes rejected before any model runs. Fourteen behaviour scenarios written before the code.
+**Strict schemas, node:test, Gherkin.** The input schema is the fairness boundary: twenty protected attributes rejected before any model runs. Fourteen behaviour scenarios written before the code.
 
 ## 3. Live demo (1:10 – 2:20)
 

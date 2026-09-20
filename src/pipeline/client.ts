@@ -10,7 +10,8 @@ export type TurnEvent = {
 };
 
 export class TrueForgeClient {
-  constructor(private readonly baseUrl = TRUEFORGE_URL) {}
+  private readonly baseUrl: string;
+  constructor(baseUrl = TRUEFORGE_URL) { this.baseUrl = baseUrl; }
 
   private async json<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`, {

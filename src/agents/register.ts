@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
-import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.js';
-import { MCP_URL } from '../mcp/server.js';
-import { AGENT_NAMES, MCP_SERVER_NAME, SCHEDULE_NAME, actionManifest, analystManifest, fairnessManifest, rescorerManifest } from './manifests.js';
+import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.ts';
+import { MCP_URL } from '../mcp/server.ts';
+import { AGENT_NAMES, MCP_SERVER_NAME, SCHEDULE_NAME, actionManifest, analystManifest, fairnessManifest, rescorerManifest } from './manifests.ts';
 
 export async function registerAll(client: Harness = createHarness(), domainPack = 'university-admissions'): Promise<void> {
   await client.upsertMcpServer({

@@ -1,9 +1,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { AGENT_NAMES } from '../agents/manifests.js';
-import { FairnessAttestation, LongTermFitReport } from '../schema/report.js';
-import { finalOutput, indexEvents, type TurnEvent } from './client.js';
-import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.js';
+import { AGENT_NAMES } from '../agents/manifests.ts';
+import { FairnessAttestation, LongTermFitReport } from '../schema/report.ts';
+import { finalOutput, indexEvents, type TurnEvent } from './client.ts';
+import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.ts';
 
 export type Budget = { max_usd_per_report: number; spent_usd: number };
 

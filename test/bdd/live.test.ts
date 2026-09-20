@@ -1,13 +1,13 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { registerAll } from '../../src/agents/register.js';
-import { AGENT_NAMES } from '../../src/agents/manifests.js';
-import { generateDataset, makeApplicant, mulberry32 } from '../../src/data/generate.js';
-import { loadStore } from '../../src/tools/index.js';
-import { TrueForgeClient, finalOutput } from '../../src/pipeline/client.js';
-import { LocalHarness } from '../../src/harness/local.js';
-import { HARNESS_MODE, type Harness } from '../../src/harness/index.js';
-import { decideApproval, runReport } from '../../src/pipeline/run.js';
-import { FairnessAttestation } from '../../src/schema/report.js';
+import { afterAll, beforeAll, describe, expect, it } from '../harness.ts';
+import { registerAll } from '../../src/agents/register.ts';
+import { AGENT_NAMES } from '../../src/agents/manifests.ts';
+import { generateDataset, makeApplicant, mulberry32 } from '../../src/data/generate.ts';
+import { loadStore } from '../../src/tools/index.ts';
+import { TrueForgeClient, finalOutput } from '../../src/pipeline/client.ts';
+import { LocalHarness } from '../../src/harness/local.ts';
+import { HARNESS_MODE, type Harness } from '../../src/harness/index.ts';
+import { decideApproval, runReport } from '../../src/pipeline/run.ts';
+import { FairnessAttestation } from '../../src/schema/report.ts';
 
 const LIVE = process.env.LIVE === '1';
 const NOISE = 0.15;
@@ -44,7 +44,7 @@ describe.skipIf(!LIVE)(`live scenarios (LIVE=1; ${HARNESS_MODE} harness — need
     store.applicants.set('app_inject', injected);
     const referrer = { ...ds.inputs[1]!, applicant_id: 'app_ref3', institution_interaction: { ...ds.inputs[1]!.institution_interaction, referrals_made: 3 }, consent: { application_data: true as const, interaction_tracking: true } };
     store.applicants.set('app_ref3', referrer);
-    if (HARNESS_MODE === 'trueforge') stop = await (await import('../../src/mcp/server.js')).startMcpServer(store);
+    if (HARNESS_MODE === 'trueforge') stop = await (await import('../../src/mcp/server.ts')).startMcpServer(store);
     await registerAll(client);
   });
   afterAll(async () => {

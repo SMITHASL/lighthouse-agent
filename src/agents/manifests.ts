@@ -1,7 +1,6 @@
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { FairnessAttestation, LongTermFitReport } from '../schema/report.js';
-import { PROTECTED_ATTRIBUTES } from '../schema/applicant.js';
-import { loadDomainPack } from './domainPacks.js';
+import { FairnessAttestation, LongTermFitReport } from '../schema/report.ts';
+import { PROTECTED_ATTRIBUTES } from '../schema/applicant.ts';
+import { loadDomainPack } from './domainPacks.ts';
 
 export const MODELS = {
   full: 'openai/gpt-5-5',
@@ -69,7 +68,7 @@ export function analystManifest(domainPackName = 'university-admissions') {
     model: { name: MODELS.full, params: { reasoning_effort: 'medium' } },
     instructions: analystInstructions(domainPackName),
     mcp_servers: [{ name: MCP_SERVER_NAME, enable_tools: ['applicants_get', 'applicants_timeline', 'institution_reference_class_stats'], require_approval_for_tools: [], preload: true }],
-    response_format: { type: 'json_schema', json_schema: { name: 'long_term_fit_report', schema: zodToJsonSchema(LongTermFitReport, { $refStrategy: 'none' }), strict: false } },
+    response_format: { type: 'json_schema', json_schema: { name: 'long_term_fit_report', schema: LongTermFitReport.toJsonSchema(), strict: false } },
     config: { sandbox: { enabled: false }, generative_ui: { enabled: false }, ask_user_questions: { enabled: false }, dynamic_sub_agents: { enabled: false }, iteration_limit: 20 },
   };
 }
@@ -77,7 +76,7 @@ export function analystManifest(domainPackName = 'university-admissions') {
 export const fairnessManifest = {
   model: { name: MODELS.mini, params: { reasoning_effort: 'low' } },
   instructions: FAIRNESS_INSTRUCTIONS,
-  response_format: { type: 'json_schema', json_schema: { name: 'fairness_attestation', schema: zodToJsonSchema(FairnessAttestation, { $refStrategy: 'none' }), strict: false } },
+  response_format: { type: 'json_schema', json_schema: { name: 'fairness_attestation', schema: FairnessAttestation.toJsonSchema(), strict: false } },
   config: { sandbox: { enabled: false }, generative_ui: { enabled: false }, ask_user_questions: { enabled: false }, dynamic_sub_agents: { enabled: false }, iteration_limit: 5 },
 };
 

@@ -1,4 +1,4 @@
-import type { LongTermFitReport } from '../src/schema/report.js';
+import type { LongTermFitReport } from '../src/schema/report.ts';
 
 const ev = (claim: string, source_field: string) => ({ claim, source_field, quality: 'direct' as const });
 const est = (p: number, field: string) => ({ estimate: p, ci_low: Math.max(0, p - 0.15), ci_high: Math.min(1, p + 0.15), evidence: [ev('x', field)], counter_evidence: [], missing_signals: [] });

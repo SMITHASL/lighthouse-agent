@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, type Infer } from '../lib/schema.ts';
 
 /**
  * Attributes that may never reach a prediction. The input schema is `strict`, so any of
@@ -76,7 +76,7 @@ export const ApplicantInput = z
   })
   .strict();
 
-export type ApplicantInput = z.infer<typeof ApplicantInput>;
+export type ApplicantInput = Infer<typeof ApplicantInput>;
 
 /**
  * Held only by the evaluation harness for fairness audits. Structurally separate from
@@ -90,7 +90,7 @@ export const ProtectedLabels = z
   })
   .strict();
 
-export type ProtectedLabels = z.infer<typeof ProtectedLabels>;
+export type ProtectedLabels = Infer<typeof ProtectedLabels>;
 
 export const GroundTruth = z
   .object({
@@ -103,4 +103,4 @@ export const GroundTruth = z
   })
   .strict();
 
-export type GroundTruth = z.infer<typeof GroundTruth>;
+export type GroundTruth = Infer<typeof GroundTruth>;

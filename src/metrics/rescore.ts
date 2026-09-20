@@ -1,5 +1,5 @@
-import { auroc, brier, ciCoverage, ece } from './index.js';
-import type { GroundTruth, LongTermFitReport } from '../schema/index.js';
+import { auroc, brier, ciCoverage, ece } from './index.ts';
+import type { GroundTruth, LongTermFitReport } from '../schema/index.ts';
 
 export type Calibration = {
   computed_at: string;

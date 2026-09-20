@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { auroc, brier, ciCoverage, demographicParityDifference, ece, equalOpportunityDifference } from '../../src/metrics/index.js';
+import { describe, expect, it } from '../harness.ts';
+import { auroc, brier, ciCoverage, demographicParityDifference, ece, equalOpportunityDifference } from '../../src/metrics/index.ts';
 
 describe('metrics', () => {
   it('brier is 0 for perfect and 1 for inverted predictions', () => {

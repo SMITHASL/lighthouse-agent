@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, type Infer } from '../lib/schema.ts';
 
 const EvidenceQuality = z.enum(['direct', 'indirect', 'anecdotal', 'absent']);
 
@@ -123,7 +123,7 @@ export const LongTermFitReport = z
   })
   .strict();
 
-export type LongTermFitReport = z.infer<typeof LongTermFitReport>;
+export type LongTermFitReport = Infer<typeof LongTermFitReport>;
 
 export const FairnessAttestation = z
   .object({
@@ -135,4 +135,4 @@ export const FairnessAttestation = z
   })
   .strict();
 
-export type FairnessAttestation = z.infer<typeof FairnessAttestation>;
+export type FairnessAttestation = Infer<typeof FairnessAttestation>;

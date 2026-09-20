@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { ApplicantInput, type GroundTruth, type ProtectedLabels } from '../schema/applicant.js';
+import { ApplicantInput, type GroundTruth, type ProtectedLabels } from '../schema/applicant.ts';
 
 /** Deterministic PRNG so eval runs are reproducible from a seed. */
 export function mulberry32(seed: number): () => number {

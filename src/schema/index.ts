@@ -1,2 +1,2 @@
-export * from './applicant.js';
-export * from './report.js';
+export * from './applicant.ts';
+export * from './report.ts';

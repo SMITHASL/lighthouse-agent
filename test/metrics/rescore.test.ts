@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { rescore } from '../../src/metrics/rescore.js';
-import { sampleReport } from '../fixtures.js';
+import { describe, expect, it } from '../harness.ts';
+import { rescore } from '../../src/metrics/rescore.ts';
+import { sampleReport } from '../fixtures.ts';
 
 describe('control.feature', () => {
   it('nightly_rescoring_updates_calibration', () => {

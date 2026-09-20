@@ -16,11 +16,10 @@
  */
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { z } from 'zod';
-import { TOOLS, callTool, loadStore, toolByName, type Store } from '../tools/index.js';
-import type { TurnEvent } from '../pipeline/client.js';
-import { createResponse, type InputItem, type ResponsesTool } from './provider.js';
+import { z } from '../lib/schema.ts';
+import { TOOLS, callTool, loadStore, toolByName, type Store } from '../tools/index.ts';
+import type { TurnEvent } from '../pipeline/client.ts';
+import { createResponse, type InputItem, type ResponsesTool } from './provider.ts';
 
 export type AgentManifest = {
   model: { name: string; params?: { reasoning_effort?: string } };
@@ -48,7 +47,9 @@ type ScheduleFile = { id: string; name: string; agent_name: string; manifest: { 
 export class LocalHarness {
   private agents = new Map<string, { id: string; name: string; description: string; manifest: AgentManifest }>();
   private store: Store;
-  constructor(readonly dataDir = process.env.LIGHTHOUSE_DATA_DIR ?? 'data', store?: Store) {
+  readonly dataDir: string;
+  constructor(dataDir = process.env.LIGHTHOUSE_DATA_DIR ?? 'data', store?: Store) {
+    this.dataDir = dataDir;
     this.store = store ?? loadStore(this.dataDir);
     mkdirSync(`${this.dataDir}/sessions`, { recursive: true });
     this.loadAgents();
@@ -143,7 +144,7 @@ export class LocalHarness {
       type: 'function',
       name: t.name,
       description: t.description,
-      parameters: zodToJsonSchema(z.object(t.inputSchema), { $refStrategy: 'none' }),
+      parameters: z.object(t.inputSchema).toJsonSchema(),
     }));
 
     s.status = 'running';
