@@ -1,5 +1,7 @@
 # Lighthouse — Long-Term-Fit Admissions & Alumni-Engagement Agent
 
+[![ci](https://github.com/SMITHASL/lighthouse-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/SMITHASL/lighthouse-agent/actions/workflows/ci.yml)
+
 Built for the Agent Harness Hackathon (Santa Clara, 19 Sep 2026). **Standalone, zero dependencies**: its own runtime layer (`src/harness/`) runs the agents, the approval gate and the schedules with no external server and no npm packages — Node 24 and an OpenAI key, done. `package.json` has no `dependencies`; the only dev packages are `typescript` + `@types/node` for `npm run typecheck`. The original [TrueForge](https://trueforge.dev) runtime remains an optional mode (`TRUEFORGE_BASE_URL`).
 
 Lighthouse reads a LEAD Certificate applicant's record and produces a **Long-Term Fit Report**: a critically reasoned, evidence-traced, calibrated estimate of whether they will **complete the course** and become a **volunteer, cheerleader, donor and recruiter** for the University over a 10-year horizon. Every recommendation goes to a human; the agent never acts alone.
