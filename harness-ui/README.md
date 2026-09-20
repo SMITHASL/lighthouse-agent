@@ -2,7 +2,7 @@
 
 The screen an admissions office actually sits in front of: a case queue, the agent run with cited evidence, and an advising chat with two audiences (coordinator / student) separated by a hard information boundary.
 
-**Demo video (3:20, captions, no audio):** [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4)
+**Demo video (1:36, captions, no audio, 2x speed):** [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4)
 
 ## What it is, honestly
 
