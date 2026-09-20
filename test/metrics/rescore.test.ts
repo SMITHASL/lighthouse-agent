@@ -6,7 +6,7 @@ describe('control.feature', () => {
   it('nightly_rescoring_updates_calibration', () => {
     const r1 = sampleReport();
     const r2 = { ...sampleReport(), applicant_id: 'app_0002' };
-    r2.completion_likelihood = { ...r2.completion_likelihood, estimate: 0.2, ci_low: 0.05, ci_high: 0.35 };
+    r2.outcomes.completion = { ...r2.outcomes.completion!, estimate: 0.2, ci_low: 0.05, ci_high: 0.35 };
     const truth = [
       { applicant_id: 'app_0001', completed: true, volunteered: true, cheerled: false, donated: false, referrals_5y: 1 },
       { applicant_id: 'app_0002', completed: false, volunteered: false, cheerled: false, donated: false, referrals_5y: 0 },

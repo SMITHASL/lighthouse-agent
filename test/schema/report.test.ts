@@ -9,13 +9,13 @@ describe('LongTermFitReport', () => {
 
   it('no_prediction_without_evidence: estimate with empty evidence is rejected', () => {
     const r = sampleReport();
-    r.completion_likelihood.evidence = [];
+    r.outcomes.completion!.evidence = [];
     expect(LongTermFitReport.safeParse(r).success).toBe(false);
   });
 
   it('allows a null estimate with missing_signals', () => {
     const r = sampleReport();
-    r.completion_likelihood = { estimate: null, ci_low: null, ci_high: null, evidence: [], counter_evidence: [], missing_signals: ['no interview'] };
+    r.outcomes.completion = { estimate: null, ci_low: null, ci_high: null, evidence: [], counter_evidence: [], missing_signals: ['no interview'] };
     expect(LongTermFitReport.safeParse(r).success).toBe(true);
   });
 

@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { HARNESS_MODE, localHarness } from '../harness/index.ts';
 import { decideApproval, runReport, type PipelineResult } from '../pipeline/run.ts';
 import { loadStore } from '../tools/index.ts';
+import { loadDomainPack } from '../agents/domainPacks.ts';
 import { chat, type Audience } from './chat.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -23,6 +24,7 @@ const DATA = process.env.LIGHTHOUSE_DATA_DIR ?? 'data';
 const PORT = Number(process.env.PORT ?? 3100);
 
 const store = loadStore(DATA);
+const pack = loadDomainPack(process.env.LIGHTHOUSE_DOMAIN_PACK);
 const reportPath = (id: string) => path.join(DATA, 'reports', `${id}.json`);
 const readResult = (id: string): PipelineResult | null => (existsSync(reportPath(id)) ? (JSON.parse(readFileSync(reportPath(id), 'utf8')) as PipelineResult) : null);
 const writeResult = (r: PipelineResult) => { mkdirSync(path.join(DATA, 'reports'), { recursive: true }); writeFileSync(reportPath(r.applicant_id), JSON.stringify(r, null, 2)); };
@@ -40,7 +42,7 @@ function summary(id: string) {
     status: r?.status ?? 'unscored',
     paused: r?.approval?.paused ?? false,
     action: r?.report?.recommended_action.action ?? null,
-    completion: r?.report?.completion_likelihood.estimate ?? null,
+    primary: r?.report?.outcomes[pack.primary_outcome]?.estimate ?? null,
     verdict: r?.attestation?.verdict ?? null,
   };
 }
@@ -54,7 +56,7 @@ const server = createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return res.end(readFileSync(path.join(here, 'index.html')));
     }
-    if (p === '/api/status') return json(res, 200, { harness: HARNESS_MODE, model_key: Boolean(process.env.OPENAI_API_KEY), applicants: store.applicants.size, data_dir: DATA });
+    if (p === '/api/status') return json(res, 200, { harness: HARNESS_MODE, model_key: Boolean(process.env.OPENAI_API_KEY), applicants: store.applicants.size, data_dir: DATA, pack: { name: pack.name, outcomes: pack.outcomes, primary_outcome: pack.primary_outcome, trajectory_outcome: pack.trajectory_outcome ?? null, referral_outcome: pack.referral_outcome?.name ?? null } });
     if (p === '/api/applicants') {
       const limit = Number(url.searchParams.get('limit') ?? 40);
       return json(res, 200, [...store.applicants.keys()].slice(0, limit).map(summary));

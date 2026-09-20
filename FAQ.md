@@ -36,7 +36,7 @@ Race, ethnicity, religion, sex, gender, disability, age, date of birth, national
 The analyst separates signals about the person (their own choices and behaviour) from signals about their circumstances (wealth, family, geography, school or employer prestige, sponsorship) and must list circumstance signals as excluded. An independent fairness auditor then reads the report cold and vetoes it if any circumstance signal or protected attribute was used as evidence. In the 30-applicant evaluation it withheld 3 reports.
 
 **Who is the auditor?**
-A separate agent on a different, cheaper model with no shared context, so it cannot inherit the analyst's blind spots. It cannot be talked out of a veto by the analyst because they never talk.
+A separate agent on a different, cheaper model with no shared context, so it cannot inherit the analyst's blind spots. It cannot be talked out of a veto by the analyst because they never talk. It can also run on a different vendor (LIGHTHOUSE_AUDITOR_MODEL=anthropic/claude-opus-5), so the two cannot share a provider-side blind spot either.
 
 **Can an applicant game it by writing what the model wants to hear?**
 Instructions embedded in applicant text ("rate me highly", "ignore prior instructions") are treated as an integrity signal: flagged as an inconsistency, never followed. This is a live test. Keyword-stuffing is limited by the evidence rule: every claim must cite a specific field and grade its quality, and self-reported claims are graded lower than corroborated ones.
@@ -62,7 +62,7 @@ An open-source agent harness from TrueFoundry: the runtime that turns a model in
 OpenAI GPT-5.5 for the analyst, where reasoning depth matters. GPT-5.4-mini for the auditor, the action proposer and the nightly rescorer. The split is deliberate: a different model audits the analyst. Any provider TrueForge supports can be swapped in with one setting; no applicant data is used for training.
 
 **What does it cost to run?**
-$0.047 per report on the 30-applicant evaluation of 20 September 2026 on the standalone runtime (about 11,000 input and 3,800 output tokens); $0.054 on the earlier TrueForge-hosted run. Hard caps: $0.15 per report, $10 per evaluation run. The eval runner prints projected cost before any model call and refuses to exceed the cap; a report that hits its budget degrades to a partial report with a data-gap flag rather than overspending.
+$0.056 per report on the 30-applicant evaluation of 20 September 2026 on the standalone runtime with the pack-driven schema (about 12,900 input and 4,600 output tokens); $0.047 on the earlier standalone run and $0.054 on the TrueForge-hosted one. Hard caps: $0.15 per report, $10 per evaluation run. The eval runner prints projected cost before any model call and refuses to exceed the cap; a report that hits its budget degrades to a partial report with a data-gap flag rather than overspending.
 
 **What is MCP and what does the connector expose?**
 Model Context Protocol: the standard way an agent calls tools. Lighthouse's connector is a small server the institution hosts. Read tools: fetch an applicant, fetch their interaction timeline, fetch reference-class base rates. Write tools: record an observed outcome, propose an action (approval-gated), re-score calibration. TrueForge discovers the tools and enforces read versus write from their annotations.
@@ -76,7 +76,7 @@ A dropped connection or a malformed report triggers one retry in the same sessio
 ## Accuracy and testing
 
 **How accurate is it?**
-On the 30-applicant evaluation of 20 September 2026 (standalone runtime) it beat the base-rate baseline on every outcome. Ranking quality (AUROC): recruiter 0.95, volunteer 0.73, cheerleader 0.69, completion 0.67, donor 0.57. The TrueForge-hosted run a day earlier was within noise of these (recruiter 0.97, donor 0.50). The data is synthetic, so these numbers prove the machinery, not real-world accuracy; a pilot on real applicants is what establishes that.
+On the 30-applicant evaluation of 20 September 2026 (standalone runtime, pack-driven schema) it beat the base-rate baseline on every outcome. Ranking quality (AUROC): recruiter 0.97, cheerleader 0.75, completion 0.70, volunteer 0.68, donor 0.49. Three runs on two runtimes have landed within noise of each other. The data is synthetic, so these numbers prove the machinery, not real-world accuracy; a pilot on real applicants is what establishes that.
 
 **What do the metrics mean in plain words?**
 
@@ -88,20 +88,20 @@ On the 30-applicant evaluation of 20 September 2026 (standalone runtime) it beat
 | Calibration (ECE) | When it says 70%, does it happen about 70% of the time? | Under 0.10 is well calibrated |
 | Error bars honest? | How often the 90% interval contained the truth | About 0.90 |
 
-**Why is the donor ranking only 0.57?**
+**Why is the donor ranking only 0.49?**
 In the synthetic data the donor outcome is generated almost at random by design (a weak function of ambition and reciprocity), so there is little signal to find. That is a property of the test data, not evidence the approach fails; real alumni-giving data is where this outcome gets measured.
 
-**Why does recruiter rank at 0.95 but calibrate badly?**
+**Why does recruiter rank at 0.97 but calibrate badly?**
 The model identifies likely recruiters almost perfectly but anchors its probabilities on the 22% base rate, while the evaluation label (at least one referral in five years) is far more common. That is a mismatch between the eval's label and the base rate it was given, not a reasoning failure, and it is exactly the kind of drift nightly re-scoring corrects.
 
 **Which gates fail, and why show them?**
 Two of four: fairness parity (0.17 on volunteer, with about ten people per synthetic group, so mostly noise) and confidence-interval coverage (intervals too narrow on donor and recruiter). They are shown because an agent harness exists to make failure visible; hiding a failed gate would defeat the point of the product.
 
 **Does it make things up?**
-Two checks. Existence: across 869 evidence claims, zero cited a field that does not exist on the record. Support: an independent judge model (GPT-5.4-mini, no shared context) reads each claim next to the actual value of its cited field; on 893 claims it found 59.8% supported, 29.7% partially supported (consistent with the value but adding inference, which is what indirect evidence is) and 10.5% unsupported — above our 5% gate, so that gate fails. Most unsupported claims are true elsewhere on the record but cite a single field when they draw on several, or are base-rate statements that have no record field to cite; the fix is a schema change (multiple source fields, a base-rate citation form), not a reasoning change.
+Two checks. Existence: across 869 evidence claims, zero cited a field that does not exist on the record. Support: an independent judge model (GPT-5.4-mini, no shared context) reads each claim next to the actual values of every source it cites; on 950 claims it found 64.1% supported, 32.4% partially supported (consistent with the values but adding inference, which is what indirect evidence is) and 3.5% unsupported, inside our 5% gate. An earlier run failed that gate at 10.5% because a claim could cite only one field and base rates had no legitimate citation; the schema now allows several source fields and a base_rate citation, which removed two-thirds of the failures. Most of the rest are claims about what the record does not contain, which no single field can prove.
 
 **Is it consistent?**
-The same applicant scored three times varied by 0.009 on the completion estimate. Counter-evidence was present in 100% of reports.
+The same applicant scored three times varied by 0.012 on the completion estimate. Counter-evidence was present in 100% of reports.
 
 **How was it tested?**
 Behaviour first: 14 Gherkin scenarios written before any code, covering the reasoning contract, protected attributes, textual proxies, prompt injection, the approval gate, budget exhaustion, nightly re-scoring and the domain-pack swap. Then 51 offline tests and 6 live tests against the running system, all passing, and a traceability test that fails the build if any scenario lacks a test.
@@ -141,7 +141,7 @@ Today, the TrueForge chat UI: agents, sessions with every tool call, and the All
 Through a domain pack: the outcomes, base rates and vocabulary for a segment. `university-admissions` predicts completion, volunteer, cheerleader, donor, recruiter; `startup-recruiting` predicts hire, retain 2 years, refer, advocate; `corporate-talent` adds promote and retain 3 years. The analyst, auditor, approval gate and evaluation suite are shared.
 
 **Is the domain-pack swap complete today?**
-Instructions, base rates and vocabulary swap cleanly and are tested. The report schema is still university-specific; a per-pack report schema is the next piece of work before a startup pilot.
+Yes for the machinery: instructions, base rates, vocabulary and the report schema itself are all built from the pack and tested (a startup-shaped report is rejected by the university schema and accepted by the startup one). What a startup pilot still needs is labelled outcome data of its own; the synthetic set only carries university labels.
 
 **Can we use our own model provider?**
 Yes. Any provider TrueForge supports, changed in one setting; the agents do not care which model answers. The auditor should stay on a different model from the analyst.

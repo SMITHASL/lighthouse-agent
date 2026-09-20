@@ -3,6 +3,7 @@ import { loadDomainPack } from '../src/agents/domainPacks.ts';
 import { auroc, brier, ciCoverage, demographicParityDifference, ece, equalOpportunityDifference, mean, stddev } from '../src/metrics/index.ts';
 import { runReport, type PipelineResult } from '../src/pipeline/run.ts';
 import { GroundTruth, ProtectedLabels, type LongTermFitReport } from '../src/schema/index.ts';
+import { allEvidence, isRecordPath } from '../src/schema/report.ts';
 
 // Caps from PROMPT.md §9a. The projected cost is printed before any model call.
 const CAP_USD_PER_RUN = 10;
@@ -67,13 +68,11 @@ if (released.length === 0) {
 
 // --- A. Predictive quality vs. base-rate baseline
 const pack = loadDomainPack('university-admissions');
-const outcomes = {
-  completion: { get: (r: LongTermFitReport) => r.completion_likelihood, y: (t: GroundTruth) => t.completed, base: pack.base_rates.completion! },
-  volunteer: { get: (r: LongTermFitReport) => r.alumni_engagement_profile.volunteer, y: (t: GroundTruth) => t.volunteered, base: pack.base_rates.volunteer! },
-  cheerleader: { get: (r: LongTermFitReport) => r.alumni_engagement_profile.cheerleader, y: (t: GroundTruth) => t.cheerled, base: pack.base_rates.cheerleader! },
-  donor: { get: (r: LongTermFitReport) => r.alumni_engagement_profile.donor, y: (t: GroundTruth) => t.donated, base: pack.base_rates.donor! },
-  recruiter: { get: (r: LongTermFitReport) => r.alumni_engagement_profile.recruiter, y: (t: GroundTruth) => t.referrals_5y > 0, base: pack.base_rates.recruiter! },
-};
+if (!pack.labels) throw new Error(`domain pack ${pack.name} has no ground-truth labels; predictive metrics need labelled data`);
+const labelsOf = pack.labels;
+const outcomes = Object.fromEntries(
+  pack.outcomes.map((o) => [o, { get: (r: LongTermFitReport) => r.outcomes[o]!, y: (t: GroundTruth) => labelsOf(t)[o]!, base: pack.base_rates[o]! }]),
+);
 const predictive: Record<string, Record<string, number>> = {};
 const fairness: Record<string, Record<string, number>> = {};
 for (const [name, o] of Object.entries(outcomes)) {
@@ -101,7 +100,8 @@ for (const [name, o] of Object.entries(outcomes)) {
   };
 }
 
-// --- B. Reasoning quality: evidence grounding (every source_field must resolve on the record)
+// --- B. Reasoning quality: evidence grounding (every cited record field must resolve on the record;
+//     base_rate:/tool: citations are not record fields and are checked by the claim-support judge)
 function resolves(obj: unknown, path: string): boolean {
   const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.');
   let cur: unknown = obj;
@@ -115,18 +115,17 @@ let claims = 0;
 let ungrounded = 0;
 for (const r of released) {
   const record = applicantFields.get(r.applicant_id);
-  const all = [r.report.completion_likelihood, ...Object.values(r.report.alumni_engagement_profile)].flatMap((e) => [...e.evidence, ...e.counter_evidence]);
-  for (const ev of all) {
+  for (const { item } of allEvidence(r.report)) {
     claims++;
-    if (!resolves(record, ev.source_field)) ungrounded++;
+    if (item.source_fields.filter(isRecordPath).some((f) => !resolves(record, f))) ungrounded++;
   }
 }
-const counterEvidencePresent = released.filter((r) => r.report.critical_analysis.strongest_case_against.length > 20 && r.report.completion_likelihood.counter_evidence.length > 0).length;
+const counterEvidencePresent = released.filter((r) => r.report.critical_analysis.strongest_case_against.length > 20 && (r.report.outcomes[pack.primary_outcome]?.counter_evidence.length ?? 0) > 0).length;
 
 // --- Consistency: same applicant, repeated runs
 const consistencyId = applicants[0]?.applicant_id;
 const repeats = consistencyId ? await pool(Array.from({ length: consistencyRuns }), 2, () => runReport(consistencyId, { proposeAction: false })) : [];
-const repeatEstimates = repeats.flatMap((r) => (r.report?.completion_likelihood.estimate === null || r.report === null ? [] : [r.report.completion_likelihood.estimate]));
+const repeatEstimates = repeats.flatMap((r) => { const e = r.report?.outcomes[pack.primary_outcome]?.estimate; return e === null || e === undefined ? [] : [e]; });
 spent += repeats.reduce((s, r) => s + r.usage.estimated_usd, 0);
 
 // --- E. Ops

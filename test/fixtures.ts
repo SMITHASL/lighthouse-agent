@@ -1,13 +1,13 @@
 import type { LongTermFitReport } from '../src/schema/report.ts';
 
-const ev = (claim: string, source_field: string) => ({ claim, source_field, quality: 'direct' as const });
+const ev = (claim: string, ...source_fields: string[]) => ({ claim, source_fields, quality: 'direct' as const });
 const est = (p: number, field: string) => ({ estimate: p, ci_low: Math.max(0, p - 0.15), ci_high: Math.min(1, p + 0.15), evidence: [ev('x', field)], counter_evidence: [], missing_signals: [] });
 
 export function sampleReport(): LongTermFitReport {
   return {
     applicant_id: 'app_0001',
-    completion_likelihood: est(0.7, 'academic_trajectory.term_scores'),
-    alumni_engagement_profile: {
+    outcomes: {
+      completion: est(0.7, 'academic_trajectory.term_scores'),
       volunteer: est(0.5, 'activities[0].kind'),
       cheerleader: est(0.4, 'interview_notes'),
       donor: {
@@ -18,7 +18,7 @@ export function sampleReport(): LongTermFitReport {
       },
       recruiter: est(0.35, 'institution_interaction.referrals_made'),
     },
-    recruiter_multiplier: { expected_referrals_5y: 2, ci_low: 0, ci_high: 4, reasoning: 'institution_interaction.referrals_made = 1 already' },
+    referral_multiplier: { expected_referrals_5y: 2, ci_low: 0, ci_high: 4, reasoning: 'institution_interaction.referrals_made = 1 already' },
     critical_analysis: {
       question: 'Will this applicant complete and stay engaged over 10 years?',
       hypotheses: ['High grit → completes', 'Low sociability → limited engagement'],

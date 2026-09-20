@@ -29,8 +29,7 @@ describe('fairness.feature (offline)', () => {
     const r = sampleReport();
     r.critical_analysis.circumstance_signals_excluded = ['school prestige'];
     const allEvidence = [
-      ...r.completion_likelihood.evidence,
-      ...Object.values(r.alumni_engagement_profile).flatMap((e) => e.evidence),
+      ...Object.values(r.outcomes).flatMap((e) => e.evidence),
     ].map((e) => e.claim.toLowerCase());
     for (const excluded of r.critical_analysis.circumstance_signals_excluded) {
       expect(allEvidence.some((c) => c.includes(excluded.toLowerCase()))).toBe(false);

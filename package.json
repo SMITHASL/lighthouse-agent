@@ -20,7 +20,8 @@
     "ui": "node src/ui/server.ts",
     "demo:ui": "node demo/reviewer-ui/serve.mjs",
     "demo:ui:record": "node demo/reviewer-ui/record.mjs",
-    "eval:claims": "node evals/claimSupport.ts"
+    "eval:claims": "node evals/claimSupport.ts",
+    "migrate:reports": "node evals/migrateReports.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

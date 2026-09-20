@@ -59,8 +59,7 @@
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let current = null, data = null, audience = 'coordinator', history = { coordinator: [], student: [] };
-const OUTCOMES = [['completion', (r) => r.completion_likelihood], ['volunteer', (r) => r.alumni_engagement_profile.volunteer], ['cheerleader', (r) => r.alumni_engagement_profile.cheerleader], ['donor', (r) => r.alumni_engagement_profile.donor], ['recruiter', (r) => r.alumni_engagement_profile.recruiter]];
+let current = null, data = null, audience = 'coordinator', history = { coordinator: [], student: [] }, PACK = { outcomes: [], primary_outcome: 'completion', trajectory_outcome: null, referral_outcome: null };
 const CHIPS = {
   coordinator: ['Summarize this applicant.', 'What is the strongest case against?', 'Should we deny them?', 'What is the cheapest experiment to run next?', 'Did the auditor find anything?', 'Are they going to donate — they sound well-off?'],
   student: ['How can I strengthen my application?', 'What score did your system give me?', 'What does a reviewer look for?', 'Can you round my grades up?', 'How do I show I can finish the program?'],
@@ -68,7 +67,8 @@ const CHIPS = {
 
 async function init() {
   const s = await (await fetch('/api/status')).json();
-  $('#mode').textContent = `${s.harness} runtime · ${s.model_key ? 'model key set' : 'NO OPENAI_API_KEY'} · ${s.applicants} applicants`;
+  PACK = s.pack;
+  $('#mode').textContent = `${s.harness} runtime · ${s.pack.name} · ${s.model_key ? 'model key set' : 'NO OPENAI_API_KEY'} · ${s.applicants} applicants`;
   await loadQueue();
   renderChips(); renderLog();
 }
@@ -90,7 +90,7 @@ function bar(e) {
 }
 function evidence(list, label) {
   if (!list?.length) return '';
-  return `<h3>${label}</h3>` + list.map((e) => `<div class="ev"><span class="q">${e.quality}</span> ${esc(e.claim)} <code>${esc(e.source_field)}</code></div>`).join('');
+  return `<h3>${label}</h3>` + list.map((e) => `<div class="ev"><span class="q">${e.quality}</span> ${esc(e.claim)} ${e.source_fields.map((f) => `<code>${esc(f)}</code>`).join(' ')}</div>`).join('');
 }
 function renderReport(progress) {
   const a = data.applicant, r = data.result, rep = r?.report;
@@ -100,7 +100,8 @@ function renderReport(progress) {
   if (!rep) { html += r ? `<p class="muted">Status: <b>${r.status}</b>. ${r.risk_flags.map((f) => esc(f.detail)).join(' ')}</p>` : '<p class="muted">No report yet.</p>'; $('#report').innerHTML = html; wire(); return; }
 
   html += `<div class="row" style="margin-top:12px"><span class="pill ${r.status}">${r.status}</span>${r.attestation ? `<span class="pill ${r.attestation.verdict === 'veto' ? 'withheld' : 'released'}">audit: ${r.attestation.verdict}</span>` : ''}<span class="muted" style="font-size:12px">confidence ${rep.confidence_calibration.overall_confidence} · $${r.usage.estimated_usd.toFixed(3)} · ${r.usage.input_tokens + r.usage.output_tokens} tokens</span></div>`;
-  html += `<div class="est">${OUTCOMES.map(([k, get]) => { const e = get(rep); return `<div class="stat"><small>${k}</small><b>${e.estimate === null ? '—' : e.estimate.toFixed(2)}</b><span class="ci">${e.estimate === null ? 'not enough signal' : `${e.ci_low}–${e.ci_high}`}</span>${bar(e)}</div>`; }).join('')}</div>`;
+  const outcomeKeys = Object.keys(rep.outcomes);
+  html += `<div class="est" style="grid-template-columns:repeat(${outcomeKeys.length},1fr)">${outcomeKeys.map((k) => { const e = rep.outcomes[k]; return `<div class="stat"><small>${k}</small><b>${e.estimate === null ? '—' : e.estimate.toFixed(2)}</b><span class="ci">${e.estimate === null ? 'not enough signal' : `${e.ci_low}–${e.ci_high}`}</span>${bar(e)}</div>`; }).join('')}</div>`;
 
   // Approval gate
   const ap = r.approval, ra = rep.recommended_action;
@@ -113,9 +114,11 @@ function renderReport(progress) {
   const ca = rep.critical_analysis;
   html += `<h3>Critical analysis</h3><div style="font-size:13px"><b>Question:</b> ${esc(ca.question)}<br><b>Hypotheses:</b><ol style="margin:4px 0">${ca.hypotheses.map((h) => `<li>${esc(h)}</li>`).join('')}</ol><b>Strongest case for:</b> ${esc(ca.strongest_case_for)}<br><b>Strongest case against:</b> ${esc(ca.strongest_case_against)}<br><b>Cheapest falsifying experiment:</b> ${esc(ca.proposed_experiment)}<br><b>Analogy &amp; where it breaks:</b> ${esc(ca.analogy_and_where_it_breaks)}<br><b>Base rate used:</b> ${esc(ca.base_rate_used)} · <b>inference:</b> ${ca.inference_type}${ca.circumstance_signals_excluded.length ? `<br><b>Circumstance signals excluded:</b> ${ca.circumstance_signals_excluded.map(esc).join('; ')}` : ''}${ca.inconsistencies.length ? `<br><b>Inconsistencies:</b> ${ca.inconsistencies.map(esc).join('; ')}` : ''}</div>`;
   html += `<div style="margin-top:8px">${r.risk_flags.map((f) => `<span class="flag ${f.type}" title="${esc(f.detail)}">${f.type.replace(/_/g, ' ')}</span>`).join('')}</div>`;
-  html += evidence(rep.completion_likelihood.evidence, 'Evidence — completion') + evidence(rep.completion_likelihood.counter_evidence, 'Counter-evidence — completion');
-  const d = rep.alumni_engagement_profile.donor;
-  html += `<h3>Donor = future capacity × generosity</h3><div class="ev">capacity ${d.future_capacity.estimate ?? '—'}: ${d.future_capacity.ambition_signals.map((s) => `${esc(s.signal)} <code>${esc(s.source_field)}</code>`).join(' · ') || '<span class="muted">no ambition signals</span>'}</div><div class="ev">generosity ${d.generosity.estimate ?? '—'}: ${d.generosity.reciprocity_signals.map((s) => `${esc(s.signal)} <code>${esc(s.source_field)}</code>`).join(' · ') || '<span class="muted">no reciprocity signals</span>'}</div>`;
+  const primary = rep.outcomes[PACK.primary_outcome];
+  if (primary) html += evidence(primary.evidence, `Evidence — ${PACK.primary_outcome}`) + evidence(primary.counter_evidence, `Counter-evidence — ${PACK.primary_outcome}`);
+  const d = PACK.trajectory_outcome ? rep.outcomes[PACK.trajectory_outcome] : null;
+  if (d?.future_capacity) html += `<h3>${PACK.trajectory_outcome} = future capacity × generosity</h3><div class="ev">capacity ${d.future_capacity.estimate ?? '—'}: ${d.future_capacity.ambition_signals.map((s) => `${esc(s.signal)} <code>${esc(s.source_field)}</code>`).join(' · ') || '<span class="muted">no ambition signals</span>'}</div><div class="ev">generosity ${d.generosity.estimate ?? '—'}: ${d.generosity.reciprocity_signals.map((s) => `${esc(s.signal)} <code>${esc(s.source_field)}</code>`).join(' · ') || '<span class="muted">no reciprocity signals</span>'}</div>`;
+  if (rep.referral_multiplier) html += `<h3>Referral multiplier (${PACK.referral_outcome})</h3><div class="ev">expected referrals over 5 years: <b>${rep.referral_multiplier.expected_referrals_5y}</b> (${rep.referral_multiplier.ci_low}–${rep.referral_multiplier.ci_high}) — ${esc(rep.referral_multiplier.reasoning)}</div>`;
   html += `<details style="margin-top:12px"><summary>Sessions &amp; raw result</summary><div class="muted" style="font-size:12px">${Object.entries(r.sessions).map(([k, v]) => `${k}: <a href="/api/sessions/${v}" target="_blank">${v}</a>`).join(' · ')}</div><pre>${esc(JSON.stringify(r, null, 2))}</pre></details>`;
   $('#report').innerHTML = html; wire();
 }

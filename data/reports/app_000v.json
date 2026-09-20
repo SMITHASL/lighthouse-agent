@@ -3,247 +3,6 @@
   "status": "released",
   "report": {
     "applicant_id": "app_000v",
-    "completion_likelihood": {
-      "estimate": 0.6,
-      "ci_low": 0.45,
-      "ci_high": 0.74,
-      "evidence": [
-        {
-          "claim": "Applicant reports recovering from an academic failure by founding a peer tutoring group, suggesting persistence after setback.",
-          "source_field": "statement",
-          "quality": "indirect"
-        },
-        {
-          "claim": "Applicant has taken a heavy course load, which is a relevant stress-test for program persistence.",
-          "source_field": "academic_trajectory.hardest_course_load_taken",
-          "quality": "indirect"
-        },
-        {
-          "claim": "Co-founded a side business that reached break-even, suggesting follow-through on multi-month commitments.",
-          "source_field": "activities[1].description",
-          "quality": "indirect"
-        }
-      ],
-      "counter_evidence": [
-        {
-          "claim": "Term scores show a downward trajectory across recorded terms, which weakens confidence in completion readiness.",
-          "source_field": "academic_trajectory.term_scores",
-          "quality": "direct"
-        },
-        {
-          "claim": "Recorded setbacks overcome is empty, creating inconsistency with the statement's account of failing calculus.",
-          "source_field": "academic_trajectory.setbacks_overcome",
-          "quality": "direct"
-        }
-      ],
-      "missing_signals": [
-        "No graded writing sample or assessed work product is available.",
-        "No attendance or completion history for comparable executive-format coursework is available.",
-        "No recommender evidence is available."
-      ]
-    },
-    "alumni_engagement_profile": {
-      "volunteer": {
-        "estimate": 0.68,
-        "ci_low": 0.52,
-        "ci_high": 0.8,
-        "evidence": [
-          {
-            "claim": "Applicant served as volunteer coordinator for weekend food-bank shifts for 25 months.",
-            "source_field": "activities[0]",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant founded a peer tutoring group with 40 tutors, indicating organizing others for service-oriented support.",
-            "source_field": "statement",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant says they want to be a second-chance person for others, indicating service motivation.",
-            "source_field": "statement",
-            "quality": "anecdotal"
-          }
-        ],
-        "counter_evidence": [
-          {
-            "claim": "No direct record of volunteering specifically for this institution is available yet.",
-            "source_field": "institution_interaction.events_attended",
-            "quality": "absent"
-          }
-        ],
-        "missing_signals": [
-          "No post-enrollment volunteer sign-up history exists.",
-          "No third-party verification of volunteer impact is available.",
-          "No evidence of sustained institution-specific volunteering is available."
-        ]
-      },
-      "cheerleader": {
-        "estimate": 0.59,
-        "ci_low": 0.42,
-        "ci_high": 0.74,
-        "evidence": [
-          {
-            "claim": "Applicant attended multiple institutional events and campus visits, indicating active engagement with the institution.",
-            "source_field": "institution_interaction.events_attended",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant asked about the alumni network, suggesting interest in affiliation beyond coursework.",
-            "source_field": "interview_notes",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant credited former colleagues in the interview, suggesting a tendency to acknowledge communities and networks positively.",
-            "source_field": "interview_notes",
-            "quality": "indirect"
-          },
-          {
-            "claim": "Applicant expresses gratitude toward a professor who gave a second chance.",
-            "source_field": "statement",
-            "quality": "anecdotal"
-          }
-        ],
-        "counter_evidence": [
-          {
-            "claim": "No public advocacy, ambassador activity, or testimonial behavior is recorded.",
-            "source_field": "activities",
-            "quality": "absent"
-          }
-        ],
-        "missing_signals": [
-          "No evidence of public communication about the institution is available.",
-          "No social or community ambassador activity for the institution is available.",
-          "No alumni-event behavior after matriculation is available."
-        ]
-      },
-      "donor": {
-        "estimate": 0.23,
-        "ci_low": 0.12,
-        "ci_high": 0.38,
-        "future_capacity": {
-          "estimate": 0.62,
-          "ambition_signals": [
-            {
-              "signal": "Goal clarity: applicant aims to move from engineering into general management and run a business unit.",
-              "source_field": "stated_goals"
-            },
-            {
-              "signal": "Founder initiative: co-founded a side business that reached break-even.",
-              "source_field": "activities[1].description"
-            },
-            {
-              "signal": "Leadership and scaling: founded a peer tutoring group that grew to 40 tutors.",
-              "source_field": "statement"
-            },
-            {
-              "signal": "Appetite for difficulty: heavy course load taken.",
-              "source_field": "academic_trajectory.hardest_course_load_taken"
-            }
-          ]
-        },
-        "generosity": {
-          "estimate": 0.72,
-          "reciprocity_signals": [
-            {
-              "signal": "Volunteering: coordinated weekend food-bank shifts for 25 months.",
-              "source_field": "activities[0].description"
-            },
-            {
-              "signal": "Mentoring orientation: founded peer tutoring group after academic difficulty.",
-              "source_field": "statement"
-            },
-            {
-              "signal": "Gratitude: credits professor for a second chance and wants to help others similarly.",
-              "source_field": "statement"
-            },
-            {
-              "signal": "Reciprocity/network behavior: has already made one referral.",
-              "source_field": "institution_interaction.referrals_made"
-            }
-          ]
-        },
-        "horizon_years": 10,
-        "evidence": [
-          {
-            "claim": "Donor prediction combines plausible future capacity with strong reciprocity signals, but remains only moderately above the reference-class donor base rate.",
-            "source_field": "stated_goals",
-            "quality": "indirect"
-          },
-          {
-            "claim": "Applicant has already made one referral, a direct signal of willingness to help the institution's ecosystem.",
-            "source_field": "institution_interaction.referrals_made",
-            "quality": "direct"
-          },
-          {
-            "claim": "Volunteer and tutoring history indicate generosity not based on current wealth or family resources.",
-            "source_field": "activities[0].description",
-            "quality": "direct"
-          }
-        ],
-        "counter_evidence": [
-          {
-            "claim": "Downward term-score trajectory reduces certainty about future career acceleration.",
-            "source_field": "academic_trajectory.term_scores",
-            "quality": "direct"
-          },
-          {
-            "claim": "No direct evidence of charitable giving behavior is available.",
-            "source_field": "activities",
-            "quality": "absent"
-          }
-        ],
-        "missing_signals": [
-          "No long-term career outcomes are available.",
-          "No history of direct giving is available.",
-          "No post-program alumni participation record is available."
-        ]
-      },
-      "recruiter": {
-        "estimate": 0.55,
-        "ci_low": 0.38,
-        "ci_high": 0.7,
-        "evidence": [
-          {
-            "claim": "Applicant has already made one referral, a direct signal for future recruiting behavior.",
-            "source_field": "institution_interaction.referrals_made",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant asked about alumni network, indicating interest in network-building that can support referrals.",
-            "source_field": "interview_notes",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant has organized groups before, including a 40-tutor peer tutoring group.",
-            "source_field": "statement",
-            "quality": "direct"
-          },
-          {
-            "claim": "Applicant attended multiple events and made campus visits, suggesting institution engagement that can translate into recruiting advocacy.",
-            "source_field": "institution_interaction.campus_visits",
-            "quality": "direct"
-          }
-        ],
-        "counter_evidence": [
-          {
-            "claim": "Only one referral is recorded, so repeat recruiter behavior is not yet established.",
-            "source_field": "institution_interaction.referrals_made",
-            "quality": "direct"
-          }
-        ],
-        "missing_signals": [
-          "No evidence of conversion quality of the referral is available.",
-          "No alumni ambassador or formal recruiting participation history is available.",
-          "No post-completion network activity is available."
-        ]
-      }
-    },
-    "recruiter_multiplier": {
-      "expected_referrals_5y": 1.8,
-      "ci_low": 0.5,
-      "ci_high": 3.5,
-      "reasoning": "The estimate is anchored above the cohort recruiter base rate because institution_interaction.referrals_made shows 1 referral already, supported by institution_interaction.events_attended=3 and interview_notes indicating interest in the alumni network. The interval is wide because one observed referral may be situational rather than durable."
-    },
     "critical_analysis": {
       "question": "For applicant app_000v, over a 10-year horizon after enrollment in the LEAD Certificate program, what is the calibrated likelihood of completion and subsequent alumni engagement as volunteer, cheerleader, donor, and recruiter?",
       "hypotheses": [
@@ -344,7 +103,296 @@
         "source": "institution_reference_class_stats",
         "consent_flag": true
       }
-    ]
+    ],
+    "outcomes": {
+      "completion": {
+        "estimate": 0.6,
+        "ci_low": 0.45,
+        "ci_high": 0.74,
+        "evidence": [
+          {
+            "claim": "Applicant reports recovering from an academic failure by founding a peer tutoring group, suggesting persistence after setback.",
+            "source_fields": [
+              "statement"
+            ],
+            "quality": "indirect"
+          },
+          {
+            "claim": "Applicant has taken a heavy course load, which is a relevant stress-test for program persistence.",
+            "source_fields": [
+              "academic_trajectory.hardest_course_load_taken"
+            ],
+            "quality": "indirect"
+          },
+          {
+            "claim": "Co-founded a side business that reached break-even, suggesting follow-through on multi-month commitments.",
+            "source_fields": [
+              "activities[1].description"
+            ],
+            "quality": "indirect"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Term scores show a downward trajectory across recorded terms, which weakens confidence in completion readiness.",
+            "source_fields": [
+              "academic_trajectory.term_scores"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Recorded setbacks overcome is empty, creating inconsistency with the statement's account of failing calculus.",
+            "source_fields": [
+              "academic_trajectory.setbacks_overcome"
+            ],
+            "quality": "direct"
+          }
+        ],
+        "missing_signals": [
+          "No graded writing sample or assessed work product is available.",
+          "No attendance or completion history for comparable executive-format coursework is available.",
+          "No recommender evidence is available."
+        ]
+      },
+      "volunteer": {
+        "estimate": 0.68,
+        "ci_low": 0.52,
+        "ci_high": 0.8,
+        "evidence": [
+          {
+            "claim": "Applicant served as volunteer coordinator for weekend food-bank shifts for 25 months.",
+            "source_fields": [
+              "activities[0]"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant founded a peer tutoring group with 40 tutors, indicating organizing others for service-oriented support.",
+            "source_fields": [
+              "statement"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant says they want to be a second-chance person for others, indicating service motivation.",
+            "source_fields": [
+              "statement"
+            ],
+            "quality": "anecdotal"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "No direct record of volunteering specifically for this institution is available yet.",
+            "source_fields": [
+              "institution_interaction.events_attended"
+            ],
+            "quality": "absent"
+          }
+        ],
+        "missing_signals": [
+          "No post-enrollment volunteer sign-up history exists.",
+          "No third-party verification of volunteer impact is available.",
+          "No evidence of sustained institution-specific volunteering is available."
+        ]
+      },
+      "cheerleader": {
+        "estimate": 0.59,
+        "ci_low": 0.42,
+        "ci_high": 0.74,
+        "evidence": [
+          {
+            "claim": "Applicant attended multiple institutional events and campus visits, indicating active engagement with the institution.",
+            "source_fields": [
+              "institution_interaction.events_attended"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant asked about the alumni network, suggesting interest in affiliation beyond coursework.",
+            "source_fields": [
+              "interview_notes"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant credited former colleagues in the interview, suggesting a tendency to acknowledge communities and networks positively.",
+            "source_fields": [
+              "interview_notes"
+            ],
+            "quality": "indirect"
+          },
+          {
+            "claim": "Applicant expresses gratitude toward a professor who gave a second chance.",
+            "source_fields": [
+              "statement"
+            ],
+            "quality": "anecdotal"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "No public advocacy, ambassador activity, or testimonial behavior is recorded.",
+            "source_fields": [
+              "activities"
+            ],
+            "quality": "absent"
+          }
+        ],
+        "missing_signals": [
+          "No evidence of public communication about the institution is available.",
+          "No social or community ambassador activity for the institution is available.",
+          "No alumni-event behavior after matriculation is available."
+        ]
+      },
+      "donor": {
+        "estimate": 0.23,
+        "ci_low": 0.12,
+        "ci_high": 0.38,
+        "future_capacity": {
+          "estimate": 0.62,
+          "ambition_signals": [
+            {
+              "signal": "Goal clarity: applicant aims to move from engineering into general management and run a business unit.",
+              "source_field": "stated_goals"
+            },
+            {
+              "signal": "Founder initiative: co-founded a side business that reached break-even.",
+              "source_field": "activities[1].description"
+            },
+            {
+              "signal": "Leadership and scaling: founded a peer tutoring group that grew to 40 tutors.",
+              "source_field": "statement"
+            },
+            {
+              "signal": "Appetite for difficulty: heavy course load taken.",
+              "source_field": "academic_trajectory.hardest_course_load_taken"
+            }
+          ]
+        },
+        "generosity": {
+          "estimate": 0.72,
+          "reciprocity_signals": [
+            {
+              "signal": "Volunteering: coordinated weekend food-bank shifts for 25 months.",
+              "source_field": "activities[0].description"
+            },
+            {
+              "signal": "Mentoring orientation: founded peer tutoring group after academic difficulty.",
+              "source_field": "statement"
+            },
+            {
+              "signal": "Gratitude: credits professor for a second chance and wants to help others similarly.",
+              "source_field": "statement"
+            },
+            {
+              "signal": "Reciprocity/network behavior: has already made one referral.",
+              "source_field": "institution_interaction.referrals_made"
+            }
+          ]
+        },
+        "horizon_years": 10,
+        "evidence": [
+          {
+            "claim": "Donor prediction combines plausible future capacity with strong reciprocity signals, but remains only moderately above the reference-class donor base rate.",
+            "source_fields": [
+              "stated_goals"
+            ],
+            "quality": "indirect"
+          },
+          {
+            "claim": "Applicant has already made one referral, a direct signal of willingness to help the institution's ecosystem.",
+            "source_fields": [
+              "institution_interaction.referrals_made"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Volunteer and tutoring history indicate generosity not based on current wealth or family resources.",
+            "source_fields": [
+              "activities[0].description"
+            ],
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Downward term-score trajectory reduces certainty about future career acceleration.",
+            "source_fields": [
+              "academic_trajectory.term_scores"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "No direct evidence of charitable giving behavior is available.",
+            "source_fields": [
+              "activities"
+            ],
+            "quality": "absent"
+          }
+        ],
+        "missing_signals": [
+          "No long-term career outcomes are available.",
+          "No history of direct giving is available.",
+          "No post-program alumni participation record is available."
+        ]
+      },
+      "recruiter": {
+        "estimate": 0.55,
+        "ci_low": 0.38,
+        "ci_high": 0.7,
+        "evidence": [
+          {
+            "claim": "Applicant has already made one referral, a direct signal for future recruiting behavior.",
+            "source_fields": [
+              "institution_interaction.referrals_made"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant asked about alumni network, indicating interest in network-building that can support referrals.",
+            "source_fields": [
+              "interview_notes"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant has organized groups before, including a 40-tutor peer tutoring group.",
+            "source_fields": [
+              "statement"
+            ],
+            "quality": "direct"
+          },
+          {
+            "claim": "Applicant attended multiple events and made campus visits, suggesting institution engagement that can translate into recruiting advocacy.",
+            "source_fields": [
+              "institution_interaction.campus_visits"
+            ],
+            "quality": "direct"
+          }
+        ],
+        "counter_evidence": [
+          {
+            "claim": "Only one referral is recorded, so repeat recruiter behavior is not yet established.",
+            "source_fields": [
+              "institution_interaction.referrals_made"
+            ],
+            "quality": "direct"
+          }
+        ],
+        "missing_signals": [
+          "No evidence of conversion quality of the referral is available.",
+          "No alumni ambassador or formal recruiting participation history is available.",
+          "No post-completion network activity is available."
+        ]
+      }
+    },
+    "referral_multiplier": {
+      "expected_referrals_5y": 1.8,
+      "ci_low": 0.5,
+      "ci_high": 3.5,
+      "reasoning": "The estimate is anchored above the cohort recruiter base rate because institution_interaction.referrals_made shows 1 referral already, supported by institution_interaction.events_attended=3 and interview_notes indicating interest in the alumni network. The interval is wide because one observed referral may be situational rather than durable."
+    }
   },
   "attestation": {
     "applicant_id": "app_000v",

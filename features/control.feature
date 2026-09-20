@@ -16,3 +16,10 @@ Feature: Humans stay in control
     Given predictions with recorded ground truth
     When rescoring runs
     Then calibration metrics are recomputed and stored with a timestamp
+
+  Scenario: independent_auditor_on_a_different_vendor
+    Given the analyst runs on one model vendor
+    When LIGHTHOUSE_AUDITOR_MODEL names a model from another vendor
+    Then the fairness auditor runs on that vendor through the same runtime
+    And the transcript, tool loop and approval gate behave identically
+    And a refusal from the vendor is surfaced as an error rather than an empty verdict

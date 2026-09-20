@@ -17,15 +17,16 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { fileURLToPath } from 'node:url';
 import { createResponse } from '../src/harness/provider.ts';
 import { z } from '../src/lib/schema.ts';
-import type { LongTermFitReport } from '../src/schema/report.ts';
+import { allEvidence, type LongTermFitReport } from '../src/schema/report.ts';
 import type { PipelineResult } from '../src/pipeline/run.ts';
+import { loadDomainPack, type DomainPack } from '../src/agents/domainPacks.ts';
 
 export const JUDGE_MODEL = 'openai/gpt-5-4-mini';
 export const UNSUPPORTED_MAX = 0.05;
 
-export type Claim = { outcome: string; kind: 'evidence' | 'counter_evidence'; claim: string; source_field: string; quality: string };
+export type Claim = { outcome: string; kind: 'evidence' | 'counter_evidence'; claim: string; source_fields: string[]; quality: string };
 export type Verdict = 'supported' | 'partially' | 'unsupported' | 'field_missing';
-export type Judgement = Claim & { applicant_id: string; field_value: unknown; verdict: Verdict; reason: string };
+export type Judgement = Claim & { applicant_id: string; field_values: Record<string, unknown>; verdict: Verdict; reason: string };
 
 /** Resolve a dot/bracket path ("activities[0].role") on a record; undefined when it does not exist. */
 export function resolveField(record: unknown, path: string): { found: boolean; value: unknown } {
@@ -40,31 +41,46 @@ export function resolveField(record: unknown, path: string): { found: boolean; v
 
 /** Every evidence and counter-evidence claim in a report, tagged with its outcome. */
 export function collectClaims(report: LongTermFitReport): Claim[] {
-  type Est = { evidence: LongTermFitReport['completion_likelihood']['evidence']; counter_evidence: LongTermFitReport['completion_likelihood']['counter_evidence'] };
-  const groups: [string, Est][] = [['completion', report.completion_likelihood], ...Object.entries(report.alumni_engagement_profile)];
-  return groups.flatMap(([outcome, e]) => [
-    ...e.evidence.map((c) => ({ outcome, kind: 'evidence' as const, claim: c.claim, source_field: c.source_field, quality: c.quality })),
-    ...e.counter_evidence.map((c) => ({ outcome, kind: 'counter_evidence' as const, claim: c.claim, source_field: c.source_field, quality: c.quality })),
-  ]);
+  return allEvidence(report).map(({ outcome, kind, item }) => ({ outcome, kind, claim: item.claim, source_fields: item.source_fields, quality: item.quality }));
+}
+
+/** Resolve every citation of a claim: record paths on the record, base_rate:<o> from the pack, tool:<n> as opaque. */
+export function resolveCitations(record: unknown, refs: string[], pack: DomainPack): { found: boolean; values: Record<string, unknown> } {
+  const values: Record<string, unknown> = {};
+  let found = true;
+  for (const ref of refs) {
+    if (ref.startsWith('base_rate:')) {
+      const v = pack.base_rates[ref.slice('base_rate:'.length)];
+      if (v === undefined) found = false;
+      values[ref] = v;
+    } else if (ref.startsWith('tool:')) {
+      values[ref] = '(tool output; not a record field)';
+    } else {
+      const r = resolveField(record, ref);
+      if (!r.found) found = false;
+      values[ref] = r.value;
+    }
+  }
+  return { found, values };
 }
 
 const JudgeOutput = z.object({
   verdicts: z.array(z.object({ index: z.number().int().min(0), verdict: z.enum(['supported', 'partially', 'unsupported']), reason: z.string().min(1) }).strict()),
 }).strict();
 
-const INSTRUCTIONS = `You are a strict evidence auditor. For each numbered claim you receive the claim text and the ACTUAL VALUE of the record field it cites. Judge only whether that value substantiates the claim as written:
+const INSTRUCTIONS = `You are a strict evidence auditor. For each numbered claim you receive the claim text and the ACTUAL VALUES of every source it cites (record fields, base_rate:<outcome> values, or tool outputs). Judge only whether those values, taken together, substantiate the claim as written:
 - supported: the value clearly substantiates the claim (a reasonable reader would accept the claim from that value alone).
 - partially: the value is consistent with the claim but the claim adds interpretation, degree, or detail the value does not carry.
 - unsupported: the value contradicts the claim, or has no bearing on it, or the claim asserts something the value cannot show.
 Do not reward plausibility from outside knowledge; judge from the value only. Return one verdict per index, every index exactly once.`;
 
-export async function judgeReport(applicantId: string, report: LongTermFitReport, record: unknown): Promise<Judgement[]> {
+export async function judgeReport(applicantId: string, report: LongTermFitReport, record: unknown, pack: DomainPack = loadDomainPack()): Promise<Judgement[]> {
   const claims = collectClaims(report);
-  const resolved = claims.map((c) => ({ ...c, ...resolveField(record, c.source_field) }));
+  const resolved = claims.map((c) => ({ ...c, ...resolveCitations(record, c.source_fields, pack) }));
   const askable = resolved.map((c, index) => ({ c, index })).filter(({ c }) => c.found);
   const judged = new Map<number, { verdict: Verdict; reason: string }>();
   if (askable.length) {
-    const items = askable.map(({ c, index }) => `#${index} [${c.outcome} / ${c.kind}] claim: ${JSON.stringify(c.claim)}\n    field ${c.source_field} = ${JSON.stringify(c.value)}`).join('\n');
+    const items = askable.map(({ c, index }) => `#${index} [${c.outcome} / ${c.kind}] claim: ${JSON.stringify(c.claim)}\n` + Object.entries(c.values).map(([f, v]) => `    ${f} = ${JSON.stringify(v)}`).join('\n')).join('\n');
     const reply = await createResponse({
       model: JUDGE_MODEL,
       instructions: INSTRUCTIONS,
@@ -80,10 +96,10 @@ export async function judgeReport(applicantId: string, report: LongTermFitReport
     const j = c.found ? judged.get(index) : undefined;
     return {
       applicant_id: applicantId,
-      outcome: c.outcome, kind: c.kind, claim: c.claim, source_field: c.source_field, quality: c.quality,
-      field_value: c.value,
+      outcome: c.outcome, kind: c.kind, claim: c.claim, source_fields: c.source_fields, quality: c.quality,
+      field_values: c.values,
       verdict: !c.found ? 'field_missing' : (j?.verdict ?? 'unsupported'),
-      reason: !c.found ? 'cited field does not exist on the record' : (j?.reason ?? 'judge returned no verdict for this claim'),
+      reason: !c.found ? 'a cited field does not exist on the record (or the base rate is unknown)' : (j?.reason ?? 'judge returned no verdict for this claim'),
     };
   });
 }
@@ -114,9 +130,10 @@ export function summarize(judgements: Judgement[]) {
 export type ClaimSupportSummary = ReturnType<typeof summarize>;
 
 /** Judge every released report under dataDir/reports; returns the summary and writes the detail file. */
-export async function judgeStoredReports(opts: { dataDir?: string; n?: number; log?: (s: string) => void } = {}) {
+export async function judgeStoredReports(opts: { dataDir?: string; n?: number; pack?: string; log?: (s: string) => void } = {}) {
   const dataDir = opts.dataDir ?? 'data';
   const log = opts.log ?? (() => {});
+  const pack = loadDomainPack(opts.pack);
   const applicants = new Map((JSON.parse(readFileSync(`${dataDir}/applicants.json`, 'utf8')) as { applicant_id: string }[]).map((a) => [a.applicant_id, a]));
   const files = readdirSync(`${dataDir}/reports`).filter((f) => f.endsWith('.json')).sort().slice(0, opts.n ?? Infinity);
   const all: Judgement[] = [];
@@ -124,7 +141,7 @@ export async function judgeStoredReports(opts: { dataDir?: string; n?: number; l
     const r = JSON.parse(readFileSync(`${dataDir}/reports/${f}`, 'utf8')) as PipelineResult;
     if (!r.report) continue;
     const before = Date.now();
-    const js = await judgeReport(r.applicant_id, r.report, applicants.get(r.applicant_id));
+    const js = await judgeReport(r.applicant_id, r.report, applicants.get(r.applicant_id), pack);
     all.push(...js);
     const s = summarize(js);
     log(`${r.applicant_id}: ${s.claims} claims — ${s.supported} supported, ${s.partially} partial, ${s.unsupported} unsupported (${((Date.now() - before) / 1000).toFixed(1)}s)`);

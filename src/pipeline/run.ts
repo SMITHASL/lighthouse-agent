@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { AGENT_NAMES } from '../agents/manifests.ts';
+import { AGENT_NAMES, MODELS } from '../agents/manifests.ts';
 import { FairnessAttestation, LongTermFitReport } from '../schema/report.ts';
 import { finalOutput, indexEvents, type TurnEvent } from './client.ts';
 import { HARNESS_MODE, createHarness, type Harness } from '../harness/index.ts';
@@ -19,9 +19,15 @@ export type PipelineResult = {
 };
 
 // Rough list prices per 1M tokens; enough to keep the demo inside the $50 credit.
-const PRICE_USD_PER_M = { 'openai/gpt-5-5': { in: 1.25, out: 10 }, 'openai/gpt-5-4-mini': { in: 0.25, out: 2 } } as const;
+const PRICE_USD_PER_M: Record<string, { in: number; out: number }> = {
+  'openai/gpt-5-5': { in: 1.25, out: 10 },
+  'openai/gpt-5-4-mini': { in: 0.25, out: 2 },
+  'anthropic/claude-opus-5': { in: 5, out: 25 },
+  'anthropic/claude-sonnet-5': { in: 2, out: 10 },
+  'anthropic/claude-haiku-4-5': { in: 1, out: 5 },
+};
 
-function usageFromEvents(events: TurnEvent[], model: keyof typeof PRICE_USD_PER_M) {
+function usageFromEvents(events: TurnEvent[], model: string) {
   let input = 0;
   let output = 0;
   for (const e of events) {
@@ -30,7 +36,7 @@ function usageFromEvents(events: TurnEvent[], model: keyof typeof PRICE_USD_PER_
     input += u.input_tokens ?? 0;
     output += u.output_tokens ?? 0;
   }
-  const p = PRICE_USD_PER_M[model];
+  const p = PRICE_USD_PER_M[model] ?? { in: 5, out: 25 }; // unknown model: assume Opus-tier so the cap errs safe
   return { input_tokens: input, output_tokens: output, estimated_usd: (input * p.in + output * p.out) / 1e6 };
 }
 
@@ -86,7 +92,7 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
     let message = `Produce the Long-Term Fit Report for applicant_id ${applicantId}. Return only the JSON.`;
     for (let attempt = 1; attempt <= 2; attempt++) {
       const analystEvents = await client.runTurn(analystSession, [{ type: 'user.message', content: message }], (e) => opts.onEvent?.('analyst', e));
-      addUsage(result, usageFromEvents(analystEvents, 'openai/gpt-5-5'));
+      addUsage(result, usageFromEvents(analystEvents, MODELS.analyst));
       const analystOut = finalOutput(analystEvents);
       if (analystOut.status !== 'done') {
         report = { ok: false, reason: `analyst turn ended with status ${analystOut.status}` };
@@ -113,7 +119,7 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
       [{ type: 'user.message', content: `Audit this report and return only the JSON attestation:\n${JSON.stringify(report.value)}` }],
       (e) => opts.onEvent?.('fairness', e),
     );
-    addUsage(result, usageFromEvents(fairnessEvents, 'openai/gpt-5-4-mini'));
+    addUsage(result, usageFromEvents(fairnessEvents, MODELS.auditor));
     const attestation = parseJson(FairnessAttestation, finalOutput(fairnessEvents).content);
     if (!attestation.ok) {
       result.risk_flags.push({ type: 'fairness_concern', detail: `auditor output rejected: ${attestation.reason}; report withheld` });
@@ -138,7 +144,7 @@ export async function runReport(applicantId: string, opts: RunOptions = {}): Pro
         [{ type: 'user.message', content: `applicant_id: ${applicantId}\naction: ${action}\nrationale: ${rationale}` }],
         (e) => opts.onEvent?.('action', e),
       );
-      addUsage(result, usageFromEvents(actionEvents, 'openai/gpt-5-4-mini'));
+      addUsage(result, usageFromEvents(actionEvents, MODELS.action));
       const pending = actionEvents.find((e) => e.type === 'tool.approval_required');
       const calls = (pending?.tool_calls as { id: string }[] | undefined) ?? [];
       result.approval = pending

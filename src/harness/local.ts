@@ -35,10 +35,12 @@ type SessionFile = {
   agent: string;
   created_at: string;
   status: 'idle' | 'running' | 'paused' | 'done' | 'error';
-  /** Input items not yet sent to the model (the next call sends only these, chained on response_id). */
+  /** Input items not yet sent to a stateful vendor (OpenAI chains them on response_id). */
   inbox: InputItem[];
-  /** Last model response id; the provider chains on it so reasoning state carries across calls. */
-  response_id?: string;
+  /** The whole transcript — user turns, assistant text, tool calls and results — for stateless vendors and for the record. */
+  history: InputItem[];
+  /** Last model response id when the vendor keeps state; the provider chains on it so reasoning state carries across calls. */
+  response_id?: string | null;
   events: TurnEvent[];
   pending?: PendingApproval;
 };
@@ -115,14 +117,16 @@ export class LocalHarness {
     const agent = this.agents.get(agentName);
     if (!agent) throw new Error(`agent "${agentName}" is not registered — run \`npm run setup\``);
     const id = `ls_${Date.now().toString(36)}_${randomUUID().slice(0, 8)}`;
-    this.save({ id, agent: agentName, created_at: new Date().toISOString(), status: 'idle', inbox: [], events: [] });
+    this.save({ id, agent: agentName, created_at: new Date().toISOString(), status: 'idle', inbox: [], history: [], events: [] });
     return id;
   }
 
   /** One turn: consume the inputs, loop model ↔ tools until a final answer or an approval pause. */
   async runTurn(sessionId: string, input: unknown[], onEvent?: (e: TurnEvent) => void): Promise<TurnEvent[]> {
     const s = this.readSession(sessionId);
+    s.history ??= []; // sessions written before transcripts were kept
     const agent = this.agents.get(s.agent)!;
+    const add = (item: InputItem) => { s.inbox.push(item); s.history.push(item); };
     const m = agent.manifest;
     const turnEvents: TurnEvent[] = [];
     const emit = (type: string, extra: Record<string, unknown> = {}) => {
@@ -151,7 +155,7 @@ export class LocalHarness {
     emit('turn.started', { input });
     for (const raw of input) {
       const inp = raw as { type: string; content?: string; tool_call_id?: string; approval?: { status: 'allow' | 'deny'; reason?: string } };
-      if (inp.type === 'user.message') s.inbox.push({ role: 'user', content: inp.content ?? '' });
+      if (inp.type === 'user.message') add({ role: 'user', content: inp.content ?? '' });
       else if (inp.type === 'user.tool_approval') {
         const p = s.pending;
         if (!p || p.tool_call_id !== inp.tool_call_id) return done('error', `no pending approval for tool_call ${inp.tool_call_id}`);
@@ -160,11 +164,11 @@ export class LocalHarness {
           const result = await callTool(p.name, p.arguments, { store: this.store, dataDir: this.dataDir });
           emit('tool.approved', { tool_call_id: p.tool_call_id, name: p.name });
           emit('tool.response', { tool_call_id: p.tool_call_id, name: p.name, content: JSON.stringify(result), result });
-          s.inbox.push({ type: 'function_call_output', call_id: p.call_id, output: JSON.stringify(result) });
+          add({ type: 'function_call_output', call_id: p.call_id, output: JSON.stringify(result) });
         } else {
           const reason = inp.approval?.reason ?? 'denied by reviewer';
           emit('tool.denied', { tool_call_id: p.tool_call_id, name: p.name, reason });
-          s.inbox.push({ type: 'function_call_output', call_id: p.call_id, output: JSON.stringify({ error: 'denied_by_human', reason }) });
+          add({ type: 'function_call_output', call_id: p.call_id, output: JSON.stringify({ error: 'denied_by_human', reason }) });
         }
       }
     }
@@ -177,6 +181,7 @@ export class LocalHarness {
           model: m.model.name,
           instructions: m.instructions,
           input: s.inbox,
+          history: s.history,
           previous_response_id: s.response_id,
           tools,
           json_schema: m.response_format?.json_schema,
@@ -188,6 +193,8 @@ export class LocalHarness {
       }
       s.response_id = reply.response_id;
       s.inbox = [];
+      if (reply.content) s.history.push({ role: 'assistant', content: reply.content });
+      for (const tc of reply.tool_calls ?? []) s.history.push({ type: 'function_call', call_id: tc.call_id, name: tc.name, arguments: tc.arguments });
       emit('model.message', { role: 'assistant', content: reply.content, tool_calls: reply.tool_calls, usage: reply.usage, model: reply.model, response_id: reply.response_id });
       if (!reply.tool_calls?.length) return done('done', reply.content);
 
@@ -202,7 +209,7 @@ export class LocalHarness {
         }
         const result = await callTool(tc.name, args, { store: this.store, dataDir: this.dataDir });
         emit('tool.response', { tool_call_id: tc.call_id, name: tc.name, content: JSON.stringify(result), result });
-        s.inbox.push({ type: 'function_call_output', call_id: tc.call_id, output: JSON.stringify(result) });
+        add({ type: 'function_call_output', call_id: tc.call_id, output: JSON.stringify(result) });
       }
     }
     emit('model.error', { error: `iteration limit ${limit} reached` });

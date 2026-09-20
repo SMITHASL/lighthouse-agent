@@ -15,11 +15,11 @@ describe('claim-support judge (evidence_claims_are_supported_by_cited_fields)', 
     const claims = collectClaims(sampleReport());
     expect(claims.length).toBeGreaterThan(0);
     expect(new Set(claims.map((c) => c.outcome))).toEqual(new Set(['completion', 'volunteer', 'cheerleader', 'donor', 'recruiter']));
-    expect(claims.every((c) => c.claim && c.source_field && ['evidence', 'counter_evidence'].includes(c.kind))).toBe(true);
+    expect(claims.every((c) => c.claim && c.source_fields.length > 0 && ['evidence', 'counter_evidence'].includes(c.kind))).toBe(true);
   });
 
   it('summarize computes rates, the per-grade breakdown and the gate', () => {
-    const j = (verdict: Judgement['verdict'], quality: string): Judgement => ({ applicant_id: 'app_x', outcome: 'completion', kind: 'evidence', claim: 'c', source_field: 'f', quality, field_value: 1, verdict, reason: 'r' });
+    const j = (verdict: Judgement['verdict'], quality: string): Judgement => ({ applicant_id: 'app_x', outcome: 'completion', kind: 'evidence', claim: 'c', source_fields: ['f'], quality, field_values: { f: 1 }, verdict, reason: 'r' });
     const ok = summarize([j('supported', 'direct'), j('supported', 'direct'), j('partially', 'indirect'), j('field_missing', 'direct')]);
     expect(ok.claims).toBe(4);
     expect(ok.unsupported_rate).toBe(0);
