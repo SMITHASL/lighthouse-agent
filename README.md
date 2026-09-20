@@ -14,6 +14,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 - [Build prompt](PROMPT.md) — the BDD/TDD spec the agent was built from
 - [Eval scoreboard](evals/SCOREBOARD.md) — latest results
 - [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.0/lighthouse-demo.mp4) — 3:16, captions, no audio
+- [Reviewer & Advising UI](harness-ui/README.md) — how the admissions office uses it: case queue, agent run, coordinator/student chat. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4) (3:20) · [presenter card](harness-ui/PRESENTER.md)
 
 ## How it maps to the judging rubric
 
@@ -76,7 +77,9 @@ npm run eval -- --n=30    # scoreboard → evals/SCOREBOARD.md (~$1.50; --full f
 
 `src/agents/domainPacks.ts` is the contract. A startup recruiter uses `startup-recruiting` (hire → retain 2y → refer → advocate); a corporate talent team uses `corporate-talent`. Same analyst, same auditor, same approval gate, same evals — only outcomes, base rates and vocabulary change. Hosted TrueForge (Postgres + Redis + OIDC) gives multi-tenant deployment without code changes.
 
-## Reviewer UI (next step)
+## Reviewer UI
+
+A working prototype of the reviewer screen is in [`harness-ui/`](harness-ui/README.md): case queue, agent run with cited evidence, and a coordinator/student advising chat with an enforced information boundary. It runs standalone today (its own lightweight agents over markdown cases); wiring it to TrueForge sessions is the next step.
 
 An admissions office will not work in the raw TrueForge chat. The reviewer experience is `@truefoundry/trueforge-ui` themed for the institution: the same Long-Term Fit Report, fairness attestation and Allow / Deny checkpoint, rendered as a review queue against the same TrueForge server — no new backend, no re-implementation of approvals or session history. The agents, MCP tools and evals stay exactly as they are.
 

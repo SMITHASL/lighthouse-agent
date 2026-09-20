@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Lighthouse Reviewer UI — captioned demo</title>
+<style>
+  :root { --bg:#0f1115; --fg:#f3f4f6; --accent:#7c83ff; --muted:#9aa0aa; --panel-text:#d5d8de; --surface:#1b1e26; --line:#2a2d35; --pass:#4ade80; --warn:#fbbf24; --fail:#f87171; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0 0 150px 0; }
+  #stage iframe, #stage .panel { position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff; display:none; }
+  #stage .panel { background:var(--bg); padding:48px 64px; box-sizing:border-box; overflow:auto; }
+  #stage .active { display:block; }
+  #caption { position:absolute; left:0; right:0; bottom:0; height:150px; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:0 64px; box-sizing:border-box; }
+  #caption p { font-size:26px; line-height:1.35; max-width:1200px; margin:0; text-align:center; }
+  #caption b { color:var(--accent); }
+  #bar { position:absolute; left:0; right:0; bottom:0; height:6px; background:var(--line); }
+  #bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s linear; }
+  #hud { position:absolute; top:12px; right:16px; font-size:13px; color:var(--muted); background:var(--surface); padding:6px 10px; border-radius:6px; z-index:10; }
+  #hud button { background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:4px 10px; cursor:pointer; font-size:13px; }
+  .panel h1 { font-size:44px; margin:0 0 12px; }
+  .panel h2 { font-size:28px; color:var(--accent); margin:0 0 16px; font-weight:600; }
+  .panel p, .panel li { font-size:22px; line-height:1.45; color:var(--panel-text); }
+  .panel table { border-collapse:collapse; font-size:20px; margin-top:12px; }
+  .panel th, .panel td { padding:8px 16px; border-bottom:1px solid var(--line); text-align:left; }
+  .panel th { color:var(--muted); font-weight:500; }
+  .panel code { background:var(--surface); padding:2px 6px; border-radius:4px; font-size:19px; }
+  .big { font-size:64px; font-weight:700; color:var(--accent); margin:8px 0; }
+  .warn { color:var(--warn); } .pass { color:var(--pass); } .fail { color:var(--fail); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 48px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="caption"><p id="cap"></p></div>
+<div id="bar"><i id="fill"></i></div>
+<div id="hud"><button id="b-prev">◀</button> <button id="b-play">▶ play</button> <button id="b-next">▶</button> <button id="b-restart">↺</button> <span id="pos"></span></div>
+
+<script>
+// The live harness UI (npm start in harness-ui/, port 3100). One iframe stays mounted; steps
+// drive it over postMessage (see the tour hook at the bottom of public/index.html).
+const UI = 'http://localhost:3100';
+const PRIYA = 'sjsu-msds-001', DANIEL = 'sjsu-msds-risk-001', ARJUN = 'sjsu-msds-intl-001';
+
+// Each step: { view, caption, seconds, act? }. view = 'panel:<id>' or 'ui'. act = message for the UI.
+const steps = [
+  { view:'panel:title', seconds:8, caption:'<b>Lighthouse Reviewer UI</b> — how an admissions office actually uses the agents: a case queue, the agent run, and an advising chat with two audiences.' },
+  { view:'panel:why', seconds:10, caption:'Reviewers will not work in a raw agent console. This is the same three-agent pattern — analyst, auditor, human gate — rendered as the screen a coordinator sits in front of.' },
+  { view:'ui', seconds:7, act:{action:'select', id:PRIYA}, caption:'<b>The queue.</b> Three applicants to SJSU\'s MS in Data Science. All synthetic. Pick one and the record loads.' },
+  { view:'ui', seconds:11, act:{action:'run'}, caption:'<b>Run agents.</b> Transcript, engagement and context agents read the same record through different lenses; each returns cited evidence and a confidence. Priya: <b>ADMIT</b>, completion 0.89 vs. a 0.78 program median.' },
+  { view:'ui', seconds:9, act:{action:'audience', value:'student'}, caption:'<b>Student chat.</b> The same record, answered for the applicant: prerequisites, GRE, working while studying. Nothing internal leaks.' },
+  { view:'ui', seconds:8, act:{action:'chat', text:'Do I need to take the GRE?'}, caption:'"Do I need the GRE?" — no, and it says so without a score or a flag anywhere in sight.' },
+  { view:'ui', seconds:7, act:{action:'select', id:DANIEL}, caption:'<b>Daniel.</b> Berkeley Math, 3.88 GPA, GRE Q169. On paper, top decile. Watch both numbers.' },
+  { view:'ui', seconds:16, act:{action:'run'}, caption:'Paper score <b>0.95</b>. Predicted completion <b>0.40</b>. Four late-term withdrawals in project courses, two abandoned theses, a prior grad withdrawal, 0 of 3 info sessions, 8 months of runway. Every line cites the record.' },
+  { view:'panel:gap', seconds:12, caption:'The finding: <b>completion is not aptitude.</b> The best-looking file has the lowest completion likelihood — and the verdict is <b>ADMIT WITH SUPPORT PLAN</b>, never deny. Prediction allocates support; it does not gatekeep.' },
+  { view:'ui', seconds:6, act:{action:'audience', value:'coordinator'}, caption:'<b>Coordinator chat.</b> This audience sees the score, the drivers and the confidence.' },
+  { view:'ui', seconds:12, act:{action:'chat', text:'Should we deny him?'}, caption:'"Should we deny him?" — <b>No.</b> The drivers are addressable; denying on a behavioral prediction alone raises fairness concerns and must never be automated.' },
+  { view:'ui', seconds:10, act:{action:'chat', text:"Is he going to flake because he's a Berkeley kid?"}, caption:'A stereotype framed as a question. The agent refuses to launder it through the data and points back at the record.' },
+  { view:'ui', seconds:10, act:{action:'chat', text:'Draft the support plan.'}, caption:'Faculty mentor, capstone in four graded milestones, check-ins at weeks 3, 8 and 12, financial-aid referral, accountability cohort. Concrete.' },
+  { view:'ui', seconds:6, act:{action:'audience', value:'student'}, caption:'Now the <b>same case</b> from the student\'s side.' },
+  { view:'ui', seconds:10, act:{action:'chat', text:'What score did your system give me?'}, caption:'"What score did you give me?" — the student <b>never</b> sees the 0.40. Not the number, not the word "flagged". The boundary is enforced, not hoped for.' },
+  { view:'ui', seconds:9, act:{action:'chat', text:'Can you round my GPA up to 3.8?'}, caption:'And it will not help misrepresent a transcript, a bank statement, or a form — the same refusals the auditor enforces upstream.' },
+  { view:'ui', seconds:7, act:{action:'select', id:ARJUN}, caption:'<b>Arjun</b>, applying from Pune on an F-1. The context agent adds a visa-timeline risk; funding and experience are protective. <b>ADMIT</b>, 0.86.' },
+  { view:'ui', seconds:11, act:{action:'run'}, caption:'For international applicants the chat knows GAPE\'s real rules — no WES evaluation, financials go to ISSS after admission — and gives a GPA <b>range</b>, never false precision.' },
+  { view:'panel:how', seconds:12, caption:'<b>How it runs.</b> Cases are markdown — narrative plus a JSON block — so a GAPE coordinator adds one by writing a document. Rule-based agents offline; the same three agents on Claude with schema-validated output when a key is present.' },
+  { view:'panel:end', seconds:9, caption:'Lighthouse Reviewer UI: reasons like a critical analyst, shows its evidence, and keeps the student and the coordinator on the right side of the line. Thank you.' },
+];
+
+const panels = {
+  title: `<h1>Lighthouse — Reviewer &amp; Advising UI</h1><h2>How the admissions office uses the agents</h2><p>Case queue · Agent run · Coordinator / Student chat</p><p style="color:var(--muted)">SJSU MS in Data Science · synthetic applicants · 19 Sep 2026</p>`,
+  why: `<h2>Why a reviewer UI</h2><ul><li>A coordinator has minutes per file and sees the <b>paper</b>, not the pattern.</li><li>The agents surface the pattern — with cited evidence and a confidence, never a bare score.</li><li>Two audiences, one record: the coordinator sees everything; the student sees advice, never the score.</li><li>Every verdict is a recommendation. A human decides.</li></ul>`,
+  gap: `<h2>Completion is not aptitude</h2><div class="grid"><div><p style="color:var(--muted);margin:0">Paper score</p><div class="big">0.95</div></div><div><p style="color:var(--muted);margin:0">Predicted completion</p><div class="big warn">0.40</div></div></div><p>Program median 0.78 · confidence 0.70</p><table><tr><th>Risk factor</th><th>Weight</th><th>Evidence</th></tr><tr><td>open-ended deliverable non-completion</td><td>−0.35</td><td>4 late-term W in project courses · 2 abandoned theses · OMSA withdrawal</td></tr><tr><td>low follow-through engagement</td><td>−0.24</td><td>0/3 info sessions · 1/4 advisor replies · SOP at T−11 min</td></tr><tr><td>contingent enrollment intent</td><td>−0.19</td><td>freelance, "may return to FT work" · generic Why-SJSU</td></tr><tr><td>financial runway shortfall</td><td>−0.14</td><td>~8 mo savings vs 24 mo program</td></tr></table><p class="pass" style="margin-top:20px">Verdict: ADMIT WITH SUPPORT PLAN — every factor above is modifiable.</p>`,
+  how: `<h2>Under the hood</h2><ul><li>Zero-dependency Node server; cases are <code>cases/*.md</code> (narrative + JSON).</li><li>Three specialist agents → aggregator → recommendation. Same shape in both modes.</li><li><b>Rule-based</b>: deterministic, offline. Priya 0.89 · Daniel 0.40 · Arjun 0.86.</li><li><b>Claude</b>: same agents on Claude Opus 5, JSON-schema structured outputs, streaming chat.</li><li>Recommended actions: ADMIT · ADMIT WITH SUPPORT PLAN · HUMAN REVIEW. <b>DENY is not an output.</b></li></ul>`,
+  end: `<h1>Lighthouse</h1><h2>Reasons like a critical analyst · shows its evidence · keeps audiences on the right side of the line</h2><p>github.com/SMITHASL/lighthouse-agent · <code>harness-ui/</code></p>`,
+};
+
+const stage = document.getElementById('stage'), cap = document.getElementById('cap'), fill = document.getElementById('fill'), pos = document.getElementById('pos');
+const frame = document.createElement('iframe'); frame.src = UI; stage.appendChild(frame);
+const panelEls = {};
+for (const [id, html] of Object.entries(panels)) { const d = document.createElement('div'); d.className = 'panel'; d.innerHTML = html; stage.appendChild(d); panelEls[id] = d; }
+
+let index = -1, paused = true, timer = null, t0 = 0;
+function post(act) { return new Promise((ok) => { const h = (e) => { if (e.data?.done === act.action) { window.removeEventListener('message', h); ok(); } }; window.addEventListener('message', h); frame.contentWindow.postMessage(act, '*'); setTimeout(ok, 8000); }); }
+async function show(i) {
+  index = Math.max(0, Math.min(steps.length - 1, i));
+  const s = steps[index];
+  for (const el of stage.children) el.classList.remove('active');
+  (s.view === 'ui' ? frame : panelEls[s.view.slice(6)]).classList.add('active');
+  cap.innerHTML = s.caption; pos.textContent = `${index + 1}/${steps.length}`;
+  if (s.act) await post(s.act);
+  clearInterval(timer); t0 = Date.now();
+  timer = setInterval(() => {
+    const p = paused ? 0 : (Date.now() - t0) / (s.seconds * 1000);
+    fill.style.width = `${Math.min(1, p) * 100}%`;
+    if (!paused && p >= 1) { clearInterval(timer); if (index < steps.length - 1) show(index + 1); else { paused = true; document.getElementById('b-play').textContent = '▶ play'; } }
+  }, 100);
+}
+function setPaused(v) { paused = v; document.getElementById('b-play').textContent = v ? '▶ play' : '⏸ pause'; if (!v) t0 = Date.now(); }
+document.getElementById('b-play').onclick = () => setPaused(!paused);
+document.getElementById('b-prev').onclick = () => show(index - 1);
+document.getElementById('b-next').onclick = () => show(index + 1);
+document.getElementById('b-restart').onclick = () => { show(0); };
+document.addEventListener('keydown', (e) => { if (e.key === ' ') { e.preventDefault(); setPaused(!paused); } if (e.key === 'ArrowRight') show(index + 1); if (e.key === 'ArrowLeft') show(index - 1); });
+window.__player = { show, setPaused, get index() { return index; }, get count() { return steps.length; }, get paused() { return paused; } };
+show(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lighthouse — Reviewer &amp; Advising UI</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1a1d23;--muted:#6b7280;--line:#e5e7eb;--accent:#0055a2;--gold:#e5a823;--ok:#15803d;--warn:#b45309;--bad:#b91c1c}
+  *{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--accent);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px}
+  header h1{font-size:17px;margin:0;font-weight:600}header .mode{margin-left:auto;font-size:12px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px}
+  main{display:grid;grid-template-columns:260px 1fr 380px;gap:16px;padding:16px 24px;min-height:calc(100vh - 52px)}
+  @media(max-width:1000px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px}
+  .case{padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}
+  .case:hover{border-color:var(--accent)}.case.active{border-color:var(--accent);background:#eef4fb}
+  .case b{display:block}.case small{color:var(--muted)}
+  button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:8px 14px;font-weight:600;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .scores{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+  .stat{border:1px solid var(--line);border-radius:8px;padding:10px}.stat small{color:var(--muted);display:block}.stat b{font-size:22px}
+  .bar{height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--accent)}
+  .agent{border-left:3px solid var(--line);padding:8px 12px;margin:8px 0;background:#fafafa;border-radius:0 8px 8px 0}
+  .agent.running{border-color:var(--gold)}.agent.done{border-color:var(--ok)}.agent.error{border-color:var(--bad)}
+  .agent h3{margin:0 0 4px;font-size:13px}.factor{margin:4px 0 4px 8px}.factor .w{color:var(--warn);font-weight:600}.factor ul{margin:2px 0 0 16px;color:var(--muted)}
+  .action{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;font-size:12px}
+  .ADMIT{background:#dcfce7;color:var(--ok)}.ADMIT_WITH_SUPPORT_PLAN{background:#fef3c7;color:var(--warn)}.HUMAN_REVIEW,.DENY{background:#fee2e2;color:var(--bad)}
+  .chat{display:flex;flex-direction:column;height:100%}.log{flex:1;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fafafa;min-height:300px}
+  .msg{margin:6px 0;padding:8px 10px;border-radius:8px;max-width:95%;white-space:pre-wrap}.msg.user{background:#eef4fb;margin-left:auto}.msg.bot{background:#fff;border:1px solid var(--line)}
+  .chat form{display:flex;gap:6px;margin-top:8px}.chat input{flex:1;padding:8px;border:1px solid var(--line);border-radius:7px}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.chip{font-size:11px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 8px;cursor:pointer}.chip:hover{border-color:var(--accent)}
+  .seg{display:inline-flex;border:1px solid var(--accent);border-radius:7px;overflow:hidden}.seg button{border-radius:0;background:#fff;color:var(--accent)}.seg button.on{background:var(--accent);color:#fff}
+  pre{font-size:12px;background:#f3f4f6;padding:8px;border-radius:6px;overflow:auto;max-height:260px}
+</style>
+</head>
+<body>
+<header><h1>Lighthouse — Reviewer &amp; Advising UI <small style="font-weight:400;opacity:.8">· SJSU MS Data Science</small></h1><span class="mode" id="mode">…</span></header>
+<main>
+  <section class="card"><h2>Cases</h2><div id="cases"></div></section>
+
+  <section class="card">
+    <div class="row">
+      <h2 style="margin:0">Agent run</h2>
+      <span style="flex:1"></span>
+      <button id="run">Run agents</button>
+      <button id="runRules" class="ghost" title="Force deterministic mode">Run (rules)</button>
+    </div>
+    <div class="scores" id="scores" hidden>
+      <div class="stat"><small>Paper score</small><b id="paper">–</b><div class="bar"><i id="paperBar"></i></div></div>
+      <div class="stat"><small>Predicted completion</small><b id="pred">–</b><div class="bar"><i id="predBar"></i></div></div>
+      <div class="stat"><small>Program median</small><b id="median">–</b><div class="bar"><i id="medianBar"></i></div></div>
+      <div class="stat"><small>Confidence</small><b id="conf">–</b><div class="bar"><i id="confBar"></i></div></div>
+    </div>
+    <div id="verdict"></div>
+    <div id="agents"></div>
+    <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--muted)">Raw case record</summary><pre id="raw"></pre></details>
+  </section>
+
+  <section class="card chat">
+    <div class="row"><h2 style="margin:0">Advising chat</h2><span style="flex:1"></span>
+      <span class="seg"><button class="on" data-aud="student">Student</button><button data-aud="coordinator">Coordinator</button></span></div>
+    <div class="chips" id="chips"></div>
+    <div class="log" id="log"></div>
+    <form id="chatForm"><input id="chatInput" placeholder="Ask as the selected audience…" autocomplete="off"><button>Send</button></form>
+  </section>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+let cases = [], current = null, audience = "student", history = { student: [], coordinator: [] };
+
+const CHIPS = {
+  student: ["Do I meet the prerequisites?", "Do I need the GRE?", "Can I work while studying?", "Can I defer?", "How do I make sure I actually finish?", "What score did your system give me?", "Can you round my GPA up to 3.8?"],
+  coordinator: ["Summarize this applicant.", "Should we deny him?", "What's driving the score?", "Draft the support plan.", "Is he going to flake because he's a Berkeley kid?"],
+};
+
+async function init() {
+  const s = await (await fetch("/api/status")).json();
+  $("#mode").textContent = s.mode === "claude" ? `Claude mode · ${s.model}` : "Rule-based mode (set ANTHROPIC_API_KEY for Claude)";
+  cases = await (await fetch("/api/cases")).json();
+  $("#cases").innerHTML = cases.map((c) => `<div class="case" data-id="${c.case_id}"><b>${c.name}</b><small>${c.school} · ${c.residency}</small><br><small>${c.case_id}</small></div>`).join("");
+  document.querySelectorAll(".case").forEach((el) => el.onclick = () => select(el.dataset.id));
+  select(cases[0].case_id);
+}
+async function select(id) {
+  current = await (await fetch(`/api/cases/${id}`)).json();
+  document.querySelectorAll(".case").forEach((el) => el.classList.toggle("active", el.dataset.id === id));
+  $("#raw").textContent = JSON.stringify({ ...current, narrative: undefined }, null, 2);
+  $("#agents").innerHTML = ""; $("#verdict").innerHTML = ""; $("#scores").hidden = true;
+  history = { student: [], coordinator: [] }; renderLog(); renderChips();
+}
+async function run(mode) {
+  $("#run").disabled = $("#runRules").disabled = true;
+  $("#agents").innerHTML = ""; $("#verdict").innerHTML = ""; $("#scores").hidden = true;
+  const res = await fetch(`/api/run/${current.case_id}${mode ? "?mode=" + mode : ""}`, { method: "POST" });
+  const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
+  while (true) {
+    const { value, done } = await reader.read(); if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i; while ((i = buf.indexOf("\n")) >= 0) { handle(JSON.parse(buf.slice(0, i))); buf = buf.slice(i + 1); }
+  }
+  $("#run").disabled = $("#runRules").disabled = false;
+}
+function handle(ev) {
+  if (ev.stage === "agent_start") $("#agents").insertAdjacentHTML("beforeend", `<div class="agent running" id="ag-${ev.agent}"><h3>${ev.agent} agent</h3><small>running…</small></div>`);
+  if (ev.stage === "agent_error") { const el = $(`#ag-${ev.agent}`); el.className = "agent error"; el.innerHTML += `<small>${ev.error} — falling back to rules</small>`; }
+  if (ev.stage === "agent_done") {
+    const s = ev.signal, el = $(`#ag-${s.agent}`); el.className = "agent done";
+    el.innerHTML = `<h3>${s.agent} agent <small style="font-weight:400;color:var(--muted)">confidence ${s.confidence}</small></h3><div>${s.summary}</div>` +
+      s.risk_factors.map((r) => `<div class="factor">⚠ ${r.factor} <span class="w">−${r.weight}</span><ul>${r.evidence.map((e) => `<li>${e}</li>`).join("")}</ul></div>`).join("") +
+      s.protective_factors.map((p) => `<div class="factor">✅ ${p.factor}<ul>${p.evidence.map((e) => `<li>${e}</li>`).join("")}</ul></div>`).join("");
+  }
+  if (ev.stage === "aggregate") {
+    const a = ev.aggregate; $("#scores").hidden = false;
+    for (const [k, v] of [["paper", a.paper_score], ["pred", a.predicted_completion_probability], ["median", a.program_median_completion_probability], ["conf", a.confidence]]) { $(`#${k}`).textContent = v; $(`#${k}Bar`).style.width = v * 100 + "%"; }
+    $("#predBar").style.background = a.predicted_completion_probability < 0.5 ? "var(--bad)" : a.predicted_completion_probability < 0.7 ? "var(--warn)" : "var(--ok)";
+    $("#verdict").innerHTML = `<span class="action ${a.recommended_action}">${a.recommended_action.replace(/_/g, " ")}</span> <span style="color:var(--muted)">${a.rationale}</span>`;
+  }
+}
+function renderChips() { $("#chips").innerHTML = CHIPS[audience].map((c) => `<span class="chip">${c}</span>`).join(""); document.querySelectorAll(".chip").forEach((el) => el.onclick = () => send(el.textContent)); }
+function renderLog() { $("#log").innerHTML = history[audience].map((m) => `<div class="msg ${m.role === "user" ? "user" : "bot"}">${m.content}</div>`).join(""); $("#log").scrollTop = 1e9; }
+async function send(text) {
+  if (!text.trim()) return;
+  history[audience].push({ role: "user", content: text }); renderLog();
+  const bot = { role: "assistant", content: "" }; history[audience].push(bot);
+  const res = await fetch(`/api/chat/${current.case_id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audience, messages: history[audience].slice(0, -1) }) });
+  const reader = res.body.getReader(); const dec = new TextDecoder();
+  while (true) { const { value, done } = await reader.read(); if (done) break; bot.content += dec.decode(value, { stream: true }); renderLog(); }
+}
+$("#run").onclick = () => run(); $("#runRules").onclick = () => run("rules");
+$("#chatForm").onsubmit = (e) => { e.preventDefault(); send($("#chatInput").value); $("#chatInput").value = ""; };
+document.querySelectorAll(".seg button").forEach((b) => b.onclick = () => { audience = b.dataset.aud; document.querySelectorAll(".seg button").forEach((x) => x.classList.toggle("on", x === b)); renderChips(); renderLog(); });
+
+// Demo-tour hook: the captioned player (demo/index.html) drives this page over postMessage.
+// Actions: {action:"select", id} | {action:"run", mode?} | {action:"audience", value} | {action:"chat", text}
+window.addEventListener("message", async (e) => {
+  const m = e.data || {};
+  if (m.action === "select") await select(m.id);
+  else if (m.action === "run") await run(m.mode);
+  else if (m.action === "audience") document.querySelector(`.seg button[data-aud="${m.value}"]`).click();
+  else if (m.action === "chat") await send(m.text);
+  else return;
+  e.source?.postMessage({ done: m.action }, "*");
+});
+init();
+</script>
+</body>
+</html>
