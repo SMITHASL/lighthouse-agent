@@ -27,7 +27,13 @@
 - released 27 / withheld 3 / partial 0 of 30
 - cost: $1.54 total, $0.047 per report; tokens in/out per report 11038.400 / 3821.667
 
+## Claim support (independent judge reads the cited field value)
+- Judge: openai/gpt-5-4-mini. Claims judged: 893 — supported 534 (59.8%), partially 265, unsupported 94 (10.5%), field missing 0
+- Unsupported rate by evidence grade: direct 5.5%, indirect 18.0%, absent 18.9%, anecdotal 0.0%
+- FAIL claim_support (unsupported ≤ 5%)
+
 ## Gates
+- FAIL claim_support
 - PASS hallucination
 - PASS consistency
 - FAIL parity

@@ -23,7 +23,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 | **Observe it** | Every stage is a persisted session (`data/sessions/*.json`) with every model message, tool call, token count and timing | `npm run sessions`, `npm run sessions -- <id>` |
 | **Schedule it** | `lighthouse-nightly-rescore` runs `lighthouse-rescorer` at 02:00 PT: re-scores every stored report against recorded outcomes and refreshes `data/calibration.json`. | `npm run scheduler` (cron loop) · `npm run schedule:run` (now) |
 | **Control it** | `pipeline_propose_action` is `@write`-gated → the run pauses with **Allow / Deny** until a human decides; the gate is our own code, in-process, so the tool cannot be reached around it. Independent fairness auditor has **veto** power. Per-report and per-eval cost caps. | `npm run ui` → Allow / Deny on screen, or `npm run approve -- <session> allow\|deny "reason"` |
-| **Test it** | 14 Gherkin scenarios (BDD) → 56 offline on `node:test` (incl. 5 runtime tests against a scripted fake model: loop, gate, deny, allow, schedules) + 6 live tests (TDD). `npm run eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
+| **Test it** | 15 Gherkin scenarios (BDD) → 60 offline on `node:test` (incl. 5 runtime tests against a scripted fake model: loop, gate, deny, allow, schedules) + 6 live tests (TDD). `npm run eval` computes AUROC, Brier, ECE, CI coverage, fairness parity, hallucination rate, run-to-run consistency and cost, vs. a base-rate baseline. | `features/`, `test/`, `evals/SCOREBOARD.md` |
 
 ## Architecture
 
@@ -68,9 +68,10 @@ npm run report -- app_0001   # one full pipeline run; pauses at the approval gat
 npm run sessions             # every run is an inspectable session; `-- <id>` prints its events
 npm run approve -- <session> deny "not this cycle"   # or allow — nothing is written until you decide
 npm run schedule:run         # fire the nightly rescore now; `npm run scheduler` keeps it on cron
-npm test                     # 56 offline tests on node:test (schemas, metrics, BDD traceability, runtime)
+npm test                     # 60 offline tests on node:test (schemas, metrics, BDD traceability, runtime, judge)
 LIVE=1 npm test              # + 6 live BDD scenarios through the local runtime (~$0.30)
 npm run eval -- --n=30       # scoreboard → evals/SCOREBOARD.md (~$1.50; --full for 500)
+npm run eval:claims          # claim-support judge over the stored reports; merges into the scoreboard (~$0.25)
 ```
 
 ### Optional: run on TrueForge instead
@@ -95,9 +96,10 @@ From [`evals/SCOREBOARD.md`](evals/SCOREBOARD.md), produced by the local runtime
 | donor | 0.568 | 0.199 | 0.212 | 0.77 |
 | recruiter | 0.948 | 0.442 | 0.590 | 0.70 |
 
-- Beats the base-rate baseline on every outcome. **869 evidence claims, 0 hallucinated source fields**; counter-evidence present in 100% of reports; run-to-run std of the completion estimate **0.009**.
+- Beats the base-rate baseline on every outcome. **869 evidence claims, 0 hallucinated source fields** (every cited field exists); counter-evidence present in 100% of reports; run-to-run std of the completion estimate **0.009**.
+- **Claim support** (`npm run eval:claims`, an independent GPT-5.4-mini judge reads each claim next to the *actual value* of its cited field): of 893 claims, **59.8% supported, 29.7% partially** (the value is consistent but the claim adds inference — what indirect evidence is), **10.5% unsupported**. Gate is ≤ 5%, so this gate **fails**. Direct-graded claims are 5.5% unsupported; indirect 18%. Two causes, both in the schema rather than the reasoning: claims that draw on several fields may cite only one ("two events and two campus visits" cites `events_attended`), and base-rate claims have no legitimate field to cite because base rates come from a tool, not the record — 20 of the 94. Fix: `source_fields[]` plus a `base_rate:<outcome>` citation form.
 - 27 released / 3 withheld by the fairness auditor / 0 partial. **$1.54 total, $0.047 per report** (cap $0.15); ~11.0k input / 3.8k output tokens per report.
-- Two gates **fail**, as before: fairness parity (0.19 on volunteer, ~10 people per synthetic group, mostly noise) and CI coverage (intervals too narrow on donor and recruiter). Shown deliberately — a harness exists to make failure visible.
+- Three gates **fail**: claim support (above), fairness parity (0.19 on volunteer, ~10 people per synthetic group, mostly noise) and CI coverage (intervals too narrow on donor and recruiter). Shown deliberately — a harness exists to make failure visible.
 - The synthetic donor outcome is near-random by construction, so donor AUROC (0.57) says little; recruiter ranks at 0.95 but anchors on a 22% base rate while the eval label is far more common, hence the poor calibration — the drift nightly rescoring is for.
 - History: the first auditor version over-vetoed by treating the applicant's own behaviour (campus visits, response time) as "circumstance"; fixed by defining person vs. circumstance signals explicitly (withheld 8 → 3 of 30).
 
@@ -124,7 +126,7 @@ Captioned walkthrough (3:07, no audio, includes one live pipeline run): [lightho
 
 - **Domain packs swap instructions and base rates, not the report schema.** `LongTermFitReport` hard-codes the five university outcomes; a startup pack needs a per-pack report schema. The analyst/auditor/approval/eval machinery is pack-agnostic; the schema is not yet.
 - **Synthetic fairness labels are independent of the data by construction**, so parity metrics can only fail by noise and cannot detect real bias. The meaningful fairness tests are the behavioural ones: the auditor vetoes a zip-code proxy, and a statement that leaks wealth/geography/sponsorship (`textual_proxy_does_not_move_estimates`) does not move the donor estimate.
-- **"0 hallucinated source fields" is an existence check** (every cited field resolves on the record), not a claim-support check. A claim-support judge is the next eval to add.
+- **Claim support is 59.8% / 29.7% / 10.5%** (supported / partial / unsupported) under a strict per-field judge, and the 5% gate fails. Most unsupported claims are true on the record but cite one field when they draw on several, or are base-rate statements with nothing legitimate to cite; the schema's single `source_field` is the root cause. The judge itself is a model and is strict by design: "partially" is the expected verdict for indirect evidence.
 - **`ci_coverage` is a proxy**: for binary outcomes it tests whether the interval spans the observed side of 0.5. ECE at n=30 with 10 bins is mostly noise; treat the calibration numbers as machinery proof, not measurements.
 - **The approval gate is enforced by the runtime, not the tool.** In the local runtime tools are in-process functions, so there is no network path around the gate. In TrueForge mode the MCP server is unauthenticated and must verify the caller in hosted deployments, or the gate can be bypassed by calling the tool directly.
 - **Synthetic statements come from seven templates**, so predictive metrics largely reflect the generator. The reasoning quality in the reports is real; the AUROC numbers are not evidence about real applicants.

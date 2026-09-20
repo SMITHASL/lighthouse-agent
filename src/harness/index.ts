@@ -2,7 +2,7 @@
  * Runtime selection. Default is the standalone LocalHarness; set TRUEFORGE_BASE_URL to run the
  * same pipeline against a TrueForge server instead. Both expose the same methods.
  */
-import './env.ts'; // loads .env before HARNESS_MODE is evaluated
+import './env.ts'; // loads .env before HARNESS_MODE is evaluated (provider.ts loads it too)
 import { TrueForgeClient } from '../pipeline/client.ts';
 import { LocalHarness } from './local.ts';
 

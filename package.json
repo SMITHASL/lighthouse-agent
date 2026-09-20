@@ -19,7 +19,8 @@
     "demo:record": "node demo/record.mjs",
     "ui": "node src/ui/server.ts",
     "demo:ui": "node demo/reviewer-ui/serve.mjs",
-    "demo:ui:record": "node demo/reviewer-ui/record.mjs"
+    "demo:ui:record": "node demo/reviewer-ui/record.mjs",
+    "eval:claims": "node evals/claimSupport.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -98,7 +98,7 @@ The model identifies likely recruiters almost perfectly but anchors its probabil
 Two of four: fairness parity (0.17 on volunteer, with about ten people per synthetic group, so mostly noise) and confidence-interval coverage (intervals too narrow on donor and recruiter). They are shown because an agent harness exists to make failure visible; hiding a failed gate would defeat the point of the product.
 
 **Does it make things up?**
-Across 869 evidence claims in the evaluation, zero cited a field that does not exist on the record. This is an existence check on the cited field, not yet a check that the claim is supported by that field; a claim-support judge is the next evaluation to add.
+Two checks. Existence: across 869 evidence claims, zero cited a field that does not exist on the record. Support: an independent judge model (GPT-5.4-mini, no shared context) reads each claim next to the actual value of its cited field; on 893 claims it found 59.8% supported, 29.7% partially supported (consistent with the value but adding inference, which is what indirect evidence is) and 10.5% unsupported — above our 5% gate, so that gate fails. Most unsupported claims are true elsewhere on the record but cite a single field when they draw on several, or are base-rate statements that have no record field to cite; the fix is a schema change (multiple source fields, a base-rate citation form), not a reasoning change.
 
 **Is it consistent?**
 The same applicant scored three times varied by 0.009 on the completion estimate. Counter-evidence was present in 100% of reports.

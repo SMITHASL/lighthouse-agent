@@ -5,6 +5,8 @@
  * new input items and the model's reasoning state survives an approval pause.
  * OPENAI_BASE_URL lets any OpenAI-compatible endpoint stand in.
  */
+import './env.ts'; // .env → process.env, so every entrypoint that calls a model picks the key up
+
 export type InputItem =
   | { role: 'user' | 'assistant' | 'system'; content: string }
   | { type: 'function_call_output'; call_id: string; output: string };
