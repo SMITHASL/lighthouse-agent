@@ -2,7 +2,7 @@
 
 The screen an admissions office actually sits in front of: a case queue, the agent run with cited evidence, and an advising chat with two audiences (coordinator / student) separated by a hard information boundary.
 
-**Demo video (1:36, captions, no audio, 2x speed):** [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4)
+**Demo video (2:11, captions, no audio):** [lighthouse-reviewer-ui-demo.mp4](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4)
 
 ## What it is, honestly
 
@@ -40,7 +40,7 @@ ANTHROPIC_API_KEY=sk-ant-... npm start
 npm start                 # harness on :3100, keep running
 npm run demo              # captioned player on http://localhost:8798 (Space = play, ←/→ = step)
 npm run demo:record       # drives Chrome, tab-captures, writes demo/lighthouse-reviewer-ui-demo.mp4
-node ../demo/fix-mp4-duration.mjs demo/lighthouse-reviewer-ui-demo.mp4 200
+node ../demo/fix-mp4-duration.mjs demo/lighthouse-reviewer-ui-demo.mp4 139
 ```
 
 The player (`demo/index.html`) drives the live UI over `postMessage` — select a case, run agents, switch audience, send a chat prompt — so the recording shows real interactions, not slides. Steps and captions are the `steps` array at the top of that file.

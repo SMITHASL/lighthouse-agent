@@ -14,7 +14,7 @@ The reasoning standard is the four pillars of Stanford GSB LEAD's *Critical Anal
 - [Build prompt](PROMPT.md) — the BDD/TDD spec the agent was built from
 - [Eval scoreboard](evals/SCOREBOARD.md) — latest results
 - [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.0/lighthouse-demo.mp4) — 3:16, captions, no audio
-- [Reviewer & Advising UI](harness-ui/README.md) — how the admissions office uses it: case queue, agent run, coordinator/student chat. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4) (1:36) · [presenter card](harness-ui/PRESENTER.md)
+- [Reviewer & Advising UI](harness-ui/README.md) — how the admissions office uses it: case queue, agent run, coordinator/student chat. [Demo video](https://github.com/SMITHASL/lighthouse-agent/releases/download/v0.1.1/lighthouse-reviewer-ui-demo.mp4) (2:11) · [presenter card](harness-ui/PRESENTER.md)
 
 ## How it maps to the judging rubric
 
