@@ -12,3 +12,7 @@ harness-ui/node_modules
 .env
 .env.*
 !.env.example
+data/sessions/
+data/agents.json
+data/schedules.json
+data/live-test/
